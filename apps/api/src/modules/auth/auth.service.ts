@@ -189,6 +189,13 @@ export class AuthService {
     }
   }
 
+  /** Starts a new login session directly in the given tenant context (e.g. after accepting an invitation). */
+  async startSession(userId: string, context: TenantContext, meta: RequestMeta): Promise<IssuedAuth> {
+    const issued = await this.sessions.create({ userId, tenantId: context.tenantId, userAgent: meta.userAgent });
+    await this.prisma.user.update({ where: { id: userId }, data: { lastLoginAt: new Date() } });
+    return { session: await this.buildSession(userId, issued.familyId, context), refreshToken: issued.refreshToken };
+  }
+
   /** Moves the current login session into another tenant the user is an active member of. */
   async switchTenant(auth: AuthContext, tenantId: string): Promise<SessionResponse> {
     const context = await this.memberships.resolveForSession(auth.userId, tenantId);

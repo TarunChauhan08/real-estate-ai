@@ -12,4 +12,4 @@ process.env.JWT_ACCESS_SECRET ??= 'test-only-secret-not-for-production-012345678
 // Generous limits so functional tests are not throttled; rate limiting has its own test.
 process.env.RATE_LIMIT_MAX ??= '10000';
 process.env.AUTH_RATE_LIMIT_MAX ??= '10000';
-process.env.INVITATION_DELIVERY ??= 'log';
+process.env.INVITATION_DELIVERY ??= 'dev_link';

@@ -16,3 +16,13 @@ export function IsStrongPassword(): PropertyDecorator {
     Matches(/\d/, { message: 'Password must contain a number' }),
   );
 }
+
+/** Same policy as @IsStrongPassword(), for checks that depend on runtime state. */
+export function passwordPolicyViolations(password: string): string[] {
+  const problems: string[] = [];
+  if (password.length < PASSWORD_MIN_LENGTH) problems.push(`Password must be at least ${PASSWORD_MIN_LENGTH} characters`);
+  if (password.length > PASSWORD_MAX_LENGTH) problems.push(`Password must be at most ${PASSWORD_MAX_LENGTH} characters`);
+  if (!/[A-Za-z]/.test(password)) problems.push('Password must contain a letter');
+  if (!/\d/.test(password)) problems.push('Password must contain a number');
+  return problems;
+}

@@ -36,4 +36,10 @@ describe('validateEnv', () => {
     ).toThrow(/COOKIE_SECURE[\s\S]*JWT_ACCESS_SECRET/);
     expect(() => validateEnv({ ...valid, NODE_ENV: 'production', COOKIE_SECURE: 'true' })).not.toThrow();
   });
+
+  it('forbids returning invitation links in production', () => {
+    expect(() =>
+      validateEnv({ ...valid, NODE_ENV: 'production', COOKIE_SECURE: 'true', INVITATION_DELIVERY: 'dev_link' }),
+    ).toThrow(/INVITATION_DELIVERY/);
+  });
 });
