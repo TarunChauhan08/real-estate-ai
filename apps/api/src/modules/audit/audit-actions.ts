@@ -1,0 +1,20 @@
+/** Catalogue of audit actions. Keep names stable — they are stored and filtered on. */
+export const AuditAction = {
+  AUTH_REGISTERED: 'auth.registered',
+  AUTH_LOGIN: 'auth.login',
+  AUTH_LOGIN_FAILED: 'auth.login_failed',
+  AUTH_LOGOUT: 'auth.logout',
+  AUTH_REFRESH_REUSE_DETECTED: 'auth.refresh_reuse_detected',
+  AUTH_TENANT_SWITCHED: 'auth.tenant_switched',
+  TENANT_CREATED: 'tenant.created',
+  TENANT_UPDATED: 'tenant.updated',
+  TENANT_ONBOARDING_COMPLETED: 'tenant.onboarding_completed',
+  BUSINESS_PROFILE_UPDATED: 'business_profile.updated',
+  TENANT_SETTINGS_UPDATED: 'tenant_settings.updated',
+  INVITATION_CREATED: 'invitation.created',
+  INVITATION_REVOKED: 'invitation.revoked',
+  INVITATION_ACCEPTED: 'invitation.accepted',
+  MEMBER_ROLE_CHANGED: 'member.role_changed',
+  MEMBER_STATUS_CHANGED: 'member.status_changed',
+} as const;
+export type AuditAction = (typeof AuditAction)[keyof typeof AuditAction];
