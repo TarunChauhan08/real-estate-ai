@@ -1,0 +1,26 @@
+{
+  "name": "real-estate-ai",
+  "private": true,
+  "version": "0.1.0",
+  "description": "AI Real Estate Sales Employee — multi-tenant SaaS for Indian real estate businesses",
+  "packageManager": "pnpm@10.28.0",
+  "engines": {
+    "node": ">=22.0.0",
+    "pnpm": ">=10.0.0"
+  },
+  "scripts": {
+    "build:packages": "pnpm --filter \"./packages/**\" run build",
+    "dev": "pnpm build:packages && pnpm --parallel --filter @rea/api --filter @rea/web run dev",
+    "dev:api": "pnpm --filter @rea/api run dev",
+    "dev:web": "pnpm --filter @rea/web run dev",
+    "build": "pnpm -r run build",
+    "lint": "pnpm -r run lint",
+    "typecheck": "pnpm build:packages && pnpm -r run typecheck",
+    "test": "pnpm -r run test",
+    "format": "prettier --write \"**/*.{ts,tsx,js,mjs,json,md,css}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,mjs,json,md,css}\""
+  },
+  "devDependencies": {
+    "prettier": "3.10.1"
+  }
+}

@@ -1,0 +1,13 @@
+import { type MiddlewareConsumer, Module, type NestModule } from '@nestjs/common';
+import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
+import { AppConfigModule } from './config/config.module';
+import { HealthModule } from './modules/health/health.module';
+
+@Module({
+  imports: [AppConfigModule, HealthModule],
+})
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer): void {
+    consumer.apply(RequestIdMiddleware).forRoutes('*');
+  }
+}
