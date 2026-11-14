@@ -23,14 +23,19 @@ export const OptionalPhone = (): PropertyDecorator =>
     Matches(/^\+?[0-9][0-9 -]{5,18}[0-9]$/, { message: 'Enter a valid phone number' }),
   );
 
-/** http(s) website; a bare domain is upgraded to https://. */
+/**
+ * http(s) website; empty clears it and a bare domain is upgraded to https://.
+ * One transform, because the execution order of stacked @Transform decorators is not guaranteed.
+ */
 export const OptionalWebsite = (): PropertyDecorator =>
   applyDecorators(
     ApiPropertyOptional({ nullable: true, example: 'https://noidahomes.in' }),
-    EmptyToNull(),
-    Transform(({ value }: { value: unknown }) =>
-      typeof value === 'string' && !/^https?:\/\//i.test(value) ? `https://${value}` : value,
-    ),
+    Transform(({ value }: { value: unknown }) => {
+      if (typeof value !== 'string') return value;
+      const trimmed = value.trim();
+      if (trimmed === '') return null;
+      return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+    }),
     IsOptional(),
     IsUrl({ protocols: ['http', 'https'], require_protocol: true }, { message: 'Enter a valid website URL' }),
     MaxLength(255),

@@ -55,8 +55,9 @@ export class AuthController {
     return this.respond(res, await this.auth.login(dto, { userAgent: req.get('user-agent') }));
   }
 
+  // Not under the strict credential limit: every page load refreshes, and the token is a
+  // 256-bit random value that cannot be guessed. The global limit still applies.
   @Public()
-  @StrictRateLimit()
   @UseGuards(TrustedOriginGuard)
   @Post('refresh')
   @HttpCode(HttpStatus.OK)

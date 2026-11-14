@@ -1,4 +1,9 @@
+import path from 'node:path';
+import { loadEnvConfig } from '@next/env';
 import type { NextConfig } from 'next';
+
+// The monorepo keeps one `.env` at the repository root; load it for the web app too.
+loadEnvConfig(path.resolve(__dirname, '../..'));
 
 const securityHeaders = [
   { key: 'X-Content-Type-Options', value: 'nosniff' },

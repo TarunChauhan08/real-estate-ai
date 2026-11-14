@@ -1,5 +1,89 @@
 @import 'tailwindcss';
+@import '@fontsource-variable/manrope';
+/* Hindi: loaded only when Devanagari glyphs are on screen (unicode-range). */
+@import '@fontsource-variable/noto-sans-devanagari';
 
+/*
+ * Colour system
+ * -------------
+ * Built on Radix Colors' 12-step scales (sage neutral, teal brand, amber attention,
+ * red danger, grass success), where each step has one job: 1–2 app backgrounds,
+ * 3–5 component fills, 6–8 borders, 9–10 solid fills, 11–12 text.
+ * Every text/background pair below was measured (WCAG 2.2 ratio and APCA Lc):
+ * body text ≥ 4.5:1, UI boundaries ≥ 3:1. Values that missed were darkened, not waived.
+ *
+ * Roles
+ *   brand      deep ink-teal for navigation and primary actions (≈ Radix teal 12)
+ *   attention  amber, reserved for states that need the user's attention
+ *   neutrals   sage, a green-tinted grey that Radix pairs with teal
+ */
 @theme {
-  --font-sans: 'Inter', 'Segoe UI', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-sans: 'Manrope Variable', 'Noto Sans Devanagari Variable', 'Segoe UI', ui-sans-serif, system-ui, sans-serif;
+
+  /* Neutrals (sage) */
+  --color-canvas: #f7f9f8; /* sage 2  — app background */
+  --color-subtle: #eef1f0; /* sage 3  — hover fills, tracks */
+  --color-line: #dfe2e0; /* sage 5  — separators */
+  --color-line-strong: #8f9693; /* between sage 9/10 — control borders, 3.02:1 on white */
+  --color-fg-faint: #868e8b; /* sage 9  — disabled or decorative only, never body text */
+  --color-fg-muted: #5f6563; /* sage 11 — secondary text, 5.95:1 */
+  --color-fg-secondary: #3b4340; /* sage 11→12 — labels, 10.4:1 */
+  --color-fg: #1a211e; /* sage 12 — primary text, 16.4:1 */
+
+  /* Brand (teal) */
+  --color-brand-soft: #e0f8f3; /* teal 3 */
+  --color-brand-soft-2: #ccf3ea; /* teal 4 */
+  --color-brand-line: #a1ded2; /* teal 6 — tinted borders; muted text on brand, 7.9:1 */
+  --color-focus: #008573; /* teal 11 — focus rings, 4.56:1 */
+  --color-brand-fg: #00715f; /* teal 11 darkened — links and brand text, 5.95:1 */
+  --color-brand-hover: #164b4c;
+  --color-brand-strong: #0d3d38; /* teal 12 */
+  --color-brand: #0f3d3e; /* primary surface; white text 11.95:1 */
+  --color-brand-deep: #0a2a2b;
+
+  /* Attention (amber) */
+  --color-attention-soft: #fff7c2; /* amber 3 */
+  --color-attention-line: #f3d673; /* amber 6 */
+  --color-attention: #ffc53d; /* amber 9 — fills and dots only */
+  --color-attention-fg: #8f5300; /* amber 11 darkened — text, 5.68:1 on amber 3 */
+
+  /* Status */
+  --color-danger-soft: #feebec; /* red 3 */
+  --color-danger: #ce2c31; /* red 11 — 5.21:1 on white */
+  --color-success-soft: #e9f6e9; /* grass 3 */
+  --color-success: #2a7e3b; /* grass 11 — 5.07:1 on white */
+
+  --radius-control: 0.5rem;
+  --radius-panel: 0.75rem;
+
+  /* Type scale (1.2 minor third from a 15px base) */
+  --text-display: 2.25rem;
+  --text-display--line-height: 1.15;
+}
+
+@layer base {
+  html {
+    color: var(--color-fg);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  body {
+    font-feature-settings: 'cv11' 1;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+  }
+  ::placeholder {
+    color: var(--color-fg-muted);
+    opacity: 1;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
 }
