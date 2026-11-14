@@ -24,16 +24,28 @@ export class DashboardService {
         where: { id: ctx.tenantId },
         select: { id: true, name: true, slug: true, status: true },
       }),
-      this.prisma.membership.count({ where: { tenantId: ctx.tenantId, status: MembershipStatus.ACTIVE } }),
+      this.prisma.membership.count({
+        where: { tenantId: ctx.tenantId, status: MembershipStatus.ACTIVE },
+      }),
       this.prisma.invitation.count({
-        where: { tenantId: ctx.tenantId, acceptedAt: null, revokedAt: null, expiresAt: { gt: now } },
+        where: {
+          tenantId: ctx.tenantId,
+          acceptedAt: null,
+          revokedAt: null,
+          expiresAt: { gt: now },
+        },
       }),
       this.prisma.invitation.count({ where: { tenantId: ctx.tenantId } }),
     ]);
     if (!tenant) throw Errors.notFound('Business');
 
     const steps: SetupStep[] = [
-      { key: 'account_created', label: 'Create your business account', completed: true, available: true },
+      {
+        key: 'account_created',
+        label: 'Create your business account',
+        completed: true,
+        available: true,
+      },
       {
         key: 'business_profile',
         label: 'Complete your business profile',
@@ -46,8 +58,18 @@ export class DashboardService {
         completed: activeMembers > 1 || totalInvitations > 0,
         available: true,
       },
-      { key: 'properties', label: 'Add your property inventory', completed: false, available: false },
-      { key: 'ai_employee', label: 'Configure your AI employee', completed: false, available: false },
+      {
+        key: 'properties',
+        label: 'Add your property inventory',
+        completed: false,
+        available: false,
+      },
+      {
+        key: 'ai_employee',
+        label: 'Configure your AI employee',
+        completed: false,
+        available: false,
+      },
     ];
 
     return {

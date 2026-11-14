@@ -6,7 +6,11 @@ import { cn } from '@/lib/utils';
 export const DropdownMenu = Menu.Root;
 export const DropdownMenuTrigger = Menu.Trigger;
 
-export function DropdownMenuContent({ className, sideOffset = 6, ...props }: Menu.DropdownMenuContentProps) {
+export function DropdownMenuContent({
+  className,
+  sideOffset = 6,
+  ...props
+}: Menu.DropdownMenuContentProps) {
   return (
     <Menu.Portal>
       <Menu.Content

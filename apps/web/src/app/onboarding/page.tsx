@@ -15,7 +15,8 @@ export default function OnboardingPage() {
         <main className="mx-auto max-w-2xl px-6 py-10">
           <h1 className="text-2xl font-bold tracking-tight text-fg">Tell us about your business</h1>
           <p className="mt-1 text-sm text-fg-muted">
-            These details appear to your team and will be used by your AI employee. You can change them later in Settings.
+            These details appear to your team and will be used by your AI employee. You can change
+            them later in Settings.
           </p>
           <div className="mt-8 rounded-[var(--radius-panel)] border border-line bg-white p-6 sm:p-8">
             <OnboardingForm />

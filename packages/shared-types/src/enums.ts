@@ -2,7 +2,11 @@
  * Domain enums shared by the API and the web app.
  * These mirror the PostgreSQL enums in prisma/schema.prisma; an API unit test fails if they drift.
  */
-export const TenantStatus = { ACTIVE: 'ACTIVE', SUSPENDED: 'SUSPENDED', PENDING: 'PENDING' } as const;
+export const TenantStatus = {
+  ACTIVE: 'ACTIVE',
+  SUSPENDED: 'SUSPENDED',
+  PENDING: 'PENDING',
+} as const;
 export type TenantStatus = (typeof TenantStatus)[keyof typeof TenantStatus];
 
 export const UserStatus = { ACTIVE: 'ACTIVE', INVITED: 'INVITED', DISABLED: 'DISABLED' } as const;
@@ -25,7 +29,11 @@ export const MembershipRole = {
 } as const;
 export type MembershipRole = (typeof MembershipRole)[keyof typeof MembershipRole];
 
-export const MembershipStatus = { ACTIVE: 'ACTIVE', INVITED: 'INVITED', SUSPENDED: 'SUSPENDED' } as const;
+export const MembershipStatus = {
+  ACTIVE: 'ACTIVE',
+  INVITED: 'INVITED',
+  SUSPENDED: 'SUSPENDED',
+} as const;
 export type MembershipStatus = (typeof MembershipStatus)[keyof typeof MembershipStatus];
 
 /** Conversation languages supported by the (future) AI employee. */

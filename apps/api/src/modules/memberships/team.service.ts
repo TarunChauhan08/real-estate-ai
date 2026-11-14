@@ -38,7 +38,11 @@ export class TeamService {
     private readonly audit: AuditService,
   ) {}
 
-  async list(ctx: TenantContext, actorId: string, query: MemberQueryDto): Promise<Paginated<MemberDto>> {
+  async list(
+    ctx: TenantContext,
+    actorId: string,
+    query: MemberQueryDto,
+  ): Promise<Paginated<MemberDto>> {
     const where: Prisma.MembershipWhereInput = {
       tenantId: ctx.tenantId,
       role: query.role,
@@ -70,16 +74,30 @@ export class TeamService {
     );
   }
 
-  async changeRole(ctx: TenantContext, actorId: string, membershipId: string, role: MembershipRole): Promise<MemberDto> {
+  async changeRole(
+    ctx: TenantContext,
+    actorId: string,
+    membershipId: string,
+    role: MembershipRole,
+  ): Promise<MemberDto> {
     return this.prisma.$transaction(async (tx) => {
       const target = await this.findManageableTarget(tx, ctx, actorId, membershipId);
       if (!canAssignRole(ctx.role, role)) {
-        throw new AppException(HttpStatus.FORBIDDEN, 'ROLE_NOT_ASSIGNABLE', 'You cannot assign this role');
+        throw new AppException(
+          HttpStatus.FORBIDDEN,
+          'ROLE_NOT_ASSIGNABLE',
+          'You cannot assign this role',
+        );
       }
       if (target.role === role) return this.toDto(target, actorId);
-      if (target.role === MembershipRole.OWNER) await this.assertAnotherActiveOwner(tx, ctx.tenantId, target.id);
+      if (target.role === MembershipRole.OWNER)
+        await this.assertAnotherActiveOwner(tx, ctx.tenantId, target.id);
 
-      const updated = await tx.membership.update({ where: { id: target.id }, data: { role }, select: memberSelect });
+      const updated = await tx.membership.update({
+        where: { id: target.id },
+        data: { role },
+        select: memberSelect,
+      });
       await this.audit.record(
         {
           tenantId: ctx.tenantId,
@@ -108,7 +126,11 @@ export class TeamService {
         await this.assertAnotherActiveOwner(tx, ctx.tenantId, target.id);
       }
 
-      const updated = await tx.membership.update({ where: { id: target.id }, data: { status }, select: memberSelect });
+      const updated = await tx.membership.update({
+        where: { id: target.id },
+        data: { status },
+        select: memberSelect,
+      });
       await this.audit.record(
         {
           tenantId: ctx.tenantId,
@@ -138,10 +160,18 @@ export class TeamService {
     });
     if (!target) throw Errors.notFound('Member');
     if (target.userId === actorId) {
-      throw new AppException(HttpStatus.FORBIDDEN, 'CANNOT_MODIFY_SELF', 'You cannot change your own role or status');
+      throw new AppException(
+        HttpStatus.FORBIDDEN,
+        'CANNOT_MODIFY_SELF',
+        'You cannot change your own role or status',
+      );
     }
     if (!canManageRole(ctx.role, target.role)) {
-      throw new AppException(HttpStatus.FORBIDDEN, 'INSUFFICIENT_ROLE', 'You cannot manage a member with this role');
+      throw new AppException(
+        HttpStatus.FORBIDDEN,
+        'INSUFFICIENT_ROLE',
+        'You cannot manage a member with this role',
+      );
     }
     return target;
   }
@@ -162,7 +192,11 @@ export class TeamService {
       },
     });
     if (others === 0) {
-      throw new AppException(HttpStatus.CONFLICT, 'LAST_OWNER', 'A business must keep at least one active owner');
+      throw new AppException(
+        HttpStatus.CONFLICT,
+        'LAST_OWNER',
+        'A business must keep at least one active owner',
+      );
     }
   }
 

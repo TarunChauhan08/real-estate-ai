@@ -18,7 +18,10 @@ export class AuditLogsController {
   @Get()
   @RequirePermissions(Permission.AUDIT_READ)
   @ApiOperation({ summary: 'Audit trail for the active business (newest first)' })
-  async list(@CurrentTenant() ctx: TenantContext, @Query() query: AuditLogQueryDto): Promise<Paginated<AuditLogDto>> {
+  async list(
+    @CurrentTenant() ctx: TenantContext,
+    @Query() query: AuditLogQueryDto,
+  ): Promise<Paginated<AuditLogDto>> {
     const where: Prisma.AuditLogWhereInput = {
       tenantId: ctx.tenantId,
       action: query.action,

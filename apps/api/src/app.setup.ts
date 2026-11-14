@@ -41,7 +41,9 @@ export function configureApp(app: INestApplication): void {
       app,
       new DocumentBuilder()
         .setTitle('AI Real Estate Sales Employee API')
-        .setDescription('Phase 1 — authentication, tenants, memberships, team management, audit logs')
+        .setDescription(
+          'Phase 1 — authentication, tenants, memberships, team management, audit logs',
+        )
         .setVersion('1.0')
         .addBearerAuth()
         .addCookieAuth('rea_refresh')

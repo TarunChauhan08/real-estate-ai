@@ -3,7 +3,10 @@ import { hasPermission, Permission, type SessionResponse, TenantStatus } from '@
 /** Where to send a user after signing in. */
 export function homeFor(session: SessionResponse): string {
   const tenant = session.activeTenant;
-  if (tenant?.status === TenantStatus.PENDING && hasPermission(tenant.role, Permission.TENANT_UPDATE)) {
+  if (
+    tenant?.status === TenantStatus.PENDING &&
+    hasPermission(tenant.role, Permission.TENANT_UPDATE)
+  ) {
     return '/onboarding';
   }
   return '/dashboard';

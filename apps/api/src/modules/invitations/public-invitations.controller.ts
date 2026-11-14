@@ -33,7 +33,9 @@ export class PublicInvitationsController {
   @StrictRateLimit()
   @Post('accept')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Accept an invitation; creates the account if needed and signs the user in' })
+  @ApiOperation({
+    summary: 'Accept an invitation; creates the account if needed and signs the user in',
+  })
   async accept(
     @Body() dto: AcceptInvitationDto,
     @Req() req: Request,

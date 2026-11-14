@@ -6,7 +6,9 @@ export const Trim = (): PropertyDecorator =>
 
 /** Trims and lower-cases email input. */
 export const NormalizeEmail = (): PropertyDecorator =>
-  Transform(({ value }: { value: unknown }) => (typeof value === 'string' ? value.trim().toLowerCase() : value));
+  Transform(({ value }: { value: unknown }) =>
+    typeof value === 'string' ? value.trim().toLowerCase() : value,
+  );
 
 /** Turns empty strings into null so optional fields can be cleared. */
 export const EmptyToNull = (): PropertyDecorator =>

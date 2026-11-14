@@ -6,3 +6,5 @@ pnpm-lock.yaml
 prisma/migrations
 playwright-report
 test-results
+apps/api/src/generated
+.next

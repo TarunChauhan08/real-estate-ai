@@ -21,7 +21,11 @@ describe('Tenant, profile, settings and onboarding (e2e)', () => {
 
   it('GET /tenants/current returns the business resolved from the membership', async () => {
     const res = await http().get('/api/v1/tenants/current').set(bearer(owner)).expect(200);
-    expect(res.body.data).toMatchObject({ id: owner.activeTenant!.id, name: 'Noida Homes Brokerage', status: 'PENDING' });
+    expect(res.body.data).toMatchObject({
+      id: owner.activeTenant!.id,
+      name: 'Noida Homes Brokerage',
+      status: 'PENDING',
+    });
   });
 
   it('PATCH /tenants/current renames the business and audits the change', async () => {
@@ -43,14 +47,22 @@ describe('Tenant, profile, settings and onboarding (e2e)', () => {
       .set(bearer(owner))
       .send({ slug: 'hijack', status: 'ACTIVE' })
       .expect(400);
-    expect(res.body.error.details.map((d: { field: string }) => d.field).sort()).toEqual(['slug', 'status']);
+    expect(res.body.error.details.map((d: { field: string }) => d.field).sort()).toEqual([
+      'slug',
+      'status',
+    ]);
   });
 
   it('updates and clears business profile fields', async () => {
     const updated = await http()
       .patch('/api/v1/tenants/current/profile')
       .set(bearer(owner))
-      .send({ phone: '+91 98765 43210', website: 'noidahomes.in', city: 'Noida', state: 'Uttar Pradesh' })
+      .send({
+        phone: '+91 98765 43210',
+        website: 'noidahomes.in',
+        city: 'Noida',
+        state: 'Uttar Pradesh',
+      })
       .expect(200);
     expect(updated.body.data).toMatchObject({
       phone: '+91 98765 43210',
@@ -80,7 +92,10 @@ describe('Tenant, profile, settings and onboarding (e2e)', () => {
   });
 
   it('reads defaults and updates tenant settings', async () => {
-    const defaults = await http().get('/api/v1/tenants/current/settings').set(bearer(owner)).expect(200);
+    const defaults = await http()
+      .get('/api/v1/tenants/current/settings')
+      .set(bearer(owner))
+      .expect(200);
     expect(defaults.body.data).toMatchObject({
       timezone: 'Asia/Kolkata',
       locale: 'en-IN',
@@ -110,19 +125,16 @@ describe('Tenant, profile, settings and onboarding (e2e)', () => {
   });
 
   it('completes onboarding: saves all details and activates the business', async () => {
-    const res = await http()
-      .post('/api/v1/tenants/current/onboarding')
-      .set(bearer(owner))
-      .send({
-        businessName: 'Noida Homes Brokerage',
-        businessType: 'REAL_ESTATE_AGENCY',
-        phone: '+91 99999 88888',
-        website: 'https://noidahomes.in',
-        city: 'Noida',
-        state: 'Uttar Pradesh',
-        timezone: 'Asia/Kolkata',
-        preferredLanguage: 'hi',
-      });
+    const res = await http().post('/api/v1/tenants/current/onboarding').set(bearer(owner)).send({
+      businessName: 'Noida Homes Brokerage',
+      businessType: 'REAL_ESTATE_AGENCY',
+      phone: '+91 99999 88888',
+      website: 'https://noidahomes.in',
+      city: 'Noida',
+      state: 'Uttar Pradesh',
+      timezone: 'Asia/Kolkata',
+      preferredLanguage: 'hi',
+    });
     expect(res.status).toBe(200);
     expect(res.body.data).toMatchObject({ name: 'Noida Homes Brokerage', status: 'ACTIVE' });
 
@@ -130,7 +142,11 @@ describe('Tenant, profile, settings and onboarding (e2e)', () => {
       http().get('/api/v1/tenants/current/profile').set(bearer(owner)),
       http().get('/api/v1/tenants/current/settings').set(bearer(owner)),
     ]);
-    expect(profile.body.data).toMatchObject({ businessType: 'REAL_ESTATE_AGENCY', city: 'Noida', phone: '+91 99999 88888' });
+    expect(profile.body.data).toMatchObject({
+      businessType: 'REAL_ESTATE_AGENCY',
+      city: 'Noida',
+      phone: '+91 99999 88888',
+    });
     expect(settings.body.data.preferredLanguage).toBe('hi');
   });
 
@@ -144,7 +160,9 @@ describe('Tenant, profile, settings and onboarding (e2e)', () => {
       expect(metrics[key]).not.toHaveProperty('value');
     }
     expect(aiEmployee).toEqual({ status: 'not_configured' });
-    expect(setup.steps.find((s: { key: string }) => s.key === 'business_profile').completed).toBe(true);
+    expect(setup.steps.find((s: { key: string }) => s.key === 'business_profile').completed).toBe(
+      true,
+    );
     expect(setup.steps.find((s: { key: string }) => s.key === 'ai_employee').available).toBe(false);
   });
 

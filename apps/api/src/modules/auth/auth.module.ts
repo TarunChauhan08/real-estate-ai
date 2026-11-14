@@ -11,13 +11,7 @@ import { TokenService } from './token.service';
 @Module({
   imports: [JwtModule.register({}), MembershipsModule],
   controllers: [AuthController],
-  providers: [
-    AuthService,
-    PasswordService,
-    TokenService,
-    SessionsService,
-    JwtAuthGuard,
-  ],
+  providers: [AuthService, PasswordService, TokenService, SessionsService, JwtAuthGuard],
   exports: [AuthService, PasswordService, SessionsService, TokenService, JwtAuthGuard],
 })
 export class AuthModule {}

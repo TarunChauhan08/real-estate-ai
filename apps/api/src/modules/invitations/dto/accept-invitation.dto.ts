@@ -22,7 +22,8 @@ export class AcceptInvitationDto extends InvitationTokenDto {
 
   @ApiProperty({
     format: 'password',
-    description: 'New users choose a password (policy enforced); existing users confirm their current password',
+    description:
+      'New users choose a password (policy enforced); existing users confirm their current password',
   })
   @IsString()
   @MinLength(1)

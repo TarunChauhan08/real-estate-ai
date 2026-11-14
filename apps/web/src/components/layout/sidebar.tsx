@@ -15,7 +15,8 @@ export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
       </Link>
       <ul className="space-y-0.5">
         {NAV_ITEMS.map((item) => {
-          const active = item.href === '/dashboard' ? pathname === '/dashboard' : pathname.startsWith(item.href);
+          const active =
+            item.href === '/dashboard' ? pathname === '/dashboard' : pathname.startsWith(item.href);
           const Icon = item.icon;
           if (!item.available) {
             return (
@@ -42,7 +43,9 @@ export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
                 aria-current={active ? 'page' : undefined}
                 className={cn(
                   'flex items-center gap-3 rounded-[var(--radius-control)] px-3 py-2 text-sm font-medium transition-colors',
-                  active ? 'bg-white/10 text-white' : 'text-brand-soft-2 hover:bg-white/5 hover:text-white',
+                  active
+                    ? 'bg-white/10 text-white'
+                    : 'text-brand-soft-2 hover:bg-white/5 hover:text-white',
                 )}
               >
                 <Icon className={cn('size-4', active && 'text-attention')} />

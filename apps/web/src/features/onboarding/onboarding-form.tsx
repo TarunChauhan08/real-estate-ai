@@ -45,8 +45,14 @@ export function OnboardingForm() {
   const { session, reload } = useAuth();
   const router = useRouter();
   const [formError, setFormError] = useState<string | null>(null);
-  const profile = useQuery({ queryKey: queryKeys.profile, queryFn: () => api<BusinessProfileDto>('/tenants/current/profile') });
-  const settings = useQuery({ queryKey: queryKeys.settings, queryFn: () => api<TenantSettingsDto>('/tenants/current/settings') });
+  const profile = useQuery({
+    queryKey: queryKeys.profile,
+    queryFn: () => api<BusinessProfileDto>('/tenants/current/profile'),
+  });
+  const settings = useQuery({
+    queryKey: queryKeys.settings,
+    queryFn: () => api<TenantSettingsDto>('/tenants/current/settings'),
+  });
   const {
     register,
     handleSubmit,
@@ -79,13 +85,20 @@ export function OnboardingForm() {
       router.replace('/dashboard');
     } catch (error) {
       if (!applyFieldErrors(error, setError)) {
-        setFormError(error instanceof ApiError ? error.message : 'Could not save your details. Try again.');
+        setFormError(
+          error instanceof ApiError ? error.message : 'Could not save your details. Try again.',
+        );
       }
     }
   });
 
   if (profile.isError || settings.isError) {
-    return <ErrorState error={profile.error ?? settings.error} onRetry={() => void Promise.all([profile.refetch(), settings.refetch()])} />;
+    return (
+      <ErrorState
+        error={profile.error ?? settings.error}
+        onRetry={() => void Promise.all([profile.refetch(), settings.refetch()])}
+      />
+    );
   }
   if (!profile.data || !settings.data) {
     return (
@@ -119,10 +132,25 @@ export function OnboardingForm() {
             )}
           </Field>
           <Field label="Phone" optional error={errors.phone?.message}>
-            {(c) => <Input {...c} type="tel" autoComplete="tel" placeholder="+91 98765 43210" {...register('phone')} />}
+            {(c) => (
+              <Input
+                {...c}
+                type="tel"
+                autoComplete="tel"
+                placeholder="+91 98765 43210"
+                {...register('phone')}
+              />
+            )}
           </Field>
           <Field label="Website" optional error={errors.website?.message}>
-            {(c) => <Input {...c} autoComplete="url" placeholder="yourbusiness.in" {...register('website')} />}
+            {(c) => (
+              <Input
+                {...c}
+                autoComplete="url"
+                placeholder="yourbusiness.in"
+                {...register('website')}
+              />
+            )}
           </Field>
           <Field label="City" error={errors.city?.message}>
             {(c) => <Input {...c} autoComplete="address-level2" {...register('city')} />}

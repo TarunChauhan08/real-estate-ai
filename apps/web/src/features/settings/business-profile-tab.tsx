@@ -29,7 +29,10 @@ import { queryKeys } from '@/lib/query-keys';
 const schema = z.object({
   name: z.string().trim().min(2, 'Enter your business name').max(120),
   businessType: z.nativeEnum(BusinessType),
-  phone: z.string().trim().regex(/^(\+?[0-9][0-9 -]{5,18}[0-9])?$/, 'Enter a valid phone number'),
+  phone: z
+    .string()
+    .trim()
+    .regex(/^(\+?[0-9][0-9 -]{5,18}[0-9])?$/, 'Enter a valid phone number'),
   website: z.string().trim().max(255),
   city: z.string().trim().max(100),
   state: z.string().trim().max(100),
@@ -40,8 +43,14 @@ export function BusinessProfileTab() {
   const canEdit = usePermission(Permission.TENANT_UPDATE);
   const { reload } = useAuth();
   const queryClient = useQueryClient();
-  const tenant = useQuery({ queryKey: queryKeys.tenant, queryFn: () => api<TenantDto>('/tenants/current') });
-  const profile = useQuery({ queryKey: queryKeys.profile, queryFn: () => api<BusinessProfileDto>('/tenants/current/profile') });
+  const tenant = useQuery({
+    queryKey: queryKeys.tenant,
+    queryFn: () => api<TenantDto>('/tenants/current'),
+  });
+  const profile = useQuery({
+    queryKey: queryKeys.profile,
+    queryFn: () => api<BusinessProfileDto>('/tenants/current/profile'),
+  });
   const form = useForm<Values>({ resolver: zodResolver(schema) });
 
   useEffect(() => {
@@ -59,7 +68,8 @@ export function BusinessProfileTab() {
 
   const save = useMutation({
     mutationFn: async ({ name, ...rest }: Values) => {
-      if (name !== tenant.data?.name) await api('/tenants/current', { method: 'PATCH', body: { name } });
+      if (name !== tenant.data?.name)
+        await api('/tenants/current', { method: 'PATCH', body: { name } });
       return api<BusinessProfileDto>('/tenants/current/profile', { method: 'PATCH', body: rest });
     },
     onSuccess: async () => {
@@ -70,20 +80,32 @@ export function BusinessProfileTab() {
     },
     onError: (error) => {
       if (!applyFieldErrors(error, form.setError)) {
-        form.setError('root', { message: error instanceof ApiError ? error.message : 'Changes were not saved' });
+        form.setError('root', {
+          message: error instanceof ApiError ? error.message : 'Changes were not saved',
+        });
       }
     },
   });
 
-  if (tenant.isError || profile.isError) return <ErrorState error={tenant.error ?? profile.error} />;
+  if (tenant.isError || profile.isError)
+    return <ErrorState error={tenant.error ?? profile.error} />;
   if (!tenant.data || !profile.data) return <Skeleton className="h-80" />;
   const { errors } = form.formState;
 
   return (
     <Panel>
-      <PanelHeader title="Business profile" description="How your business appears to your team and, later, to buyers." />
-      <form onSubmit={form.handleSubmit((v) => save.mutate(v))} noValidate className="space-y-5 p-5">
-        {!canEdit && <Alert tone="info">Only owners and admins can edit the business profile.</Alert>}
+      <PanelHeader
+        title="Business profile"
+        description="How your business appears to your team and, later, to buyers."
+      />
+      <form
+        onSubmit={form.handleSubmit((v) => save.mutate(v))}
+        noValidate
+        className="space-y-5 p-5"
+      >
+        {!canEdit && (
+          <Alert tone="info">Only owners and admins can edit the business profile.</Alert>
+        )}
         {errors.root && <Alert tone="danger">{errors.root.message}</Alert>}
         <fieldset disabled={!canEdit} className="grid gap-5 sm:grid-cols-2">
           <Field label="Business name" error={errors.name?.message}>

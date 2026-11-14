@@ -56,7 +56,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const switchTenant = useCallback(
     async (tenantId: string) => {
-      const next = await api<SessionResponse>('/auth/switch-tenant', { method: 'POST', body: { tenantId } });
+      const next = await api<SessionResponse>('/auth/switch-tenant', {
+        method: 'POST',
+        body: { tenantId },
+      });
       queryClient.clear();
       setSession(next);
     },

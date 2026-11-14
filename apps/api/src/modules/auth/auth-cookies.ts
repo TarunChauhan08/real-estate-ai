@@ -16,7 +16,12 @@ function baseOptions(config: AppConfigService): CookieOptions {
   };
 }
 
-export function setRefreshCookie(res: Response, config: AppConfigService, token: string, maxAgeMs: number): void {
+export function setRefreshCookie(
+  res: Response,
+  config: AppConfigService,
+  token: string,
+  maxAgeMs: number,
+): void {
   res.cookie(REFRESH_COOKIE, token, { ...baseOptions(config), maxAge: maxAgeMs });
 }
 

@@ -2,7 +2,12 @@ import { cn } from '@/lib/utils';
 
 /** Bordered surface for a group of related content. */
 export function Panel({ className, ...props }: React.HTMLAttributes<HTMLElement>) {
-  return <section className={cn('rounded-[var(--radius-panel)] border border-line bg-white', className)} {...props} />;
+  return (
+    <section
+      className={cn('rounded-[var(--radius-panel)] border border-line bg-white', className)}
+      {...props}
+    />
+  );
 }
 
 export function PanelHeader({

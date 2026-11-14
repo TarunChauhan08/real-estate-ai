@@ -41,7 +41,10 @@ export class AuthService {
    * refresh session in a single transaction — either everything exists afterwards or nothing does.
    */
   async register(dto: RegisterDto, meta: RequestMeta): Promise<IssuedAuth> {
-    const existing = await this.prisma.user.findUnique({ where: { email: dto.email }, select: { id: true } });
+    const existing = await this.prisma.user.findUnique({
+      where: { email: dto.email },
+      select: { id: true },
+    });
     if (existing) throw Errors.conflict('EMAIL_TAKEN', 'An account with this email already exists');
 
     const passwordHash = await this.passwords.hash(dto.password);
@@ -49,14 +52,26 @@ export class AuthService {
     try {
       const result = await this.prisma.$transaction(async (tx) => {
         const user = await tx.user.create({
-          data: { name: dto.name, email: dto.email, passwordHash, status: UserStatus.ACTIVE, lastLoginAt: new Date() },
+          data: {
+            name: dto.name,
+            email: dto.email,
+            passwordHash,
+            status: UserStatus.ACTIVE,
+            lastLoginAt: new Date(),
+          },
           select: { id: true },
         });
         const tenant = await tx.tenant.create({
-          data: { name: dto.businessName, slug: uniqueSlug(dto.businessName), status: TenantStatus.PENDING },
+          data: {
+            name: dto.businessName,
+            slug: uniqueSlug(dto.businessName),
+            status: TenantStatus.PENDING,
+          },
           select: { id: true },
         });
-        await tx.businessProfile.create({ data: { tenantId: tenant.id, businessType: dto.businessType } });
+        await tx.businessProfile.create({
+          data: { tenantId: tenant.id, businessType: dto.businessType },
+        });
         await tx.tenantSettings.create({ data: { tenantId: tenant.id } });
         const membership = await tx.membership.create({
           data: { tenantId: tenant.id, userId: user.id, role: MembershipRole.OWNER },
@@ -89,8 +104,17 @@ export class AuthService {
           tx,
         );
 
-        const context: TenantContext = { tenantId: tenant.id, membershipId: membership.id, role: MembershipRole.OWNER };
-        return { userId: user.id, familyId: issued.familyId, refreshToken: issued.refreshToken, context };
+        const context: TenantContext = {
+          tenantId: tenant.id,
+          membershipId: membership.id,
+          role: MembershipRole.OWNER,
+        };
+        return {
+          userId: user.id,
+          familyId: issued.familyId,
+          refreshToken: issued.refreshToken,
+          context,
+        };
       });
 
       return {
@@ -130,7 +154,11 @@ export class AuthService {
     }
     // Status is only revealed after the password has been verified.
     if (user.status !== UserStatus.ACTIVE) {
-      throw new AppException(403, 'ACCOUNT_DISABLED', 'This account has been disabled. Contact your administrator.');
+      throw new AppException(
+        403,
+        'ACCOUNT_DISABLED',
+        'This account has been disabled. Contact your administrator.',
+      );
     }
 
     const context = await this.memberships.resolveForSession(user.id);
@@ -148,7 +176,10 @@ export class AuthService {
       entityId: user.id,
     });
 
-    return { session: await this.buildSession(user.id, issued.familyId, context), refreshToken: issued.refreshToken };
+    return {
+      session: await this.buildSession(user.id, issued.familyId, context),
+      refreshToken: issued.refreshToken,
+    };
   }
 
   /** Rotates the refresh token and re-resolves tenant context from current memberships. */
@@ -190,17 +221,29 @@ export class AuthService {
   }
 
   /** Starts a new login session directly in the given tenant context (e.g. after accepting an invitation). */
-  async startSession(userId: string, context: TenantContext, meta: RequestMeta): Promise<IssuedAuth> {
-    const issued = await this.sessions.create({ userId, tenantId: context.tenantId, userAgent: meta.userAgent });
+  async startSession(
+    userId: string,
+    context: TenantContext,
+    meta: RequestMeta,
+  ): Promise<IssuedAuth> {
+    const issued = await this.sessions.create({
+      userId,
+      tenantId: context.tenantId,
+      userAgent: meta.userAgent,
+    });
     await this.prisma.user.update({ where: { id: userId }, data: { lastLoginAt: new Date() } });
-    return { session: await this.buildSession(userId, issued.familyId, context), refreshToken: issued.refreshToken };
+    return {
+      session: await this.buildSession(userId, issued.familyId, context),
+      refreshToken: issued.refreshToken,
+    };
   }
 
   /** Moves the current login session into another tenant the user is an active member of. */
   async switchTenant(auth: AuthContext, tenantId: string): Promise<SessionResponse> {
     const context = await this.memberships.resolveForSession(auth.userId, tenantId);
     // resolveForSession falls back to another tenant; switching requires the exact one.
-    if (!context || context.tenantId !== tenantId) throw Errors.forbidden('You are not an active member of that business');
+    if (!context || context.tenantId !== tenantId)
+      throw Errors.forbidden('You are not an active member of that business');
 
     await this.sessions.setTenant(auth.familyId, tenantId);
     await this.audit.recordSafely({
@@ -227,7 +270,11 @@ export class AuthService {
     };
   }
 
-  private async buildSession(userId: string, familyId: string, context: TenantContext | null): Promise<SessionResponse> {
+  private async buildSession(
+    userId: string,
+    familyId: string,
+    context: TenantContext | null,
+  ): Promise<SessionResponse> {
     const [user, activeTenant, accessToken] = await Promise.all([
       this.loadUser(userId),
       this.loadActiveTenant(context),

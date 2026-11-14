@@ -31,7 +31,9 @@ function MetricCell({ label, metric }: { label: string; metric: MetricValue }) {
     <div className="px-5 py-4">
       <dt className="text-sm text-fg-muted">{label}</dt>
       {metric.status === 'available' ? (
-        <dd className="mt-1 text-2xl font-bold tracking-tight text-fg tabular-nums">{metric.value.toLocaleString('en-IN')}</dd>
+        <dd className="mt-1 text-2xl font-bold tracking-tight text-fg tabular-nums">
+          {metric.value.toLocaleString('en-IN')}
+        </dd>
       ) : (
         <dd className="mt-1">
           <span className="text-2xl font-bold tracking-tight text-line-strong" aria-hidden>
@@ -45,11 +47,15 @@ function MetricCell({ label, metric }: { label: string; metric: MetricValue }) {
 }
 
 export function Overview() {
-  const overview = useQuery({ queryKey: queryKeys.overview, queryFn: () => api<DashboardOverview>('/dashboard/overview') });
+  const overview = useQuery({
+    queryKey: queryKeys.overview,
+    queryFn: () => api<DashboardOverview>('/dashboard/overview'),
+  });
   const canInvite = usePermission(Permission.MEMBERS_INVITE);
   const firstName = useAuth().session?.user.name.split(' ')[0] ?? '';
 
-  if (overview.isError) return <ErrorState error={overview.error} onRetry={() => void overview.refetch()} />;
+  if (overview.isError)
+    return <ErrorState error={overview.error} onRetry={() => void overview.refetch()} />;
   const data = overview.data;
 
   return (
@@ -63,13 +69,27 @@ export function Overview() {
         <Panel>
           <PanelHeader
             title="Get set up"
-            description={data ? `${data.setup.completed} of ${data.setup.total} steps complete` : 'Loading progress'}
+            description={
+              data
+                ? `${data.setup.completed} of ${data.setup.total} steps complete`
+                : 'Loading progress'
+            }
           />
           {data ? (
             <>
               <div className="px-5 pt-4">
-                <div className="h-1.5 overflow-hidden rounded-full bg-subtle" role="progressbar" aria-valuemin={0} aria-valuemax={data.setup.total} aria-valuenow={data.setup.completed} aria-label="Setup progress">
-                  <div className="h-full rounded-full bg-brand-fg" style={{ width: `${(data.setup.completed / data.setup.total) * 100}%` }} />
+                <div
+                  className="h-1.5 overflow-hidden rounded-full bg-subtle"
+                  role="progressbar"
+                  aria-valuemin={0}
+                  aria-valuemax={data.setup.total}
+                  aria-valuenow={data.setup.completed}
+                  aria-label="Setup progress"
+                >
+                  <div
+                    className="h-full rounded-full bg-brand-fg"
+                    style={{ width: `${(data.setup.completed / data.setup.total) * 100}%` }}
+                  />
                 </div>
               </div>
               <ol className="divide-y divide-subtle px-5 py-2">
@@ -88,9 +108,21 @@ export function Overview() {
                     >
                       {step.completed ? <Check className="size-3.5" /> : index + 1}
                     </span>
-                    <span className={cn('flex-1 text-sm', step.completed ? 'text-fg-muted' : 'font-medium text-fg', !step.available && 'font-normal text-fg-muted')}>
+                    <span
+                      className={cn(
+                        'flex-1 text-sm',
+                        step.completed ? 'text-fg-muted' : 'font-medium text-fg',
+                        !step.available && 'font-normal text-fg-muted',
+                      )}
+                    >
                       {step.label}
-                      <span className="sr-only">{step.completed ? ' (done)' : step.available ? ' (to do)' : ' (coming soon)'}</span>
+                      <span className="sr-only">
+                        {step.completed
+                          ? ' (done)'
+                          : step.available
+                            ? ' (to do)'
+                            : ' (coming soon)'}
+                      </span>
                     </span>
                     {!step.completed && !step.available && <Badge>Coming soon</Badge>}
                     {!step.completed && step.key === 'team_invited' && canInvite && (
@@ -113,10 +145,18 @@ export function Overview() {
 
         <div className="space-y-3">
           <h2 className="text-[15px] font-semibold text-fg">Your AI employee</h2>
-          {data ? <AiEmployeeIdCard businessName={data.tenant.name} compact /> : <Skeleton className="h-32" />}
+          {data ? (
+            <AiEmployeeIdCard businessName={data.tenant.name} compact />
+          ) : (
+            <Skeleton className="h-32" />
+          )}
           <p className="text-sm text-fg-muted">
-            The AI employee is not available yet. You will configure its name, voice and channels here once it launches.{' '}
-            <Link href="/dashboard/ai-employee" className="font-semibold text-brand-fg hover:underline">
+            The AI employee is not available yet. You will configure its name, voice and channels
+            here once it launches.{' '}
+            <Link
+              href="/dashboard/ai-employee"
+              className="font-semibold text-brand-fg hover:underline"
+            >
               See what’s planned
             </Link>
           </p>

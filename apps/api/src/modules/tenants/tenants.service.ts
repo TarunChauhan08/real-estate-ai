@@ -11,7 +11,14 @@ import { type UpdateBusinessProfileDto } from './dto/update-business-profile.dto
 import { type UpdateTenantSettingsDto } from './dto/update-tenant-settings.dto';
 import { type UpdateTenantDto } from './dto/update-tenant.dto';
 
-const tenantSelect = { id: true, name: true, slug: true, status: true, createdAt: true, updatedAt: true } as const;
+const tenantSelect = {
+  id: true,
+  name: true,
+  slug: true,
+  status: true,
+  createdAt: true,
+  updatedAt: true,
+} as const;
 const profileSelect = {
   businessType: true,
   phone: true,
@@ -21,7 +28,13 @@ const profileSelect = {
   country: true,
   updatedAt: true,
 } as const;
-const settingsSelect = { timezone: true, locale: true, currency: true, preferredLanguage: true, updatedAt: true } as const;
+const settingsSelect = {
+  timezone: true,
+  locale: true,
+  currency: true,
+  preferredLanguage: true,
+  updatedAt: true,
+} as const;
 
 /** Names of the fields that actually changed — recorded in audit metadata (values are not). */
 function changedFields<T extends object>(before: T, patch: Partial<T>): string[] {
@@ -42,18 +55,29 @@ export class TenantsService {
   ) {}
 
   async getTenant(ctx: TenantContext): Promise<TenantDto> {
-    const tenant = await this.prisma.tenant.findUnique({ where: { id: ctx.tenantId }, select: tenantSelect });
+    const tenant = await this.prisma.tenant.findUnique({
+      where: { id: ctx.tenantId },
+      select: tenantSelect,
+    });
     if (!tenant) throw Errors.notFound('Business');
     return this.toTenantDto(tenant);
   }
 
-  async updateTenant(ctx: TenantContext, actorId: string, dto: UpdateTenantDto): Promise<TenantDto> {
+  async updateTenant(
+    ctx: TenantContext,
+    actorId: string,
+    dto: UpdateTenantDto,
+  ): Promise<TenantDto> {
     const before = await this.getTenant(ctx);
     const fields = changedFields(before, dto);
     if (fields.length === 0) return before;
 
     return this.prisma.$transaction(async (tx) => {
-      const tenant = await tx.tenant.update({ where: { id: ctx.tenantId }, data: { name: dto.name }, select: tenantSelect });
+      const tenant = await tx.tenant.update({
+        where: { id: ctx.tenantId },
+        data: { name: dto.name },
+        select: tenantSelect,
+      });
       await this.audit.record(
         {
           tenantId: ctx.tenantId,
@@ -70,12 +94,19 @@ export class TenantsService {
   }
 
   async getProfile(ctx: TenantContext): Promise<BusinessProfileDto> {
-    const profile = await this.prisma.businessProfile.findUnique({ where: { tenantId: ctx.tenantId }, select: profileSelect });
+    const profile = await this.prisma.businessProfile.findUnique({
+      where: { tenantId: ctx.tenantId },
+      select: profileSelect,
+    });
     if (!profile) throw Errors.notFound('Business profile');
     return { ...profile, updatedAt: profile.updatedAt.toISOString() };
   }
 
-  async updateProfile(ctx: TenantContext, actorId: string, dto: UpdateBusinessProfileDto): Promise<BusinessProfileDto> {
+  async updateProfile(
+    ctx: TenantContext,
+    actorId: string,
+    dto: UpdateBusinessProfileDto,
+  ): Promise<BusinessProfileDto> {
     const before = await this.getProfile(ctx);
     const fields = changedFields(before, dto);
     if (fields.length === 0) return before;
@@ -102,12 +133,19 @@ export class TenantsService {
   }
 
   async getSettings(ctx: TenantContext): Promise<TenantSettingsDto> {
-    const settings = await this.prisma.tenantSettings.findUnique({ where: { tenantId: ctx.tenantId }, select: settingsSelect });
+    const settings = await this.prisma.tenantSettings.findUnique({
+      where: { tenantId: ctx.tenantId },
+      select: settingsSelect,
+    });
     if (!settings) throw Errors.notFound('Business settings');
     return this.toSettingsDto(settings);
   }
 
-  async updateSettings(ctx: TenantContext, actorId: string, dto: UpdateTenantSettingsDto): Promise<TenantSettingsDto> {
+  async updateSettings(
+    ctx: TenantContext,
+    actorId: string,
+    dto: UpdateTenantSettingsDto,
+  ): Promise<TenantSettingsDto> {
     const before = await this.getSettings(ctx);
     const fields = changedFields(before, dto);
     if (fields.length === 0) return before;
@@ -137,9 +175,14 @@ export class TenantsService {
    * Saves the onboarding form (tenant name, profile and preferences) in one transaction
    * and moves the tenant from PENDING to ACTIVE. Re-submitting updates the same records.
    */
-  async completeOnboarding(ctx: TenantContext, actorId: string, dto: CompleteOnboardingDto): Promise<TenantDto> {
+  async completeOnboarding(
+    ctx: TenantContext,
+    actorId: string,
+    dto: CompleteOnboardingDto,
+  ): Promise<TenantDto> {
     const current = await this.getTenant(ctx);
-    if (current.status === TenantStatus.SUSPENDED) throw Errors.forbidden('This business is suspended');
+    if (current.status === TenantStatus.SUSPENDED)
+      throw Errors.forbidden('This business is suspended');
 
     return this.prisma.$transaction(async (tx) => {
       const tenant = await tx.tenant.update({
@@ -176,11 +219,22 @@ export class TenantsService {
     });
   }
 
-  private toTenantDto(tenant: { createdAt: Date; updatedAt: Date } & Omit<TenantDto, 'createdAt' | 'updatedAt'>): TenantDto {
-    return { ...tenant, createdAt: tenant.createdAt.toISOString(), updatedAt: tenant.updatedAt.toISOString() };
+  private toTenantDto(
+    tenant: { createdAt: Date; updatedAt: Date } & Omit<TenantDto, 'createdAt' | 'updatedAt'>,
+  ): TenantDto {
+    return {
+      ...tenant,
+      createdAt: tenant.createdAt.toISOString(),
+      updatedAt: tenant.updatedAt.toISOString(),
+    };
   }
 
-  private toSettingsDto(settings: { updatedAt: Date; preferredLanguage: string } & Omit<TenantSettingsDto, 'updatedAt' | 'preferredLanguage'>): TenantSettingsDto {
+  private toSettingsDto(
+    settings: { updatedAt: Date; preferredLanguage: string } & Omit<
+      TenantSettingsDto,
+      'updatedAt' | 'preferredLanguage'
+    >,
+  ): TenantSettingsDto {
     return {
       ...settings,
       preferredLanguage: settings.preferredLanguage as TenantSettingsDto['preferredLanguage'],

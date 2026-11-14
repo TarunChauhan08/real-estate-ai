@@ -5,12 +5,15 @@
 const { execSync } = require('node:child_process');
 const path = require('node:path');
 
-const DEFAULT_TEST_URL = 'postgresql://realestate:realestate@localhost:5432/realestate_test?schema=public';
+const DEFAULT_TEST_URL =
+  'postgresql://realestate:realestate@localhost:5432/realestate_test?schema=public';
 
 function prepareTestDatabase() {
   const url = process.env.TEST_DATABASE_URL || DEFAULT_TEST_URL;
   if (!/test/i.test(url)) {
-    throw new Error('Refusing to migrate: TEST_DATABASE_URL must point at a database whose name contains "test".');
+    throw new Error(
+      'Refusing to migrate: TEST_DATABASE_URL must point at a database whose name contains "test".',
+    );
   }
   execSync('npx prisma migrate deploy', {
     cwd: path.resolve(__dirname, '..'),

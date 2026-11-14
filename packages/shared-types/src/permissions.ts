@@ -36,8 +36,18 @@ export const ROLE_PERMISSIONS: Record<MembershipRole, readonly Permission[]> = {
     Permission.MEMBERS_MANAGE,
     Permission.DASHBOARD_READ,
   ],
-  SALES_AGENT: [Permission.TENANT_READ, Permission.SETTINGS_READ, Permission.MEMBERS_READ, Permission.DASHBOARD_READ],
-  VIEWER: [Permission.TENANT_READ, Permission.SETTINGS_READ, Permission.MEMBERS_READ, Permission.DASHBOARD_READ],
+  SALES_AGENT: [
+    Permission.TENANT_READ,
+    Permission.SETTINGS_READ,
+    Permission.MEMBERS_READ,
+    Permission.DASHBOARD_READ,
+  ],
+  VIEWER: [
+    Permission.TENANT_READ,
+    Permission.SETTINGS_READ,
+    Permission.MEMBERS_READ,
+    Permission.DASHBOARD_READ,
+  ],
 };
 
 /**

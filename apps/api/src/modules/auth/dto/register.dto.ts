@@ -32,7 +32,9 @@ export class RegisterDto {
   @IsEnum(BusinessType)
   businessType: BusinessType;
 
-  @ApiProperty({ description: 'Must be true: the owner accepts the terms of service and privacy policy.' })
+  @ApiProperty({
+    description: 'Must be true: the owner accepts the terms of service and privacy policy.',
+  })
   @Equals(true, { message: 'You must accept the terms to create an account' })
   acceptTerms: boolean;
 }

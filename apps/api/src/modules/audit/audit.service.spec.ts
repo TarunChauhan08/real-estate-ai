@@ -12,7 +12,13 @@ describe('AuditService', () => {
       action: AuditAction.AUTH_LOGIN,
       entityType: 'user',
       entityId: 'u1',
-      metadata: { email: 'a@b.com', password: 'x', refreshToken: 'y', tokenHash: 'z', userAgent: 'ua' },
+      metadata: {
+        email: 'a@b.com',
+        password: 'x',
+        refreshToken: 'y',
+        tokenHash: 'z',
+        userAgent: 'ua',
+      },
     });
 
     expect(create).toHaveBeenCalledWith({

@@ -46,8 +46,14 @@ export class TokenService {
         audience: AUDIENCE,
         algorithms: ['HS256'],
       });
-      if (typeof payload.sub !== 'string' || typeof payload.fam !== 'string') throw new Error('bad claims');
-      return { sub: payload.sub, fam: payload.fam, tid: payload.tid ?? null, mid: payload.mid ?? null };
+      if (typeof payload.sub !== 'string' || typeof payload.fam !== 'string')
+        throw new Error('bad claims');
+      return {
+        sub: payload.sub,
+        fam: payload.fam,
+        tid: payload.tid ?? null,
+        mid: payload.mid ?? null,
+      };
     } catch {
       throw Errors.unauthenticated('Invalid or expired access token');
     }

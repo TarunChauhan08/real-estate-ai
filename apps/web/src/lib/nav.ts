@@ -24,7 +24,12 @@ export const NAV_ITEMS: NavItem[] = [
   { label: 'Overview', href: '/dashboard', icon: LayoutDashboard, available: true },
   { label: 'AI Employee', href: '/dashboard/ai-employee', icon: Bot, available: true },
   { label: 'Leads', href: '/dashboard/leads', icon: UserRoundSearch, available: false },
-  { label: 'Conversations', href: '/dashboard/conversations', icon: MessagesSquare, available: false },
+  {
+    label: 'Conversations',
+    href: '/dashboard/conversations',
+    icon: MessagesSquare,
+    available: false,
+  },
   { label: 'Properties', href: '/dashboard/properties', icon: Building2, available: false },
   { label: 'Site Visits', href: '/dashboard/site-visits', icon: CalendarCheck, available: false },
   { label: 'Follow-ups', href: '/dashboard/follow-ups', icon: BellRing, available: false },

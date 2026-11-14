@@ -32,13 +32,17 @@ describe('TeamService last-owner protection', () => {
 
   it('refuses to demote the last active owner', async () => {
     const { service, tx } = serviceWith({ role: 'OWNER', status: 'ACTIVE' }, 0);
-    await expect(service.changeRole(ctx, 'actor', 'target', 'ADMIN')).rejects.toMatchObject({ code: 'LAST_OWNER' });
+    await expect(service.changeRole(ctx, 'actor', 'target', 'ADMIN')).rejects.toMatchObject({
+      code: 'LAST_OWNER',
+    });
     expect(tx.membership.update).not.toHaveBeenCalled();
   });
 
   it('refuses to suspend the last active owner', async () => {
     const { service } = serviceWith({ role: 'OWNER', status: 'ACTIVE' }, 0);
-    const error = await service.changeStatus(ctx, 'actor', 'target', 'SUSPENDED').catch((e: unknown) => e);
+    const error = await service
+      .changeStatus(ctx, 'actor', 'target', 'SUSPENDED')
+      .catch((e: unknown) => e);
     expect(error).toBeInstanceOf(AppException);
     expect((error as AppException).getStatus()).toBe(409);
   });

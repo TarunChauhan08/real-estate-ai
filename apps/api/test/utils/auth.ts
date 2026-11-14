@@ -24,7 +24,12 @@ export function uniqueEmail(prefix = 'owner'): string {
 
 export async function registerBusiness(
   app: INestApplication,
-  overrides: Partial<{ name: string; email: string; businessName: string; businessType: string }> = {},
+  overrides: Partial<{
+    name: string;
+    email: string;
+    businessName: string;
+    businessType: string;
+  }> = {},
 ): Promise<TestSession> {
   const email = overrides.email ?? uniqueEmail();
   const res = await request(app.getHttpServer())
@@ -38,15 +43,32 @@ export async function registerBusiness(
       acceptTerms: true,
     })
     .expect(201);
-  return { ...(res.body.data as SessionResponse), refreshCookie: extractRefreshCookie(res.headers['set-cookie']), email };
+  return {
+    ...(res.body.data as SessionResponse),
+    refreshCookie: extractRefreshCookie(res.headers['set-cookie']),
+    email,
+  };
 }
 
-export async function login(app: INestApplication, email: string, password = PASSWORD): Promise<TestSession> {
-  const res = await request(app.getHttpServer()).post('/api/v1/auth/login').send({ email, password }).expect(200);
-  return { ...(res.body.data as SessionResponse), refreshCookie: extractRefreshCookie(res.headers['set-cookie']), email };
+export async function login(
+  app: INestApplication,
+  email: string,
+  password = PASSWORD,
+): Promise<TestSession> {
+  const res = await request(app.getHttpServer())
+    .post('/api/v1/auth/login')
+    .send({ email, password })
+    .expect(200);
+  return {
+    ...(res.body.data as SessionResponse),
+    refreshCookie: extractRefreshCookie(res.headers['set-cookie']),
+    email,
+  };
 }
 
-export const bearer = (session: { accessToken: string }) => ({ Authorization: `Bearer ${session.accessToken}` });
+export const bearer = (session: { accessToken: string }) => ({
+  Authorization: `Bearer ${session.accessToken}`,
+});
 
 /**
  * Adds a user with the given role directly to a tenant (bypassing invitations) and signs them in.
@@ -62,7 +84,11 @@ export async function addMemberAndLogin(
   const prisma = app.get(PrismaService);
   const email = uniqueEmail(role.toLowerCase());
   const user = await prisma.user.create({
-    data: { name: `Test ${role}`, email, passwordHash: await app.get(PasswordService).hash(PASSWORD) },
+    data: {
+      name: `Test ${role}`,
+      email,
+      passwordHash: await app.get(PasswordService).hash(PASSWORD),
+    },
   });
   await prisma.membership.create({ data: { tenantId, userId: user.id, role } });
   return login(app, email);

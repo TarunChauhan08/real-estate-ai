@@ -37,14 +37,20 @@ const invitationSelect = {
 
 type InvitationRow = Prisma.InvitationGetPayload<{ select: typeof invitationSelect }>;
 
-function statusOf(row: { acceptedAt: Date | null; revokedAt: Date | null; expiresAt: Date }, now = new Date()): InvitationStatus {
+function statusOf(
+  row: { acceptedAt: Date | null; revokedAt: Date | null; expiresAt: Date },
+  now = new Date(),
+): InvitationStatus {
   if (row.acceptedAt) return 'ACCEPTED';
   if (row.revokedAt) return 'REVOKED';
   if (row.expiresAt <= now) return 'EXPIRED';
   return 'PENDING';
 }
 
-function statusFilter(status: InvitationStatus | undefined, now: Date): Prisma.InvitationWhereInput {
+function statusFilter(
+  status: InvitationStatus | undefined,
+  now: Date,
+): Prisma.InvitationWhereInput {
   switch (status) {
     case 'ACCEPTED':
       return { acceptedAt: { not: null } };
@@ -77,19 +83,30 @@ export class InvitationsService {
     private readonly auth: AuthService,
   ) {}
 
-  async create(ctx: TenantContext, actorId: string, dto: CreateInvitationDto): Promise<CreateInvitationResponse> {
+  async create(
+    ctx: TenantContext,
+    actorId: string,
+    dto: CreateInvitationDto,
+  ): Promise<CreateInvitationResponse> {
     if (!invitableRoles(ctx.role).includes(dto.role)) {
-      throw new AppException(HttpStatus.FORBIDDEN, 'ROLE_NOT_ASSIGNABLE', 'You cannot invite members with this role');
+      throw new AppException(
+        HttpStatus.FORBIDDEN,
+        'ROLE_NOT_ASSIGNABLE',
+        'You cannot invite members with this role',
+      );
     }
     const existingMember = await this.prisma.membership.findFirst({
       where: { tenantId: ctx.tenantId, user: { email: dto.email } },
       select: { id: true },
     });
-    if (existingMember) throw Errors.conflict('ALREADY_MEMBER', 'This person is already a member of your business');
+    if (existingMember)
+      throw Errors.conflict('ALREADY_MEMBER', 'This person is already a member of your business');
 
     const token = generateToken(32);
     const now = new Date();
-    const expiresAt = new Date(now.getTime() + this.config.get('INVITATION_TTL_HOURS') * 60 * 60 * 1000);
+    const expiresAt = new Date(
+      now.getTime() + this.config.get('INVITATION_TTL_HOURS') * 60 * 60 * 1000,
+    );
 
     const invitation = await this.prisma.$transaction(async (tx) => {
       // A new invitation supersedes any still-pending one for the same email.
@@ -127,7 +144,10 @@ export class InvitationsService {
 
   async list(ctx: TenantContext, query: InvitationQueryDto): Promise<Paginated<InvitationDto>> {
     const now = new Date();
-    const where: Prisma.InvitationWhereInput = { tenantId: ctx.tenantId, ...statusFilter(query.status, now) };
+    const where: Prisma.InvitationWhereInput = {
+      tenantId: ctx.tenantId,
+      ...statusFilter(query.status, now),
+    };
     const [rows, total] = await Promise.all([
       this.prisma.invitation.findMany({
         where,
@@ -153,7 +173,11 @@ export class InvitationsService {
     });
     if (!invitation) throw Errors.notFound('Invitation');
     if (!invitableRoles(ctx.role).includes(invitation.role)) {
-      throw new AppException(HttpStatus.FORBIDDEN, 'ROLE_NOT_ASSIGNABLE', 'You cannot manage invitations for this role');
+      throw new AppException(
+        HttpStatus.FORBIDDEN,
+        'ROLE_NOT_ASSIGNABLE',
+        'You cannot manage invitations for this role',
+      );
     }
     if (statusOf(invitation) !== 'PENDING') {
       throw Errors.conflict('INVITATION_NOT_PENDING', 'Only pending invitations can be revoked');
@@ -183,7 +207,10 @@ export class InvitationsService {
   /** Public: what the invitation is for, so the accept page can show the right form. */
   async preview(token: string): Promise<InvitationPreview> {
     const invitation = await this.findUsable(token);
-    const user = await this.prisma.user.findUnique({ where: { email: invitation.email }, select: { id: true } });
+    const user = await this.prisma.user.findUnique({
+      where: { email: invitation.email },
+      select: { id: true },
+    });
     return {
       tenantName: invitation.tenant.name,
       email: invitation.email,
@@ -207,13 +234,22 @@ export class InvitationsService {
 
     let newUserPasswordHash: string | null = null;
     if (existingUser) {
-      if (!(await this.passwords.verify(existingUser.passwordHash, dto.password))) throw Errors.invalidCredentials();
+      if (!(await this.passwords.verify(existingUser.passwordHash, dto.password)))
+        throw Errors.invalidCredentials();
       if (existingUser.status !== UserStatus.ACTIVE) {
-        throw new AppException(HttpStatus.FORBIDDEN, 'ACCOUNT_DISABLED', 'This account has been disabled');
+        throw new AppException(
+          HttpStatus.FORBIDDEN,
+          'ACCOUNT_DISABLED',
+          'This account has been disabled',
+        );
       }
     } else {
-      const problems = passwordPolicyViolations(dto.password).map((message) => ({ field: 'password', message }));
-      if (!dto.name) problems.push({ field: 'name', message: 'Name is required to create your account' });
+      const problems = passwordPolicyViolations(dto.password).map((message) => ({
+        field: 'password',
+        message,
+      }));
+      if (!dto.name)
+        problems.push({ field: 'name', message: 'Name is required to create your account' });
       if (problems.length > 0) throw Errors.validation(problems);
       newUserPasswordHash = await this.passwords.hash(dto.password);
     }
@@ -222,22 +258,38 @@ export class InvitationsService {
       const result = await this.prisma.$transaction(async (tx) => {
         // Single use: only one request can flip acceptedAt from null.
         const { count } = await tx.invitation.updateMany({
-          where: { id: invitation.id, acceptedAt: null, revokedAt: null, expiresAt: { gt: new Date() } },
+          where: {
+            id: invitation.id,
+            acceptedAt: null,
+            revokedAt: null,
+            expiresAt: { gt: new Date() },
+          },
           data: { acceptedAt: new Date() },
         });
-        if (count !== 1) throw Errors.conflict('INVITATION_USED', 'This invitation has already been used');
+        if (count !== 1)
+          throw Errors.conflict('INVITATION_USED', 'This invitation has already been used');
 
         const userId =
           existingUser?.id ??
           (
             await tx.user.create({
-              data: { name: dto.name!, email: invitation.email, passwordHash: newUserPasswordHash!, status: UserStatus.ACTIVE },
+              data: {
+                name: dto.name!,
+                email: invitation.email,
+                passwordHash: newUserPasswordHash!,
+                status: UserStatus.ACTIVE,
+              },
               select: { id: true },
             })
           ).id;
 
         const membership = await tx.membership.create({
-          data: { tenantId: invitation.tenantId, userId, role: invitation.role, status: MembershipStatus.ACTIVE },
+          data: {
+            tenantId: invitation.tenantId,
+            userId,
+            role: invitation.role,
+            status: MembershipStatus.ACTIVE,
+          },
           select: { id: true, tenantId: true, role: true },
         });
         await this.audit.record(
@@ -247,11 +299,22 @@ export class InvitationsService {
             action: AuditAction.INVITATION_ACCEPTED,
             entityType: 'invitation',
             entityId: invitation.id,
-            metadata: { role: invitation.role, newAccount: !existingUser, membershipId: membership.id },
+            metadata: {
+              role: invitation.role,
+              newAccount: !existingUser,
+              membershipId: membership.id,
+            },
           },
           tx,
         );
-        return { userId, context: { tenantId: membership.tenantId, membershipId: membership.id, role: membership.role } };
+        return {
+          userId,
+          context: {
+            tenantId: membership.tenantId,
+            membershipId: membership.id,
+            role: membership.role,
+          },
+        };
       });
 
       return await this.auth.startSession(result.userId, result.context, meta);
@@ -282,9 +345,17 @@ export class InvitationsService {
       case 'ACCEPTED':
         throw Errors.conflict('INVITATION_USED', 'This invitation has already been used');
       case 'REVOKED':
-        throw new AppException(HttpStatus.GONE, 'INVITATION_REVOKED', 'This invitation has been withdrawn');
+        throw new AppException(
+          HttpStatus.GONE,
+          'INVITATION_REVOKED',
+          'This invitation has been withdrawn',
+        );
       case 'EXPIRED':
-        throw new AppException(HttpStatus.GONE, 'INVITATION_EXPIRED', 'This invitation has expired. Ask for a new one.');
+        throw new AppException(
+          HttpStatus.GONE,
+          'INVITATION_EXPIRED',
+          'This invitation has expired. Ask for a new one.',
+        );
       default:
         break;
     }

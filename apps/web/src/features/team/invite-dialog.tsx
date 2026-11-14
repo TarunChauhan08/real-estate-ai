@@ -2,7 +2,12 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { type CreateInvitationResponse, invitableRoles, type MembershipRole, ROLE_LABELS } from '@rea/shared-types';
+import {
+  type CreateInvitationResponse,
+  invitableRoles,
+  type MembershipRole,
+  ROLE_LABELS,
+} from '@rea/shared-types';
 import { Copy, UserPlus } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -27,11 +32,17 @@ export function InviteDialog({ actorRole }: { actorRole: MembershipRole }) {
   const [result, setResult] = useState<CreateInvitationResponse | null>(null);
   const queryClient = useQueryClient();
   const roles = invitableRoles(actorRole);
-  const form = useForm<Values>({ resolver: zodResolver(schema), defaultValues: { email: '', role: roles.at(-2) ?? roles[0] } });
+  const form = useForm<Values>({
+    resolver: zodResolver(schema),
+    defaultValues: { email: '', role: roles.at(-2) ?? roles[0] },
+  });
 
   const mutation = useMutation({
     mutationFn: (values: Values) =>
-      api<CreateInvitationResponse>('/tenants/current/invitations', { method: 'POST', body: values }),
+      api<CreateInvitationResponse>('/tenants/current/invitations', {
+        method: 'POST',
+        body: values,
+      }),
     onSuccess: (data) => {
       setResult(data);
       void queryClient.invalidateQueries({ queryKey: ['team'] });
@@ -39,7 +50,9 @@ export function InviteDialog({ actorRole }: { actorRole: MembershipRole }) {
     },
     onError: (error) => {
       if (!applyFieldErrors(error, form.setError)) {
-        form.setError('root', { message: error instanceof ApiError ? error.message : 'Could not create the invitation' });
+        form.setError('root', {
+          message: error instanceof ApiError ? error.message : 'Could not create the invitation',
+        });
       }
     },
   });
@@ -80,20 +93,33 @@ export function InviteDialog({ actorRole }: { actorRole: MembershipRole }) {
             {result.delivery.devAcceptUrl ? (
               <div className="space-y-2">
                 <p className="text-sm text-fg-secondary">
-                  Send this link to <strong>{result.invitation.email}</strong>. It works once and expires on{' '}
-                  {formatDateTime(result.invitation.expiresAt)}.
+                  Send this link to <strong>{result.invitation.email}</strong>. It works once and
+                  expires on {formatDateTime(result.invitation.expiresAt)}.
                 </p>
                 <div className="flex gap-2">
-                  <Input readOnly value={result.delivery.devAcceptUrl} aria-label="Invitation link" onFocus={(e) => e.currentTarget.select()} />
-                  <Button variant="secondary" size="icon" aria-label="Copy invitation link" onClick={() => void copy(result.delivery.devAcceptUrl!)}>
+                  <Input
+                    readOnly
+                    value={result.delivery.devAcceptUrl}
+                    aria-label="Invitation link"
+                    onFocus={(e) => e.currentTarget.select()}
+                  />
+                  <Button
+                    variant="secondary"
+                    size="icon"
+                    aria-label="Copy invitation link"
+                    onClick={() => void copy(result.delivery.devAcceptUrl!)}
+                  >
                     <Copy />
                   </Button>
                 </div>
-                <p className="text-xs text-fg-muted">This link is shown only now and only in development environments.</p>
+                <p className="text-xs text-fg-muted">
+                  This link is shown only now and only in development environments.
+                </p>
               </div>
             ) : (
               <p className="text-sm text-fg-secondary">
-                The invitation for {result.invitation.email} is pending. Email delivery will be enabled in a later release.
+                The invitation for {result.invitation.email} is pending. Email delivery will be
+                enabled in a later release.
               </p>
             )}
             <div className="flex justify-end">
@@ -103,12 +129,22 @@ export function InviteDialog({ actorRole }: { actorRole: MembershipRole }) {
             </div>
           </div>
         ) : (
-          <form onSubmit={form.handleSubmit((values) => mutation.mutate(values))} noValidate className="space-y-4">
-            {form.formState.errors.root && <Alert tone="danger">{form.formState.errors.root.message}</Alert>}
+          <form
+            onSubmit={form.handleSubmit((values) => mutation.mutate(values))}
+            noValidate
+            className="space-y-4"
+          >
+            {form.formState.errors.root && (
+              <Alert tone="danger">{form.formState.errors.root.message}</Alert>
+            )}
             <Field label="Email" error={form.formState.errors.email?.message}>
               {(c) => <Input {...c} type="email" autoFocus {...form.register('email')} />}
             </Field>
-            <Field label="Role" error={form.formState.errors.role?.message} hint="You can only invite roles below your own.">
+            <Field
+              label="Role"
+              error={form.formState.errors.role?.message}
+              hint="You can only invite roles below your own."
+            >
               {(c) => (
                 <Select {...c} {...form.register('role')}>
                   {roles.map((role) => (

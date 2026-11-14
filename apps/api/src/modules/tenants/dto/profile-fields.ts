@@ -1,7 +1,15 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsOptional, IsString, IsUrl, Length, Matches, MaxLength, ValidateIf } from 'class-validator';
+import {
+  IsOptional,
+  IsString,
+  IsUrl,
+  Length,
+  Matches,
+  MaxLength,
+  ValidateIf,
+} from 'class-validator';
 import { EmptyToNull } from '../../../common/validation/transforms';
 
 /** Optional, clearable text field: empty string or null clears the value. */
@@ -37,7 +45,10 @@ export const OptionalWebsite = (): PropertyDecorator =>
       return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
     }),
     IsOptional(),
-    IsUrl({ protocols: ['http', 'https'], require_protocol: true }, { message: 'Enter a valid website URL' }),
+    IsUrl(
+      { protocols: ['http', 'https'], require_protocol: true },
+      { message: 'Enter a valid website URL' },
+    ),
     MaxLength(255),
   );
 
@@ -45,7 +56,9 @@ export const OptionalWebsite = (): PropertyDecorator =>
 export const OptionalCountry = (): PropertyDecorator =>
   applyDecorators(
     ApiPropertyOptional({ example: 'IN' }),
-    Transform(({ value }: { value: unknown }) => (typeof value === 'string' ? value.trim().toUpperCase() : value)),
+    Transform(({ value }: { value: unknown }) =>
+      typeof value === 'string' ? value.trim().toUpperCase() : value,
+    ),
     ValidateIf((_o, value) => value !== undefined),
     IsString(),
     Length(2, 2),

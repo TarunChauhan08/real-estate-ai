@@ -25,17 +25,25 @@ export function RegisterForm() {
     handleSubmit,
     setError,
     formState: { errors, isSubmitting },
-  } = useForm<RegisterValues>({ resolver: zodResolver(registerSchema), defaultValues: { businessType: undefined } });
+  } = useForm<RegisterValues>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: { businessType: undefined },
+  });
 
   const onSubmit = handleSubmit(async (values) => {
     setFormError(null);
     try {
-      const session = await api<SessionResponse>('/auth/register', { method: 'POST', body: values });
+      const session = await api<SessionResponse>('/auth/register', {
+        method: 'POST',
+        body: values,
+      });
       signIn(session);
       router.replace(homeFor(session));
     } catch (error) {
       if (error instanceof ApiError && error.code === 'EMAIL_TAKEN') {
-        setError('email', { message: 'An account with this email already exists. Sign in instead.' });
+        setError('email', {
+          message: 'An account with this email already exists. Sign in instead.',
+        });
       } else if (!applyFieldErrors(error, setError)) {
         setFormError(error instanceof ApiError ? error.message : 'Registration failed. Try again.');
       }
@@ -57,14 +65,24 @@ export function RegisterForm() {
         {(control) => <Input {...control} autoComplete="name" autoFocus {...register('name')} />}
       </Field>
       <Field label="Business email" error={errors.email?.message}>
-        {(control) => <Input {...control} type="email" autoComplete="email" {...register('email')} />}
+        {(control) => (
+          <Input {...control} type="email" autoComplete="email" {...register('email')} />
+        )}
       </Field>
-      <Field label="Password" error={errors.password?.message} hint="At least 10 characters, with a letter and a number.">
-        {(control) => <PasswordInput {...control} autoComplete="new-password" {...register('password')} />}
+      <Field
+        label="Password"
+        error={errors.password?.message}
+        hint="At least 10 characters, with a letter and a number."
+      >
+        {(control) => (
+          <PasswordInput {...control} autoComplete="new-password" {...register('password')} />
+        )}
       </Field>
       <div className="grid gap-5 sm:grid-cols-2">
         <Field label="Business name" error={errors.businessName?.message}>
-          {(control) => <Input {...control} autoComplete="organization" {...register('businessName')} />}
+          {(control) => (
+            <Input {...control} autoComplete="organization" {...register('businessName')} />
+          )}
         </Field>
         <Field label="Business type" error={errors.businessType?.message}>
           {(control) => (

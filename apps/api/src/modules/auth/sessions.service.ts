@@ -65,9 +65,14 @@ export class SessionsService {
 
     if (existing.revokedAt) {
       const rotatedRecently =
-        existing.replacedById !== null && Date.now() - existing.revokedAt.getTime() < ROTATION_GRACE_MS;
+        existing.replacedById !== null &&
+        Date.now() - existing.revokedAt.getTime() < ROTATION_GRACE_MS;
       if (rotatedRecently) {
-        throw new AppException(HttpStatus.UNAUTHORIZED, 'REFRESH_RACE', 'Session was just refreshed; retry');
+        throw new AppException(
+          HttpStatus.UNAUTHORIZED,
+          'REFRESH_RACE',
+          'Session was just refreshed; retry',
+        );
       }
       if (existing.replacedById !== null) {
         await this.revokeFamily(existing.familyId);
@@ -82,11 +87,17 @@ export class SessionsService {
       }
       throw Errors.unauthenticated('Refresh token has been revoked');
     }
-    if (existing.expiresAt.getTime() <= Date.now()) throw Errors.unauthenticated('Refresh token has expired');
+    if (existing.expiresAt.getTime() <= Date.now())
+      throw Errors.unauthenticated('Refresh token has expired');
 
     return this.prisma.$transaction(async (tx) => {
       const next = await this.create(
-        { userId: existing.userId, tenantId: existing.tenantId, familyId: existing.familyId, userAgent },
+        {
+          userId: existing.userId,
+          tenantId: existing.tenantId,
+          familyId: existing.familyId,
+          userAgent,
+        },
         tx,
       );
       // Conditional update: only one concurrent request can win the rotation.
@@ -95,7 +106,11 @@ export class SessionsService {
         data: { revokedAt: new Date(), replacedById: next.sessionId },
       });
       if (count !== 1) {
-        throw new AppException(HttpStatus.UNAUTHORIZED, 'REFRESH_RACE', 'Session was just refreshed; retry');
+        throw new AppException(
+          HttpStatus.UNAUTHORIZED,
+          'REFRESH_RACE',
+          'Session was just refreshed; retry',
+        );
       }
       return { ...next, userId: existing.userId, tenantId: existing.tenantId };
     });
@@ -117,7 +132,9 @@ export class SessionsService {
   }
 
   /** Revokes the family a refresh token belongs to. Unknown tokens are ignored (idempotent logout). */
-  async revokeByToken(refreshToken: string): Promise<{ userId: string; tenantId: string | null } | null> {
+  async revokeByToken(
+    refreshToken: string,
+  ): Promise<{ userId: string; tenantId: string | null } | null> {
     const session = await this.prisma.refreshSession.findUnique({
       where: { tokenHash: this.tokens.hashRefreshToken(refreshToken) },
       select: { familyId: true, userId: true, tenantId: true },
@@ -136,7 +153,11 @@ export class SessionsService {
     return live !== null;
   }
 
-  async revokeAllForUserInTenant(userId: string, tenantId: string, tx?: Prisma.TransactionClient): Promise<void> {
+  async revokeAllForUserInTenant(
+    userId: string,
+    tenantId: string,
+    tx?: Prisma.TransactionClient,
+  ): Promise<void> {
     await (tx ?? this.prisma).refreshSession.updateMany({
       where: { userId, tenantId, revokedAt: null },
       data: { revokedAt: new Date() },

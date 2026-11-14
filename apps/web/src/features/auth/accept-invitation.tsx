@@ -39,7 +39,8 @@ export function AcceptInvitation() {
   const { signIn } = useAuth();
   const preview = useQuery({
     queryKey: ['invitation-preview', token],
-    queryFn: () => api<InvitationPreview>('/invitations/preview', { method: 'POST', body: { token } }),
+    queryFn: () =>
+      api<InvitationPreview>('/invitations/preview', { method: 'POST', body: { token } }),
     enabled: Boolean(token),
     retry: false,
   });
@@ -48,7 +49,11 @@ export function AcceptInvitation() {
     mutationFn: (values: Values) =>
       api<SessionResponse>('/invitations/accept', {
         method: 'POST',
-        body: { token, password: values.password, ...(preview.data?.accountExists ? {} : { name: values.name }) },
+        body: {
+          token,
+          password: values.password,
+          ...(preview.data?.accountExists ? {} : { name: values.name }),
+        },
       }),
     onSuccess: (session) => {
       signIn(session);
@@ -56,14 +61,19 @@ export function AcceptInvitation() {
     },
     onError: (error) => {
       if (!applyFieldErrors(error, form.setError)) {
-        form.setError('root', { message: error instanceof ApiError ? error.message : 'Could not accept the invitation' });
+        form.setError('root', {
+          message: error instanceof ApiError ? error.message : 'Could not accept the invitation',
+        });
       }
     },
   });
 
   if (token === undefined || (token && preview.isLoading)) return <Skeleton className="h-72" />;
   if (!token || preview.isError) {
-    const message = preview.error instanceof ApiError ? preview.error.message : 'This invitation link is incomplete.';
+    const message =
+      preview.error instanceof ApiError
+        ? preview.error.message
+        : 'This invitation link is incomplete.';
     return (
       <EmptyState
         icon={MailX}
@@ -85,25 +95,55 @@ export function AcceptInvitation() {
       <div>
         <h1 className="text-2xl font-bold tracking-tight text-fg">Join {invitation.tenantName}</h1>
         <p className="mt-1 text-sm text-fg-muted">
-          You have been invited as <strong className="text-fg-secondary">{ROLE_LABELS[invitation.role]}</strong> using{' '}
+          You have been invited as{' '}
+          <strong className="text-fg-secondary">{ROLE_LABELS[invitation.role]}</strong> using{' '}
           <strong className="text-fg-secondary">{invitation.email}</strong>.
         </p>
       </div>
       {errors.root && <Alert tone="danger">{errors.root.message}</Alert>}
       {invitation.accountExists ? (
         <>
-          <Alert tone="info">You already have an account. Enter your password to add this business to it.</Alert>
+          <Alert tone="info">
+            You already have an account. Enter your password to add this business to it.
+          </Alert>
           <Field label="Password" error={errors.password?.message}>
-            {(c) => <PasswordInput {...c} autoComplete="current-password" autoFocus {...form.register('password', { required: 'Enter your password' })} />}
+            {(c) => (
+              <PasswordInput
+                {...c}
+                autoComplete="current-password"
+                autoFocus
+                {...form.register('password', { required: 'Enter your password' })}
+              />
+            )}
           </Field>
         </>
       ) : (
         <>
           <Field label="Your name" error={errors.name?.message}>
-            {(c) => <Input {...c} autoComplete="name" autoFocus {...form.register('name', { required: 'Enter your name', minLength: { value: 2, message: 'Enter your name' } })} />}
+            {(c) => (
+              <Input
+                {...c}
+                autoComplete="name"
+                autoFocus
+                {...form.register('name', {
+                  required: 'Enter your name',
+                  minLength: { value: 2, message: 'Enter your name' },
+                })}
+              />
+            )}
           </Field>
-          <Field label="Create a password" error={errors.password?.message} hint="At least 10 characters, with a letter and a number.">
-            {(c) => <PasswordInput {...c} autoComplete="new-password" {...form.register('password', { required: 'Create a password' })} />}
+          <Field
+            label="Create a password"
+            error={errors.password?.message}
+            hint="At least 10 characters, with a letter and a number."
+          >
+            {(c) => (
+              <PasswordInput
+                {...c}
+                autoComplete="new-password"
+                {...form.register('password', { required: 'Create a password' })}
+              />
+            )}
           </Field>
         </>
       )}

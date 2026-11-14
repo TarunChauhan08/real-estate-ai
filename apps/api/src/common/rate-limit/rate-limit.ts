@@ -17,7 +17,12 @@ export function rateLimitOptions(config: AppConfigService): ThrottlerModuleOptio
   return {
     throttlers: [
       { name: 'default', ttl, limit: config.get('RATE_LIMIT_MAX') },
-      { name: 'strict', ttl, limit: config.get('AUTH_RATE_LIMIT_MAX'), skipIf: (ctx) => !isStrict(ctx) },
+      {
+        name: 'strict',
+        ttl,
+        limit: config.get('AUTH_RATE_LIMIT_MAX'),
+        skipIf: (ctx) => !isStrict(ctx),
+      },
     ],
   };
 }
