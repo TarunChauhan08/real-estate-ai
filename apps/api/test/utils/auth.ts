@@ -47,3 +47,23 @@ export async function login(app: INestApplication, email: string, password = PAS
 }
 
 export const bearer = (session: { accessToken: string }) => ({ Authorization: `Bearer ${session.accessToken}` });
+
+/**
+ * Adds a user with the given role directly to a tenant (bypassing invitations) and signs them in.
+ * Used to exercise the permission matrix.
+ */
+export async function addMemberAndLogin(
+  app: INestApplication,
+  tenantId: string,
+  role: 'OWNER' | 'ADMIN' | 'MANAGER' | 'SALES_AGENT' | 'VIEWER',
+): Promise<TestSession> {
+  const { PasswordService } = await import('../../src/modules/auth/password.service');
+  const { PrismaService } = await import('../../src/database/prisma.service');
+  const prisma = app.get(PrismaService);
+  const email = uniqueEmail(role.toLowerCase());
+  const user = await prisma.user.create({
+    data: { name: `Test ${role}`, email, passwordHash: await app.get(PasswordService).hash(PASSWORD) },
+  });
+  await prisma.membership.create({ data: { tenantId, userId: user.id, role } });
+  return login(app, email);
+}

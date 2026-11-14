@@ -8,8 +8,13 @@ import { AppConfigModule } from './config/config.module';
 import { DatabaseModule } from './database/database.module';
 import { AuditModule } from './modules/audit/audit.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
+import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { HealthModule } from './modules/health/health.module';
 import { MembershipsModule } from './modules/memberships/memberships.module';
+import { PermissionsGuard } from './modules/roles/permissions.guard';
+import { RolesModule } from './modules/roles/roles.module';
+import { TenantsModule } from './modules/tenants/tenants.module';
 
 @Module({
   imports: [
@@ -19,11 +24,17 @@ import { MembershipsModule } from './modules/memberships/memberships.module';
     AuditModule,
     MembershipsModule,
     AuthModule,
+    RolesModule,
+    TenantsModule,
+    DashboardModule,
     HealthModule,
   ],
   providers: [
-    // Registered before the auth guard so abusive clients are rejected before any DB work.
+    // Global guards run in this order for every request:
+    // 1. rate limit  2. authenticate (deny by default)  3. authorize by role permissions.
     { provide: APP_GUARD, useClass: ThrottlerGuard },
+    { provide: APP_GUARD, useExisting: JwtAuthGuard },
+    { provide: APP_GUARD, useExisting: PermissionsGuard },
   ],
 })
 export class AppModule implements NestModule {

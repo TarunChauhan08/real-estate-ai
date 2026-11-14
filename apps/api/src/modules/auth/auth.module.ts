@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { APP_GUARD } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
 import { MembershipsModule } from '../memberships/memberships.module';
 import { AuthController } from './auth.controller';
@@ -17,9 +16,8 @@ import { TokenService } from './token.service';
     PasswordService,
     TokenService,
     SessionsService,
-    // Deny by default: every route requires a valid access token unless marked @Public().
-    { provide: APP_GUARD, useClass: JwtAuthGuard },
+    JwtAuthGuard,
   ],
-  exports: [AuthService, PasswordService, SessionsService, TokenService],
+  exports: [AuthService, PasswordService, SessionsService, TokenService, JwtAuthGuard],
 })
 export class AuthModule {}
