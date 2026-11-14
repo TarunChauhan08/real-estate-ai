@@ -14,6 +14,7 @@ module.exports = {
       rootDir: '.',
       testMatch: ['<rootDir>/test/**/*.e2e-spec.ts'],
       setupFiles: ['<rootDir>/test/setup-env.ts'],
+      globalSetup: '<rootDir>/test/prepare-test-db.js',
     },
   ],
 };

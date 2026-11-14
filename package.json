@@ -2,7 +2,7 @@
   "name": "real-estate-ai",
   "private": true,
   "version": "0.1.0",
-  "description": "AI Real Estate Sales Employee — multi-tenant SaaS for Indian real estate businesses",
+  "description": "AI Real Estate Sales Employee \u2014 multi-tenant SaaS for Indian real estate businesses",
   "packageManager": "pnpm@10.28.0",
   "engines": {
     "node": ">=22.0.0",
@@ -18,7 +18,13 @@
     "typecheck": "pnpm build:packages && pnpm -r run typecheck",
     "test": "pnpm -r run test",
     "format": "prettier --write \"**/*.{ts,tsx,js,mjs,json,md,css}\"",
-    "format:check": "prettier --check \"**/*.{ts,tsx,js,mjs,json,md,css}\""
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,mjs,json,md,css}\"",
+    "db:generate": "pnpm --filter @rea/api run db:generate",
+    "db:migrate": "pnpm --filter @rea/api run db:migrate",
+    "db:deploy": "pnpm --filter @rea/api run db:deploy",
+    "db:reset": "pnpm --filter @rea/api run db:reset",
+    "db:studio": "pnpm --filter @rea/api run db:studio",
+    "db:test:prepare": "pnpm --filter @rea/api run db:test:prepare"
   },
   "devDependencies": {
     "prettier": "3.10.1"
