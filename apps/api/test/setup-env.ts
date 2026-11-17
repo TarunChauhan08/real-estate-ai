@@ -13,3 +13,5 @@ process.env.JWT_ACCESS_SECRET ??= 'test-only-secret-not-for-production-012345678
 process.env.RATE_LIMIT_MAX ??= '10000';
 process.env.AUTH_RATE_LIMIT_MAX ??= '10000';
 process.env.INVITATION_DELIVERY ??= 'dev_link';
+// The AI must never call a paid API from tests.
+process.env.LLM_PROVIDER = 'fake';

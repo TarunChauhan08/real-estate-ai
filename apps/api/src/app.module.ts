@@ -6,14 +6,18 @@ import { rateLimitOptions } from './common/rate-limit/rate-limit';
 import { AppConfigService } from './config/app-config.service';
 import { AppConfigModule } from './config/config.module';
 import { DatabaseModule } from './database/database.module';
+import { AiModule } from './modules/ai/ai.module';
 import { AuditModule } from './modules/audit/audit.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
+import { ConversationsModule } from './modules/conversations/conversations.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { HealthModule } from './modules/health/health.module';
 import { InvitationsModule } from './modules/invitations/invitations.module';
 import { MembershipsModule } from './modules/memberships/memberships.module';
+import { LeadsModule } from './modules/leads/leads.module';
 import { PermissionsGuard } from './modules/roles/permissions.guard';
+import { PropertiesModule } from './modules/properties/properties.module';
 import { RolesModule } from './modules/roles/roles.module';
 import { TenantsModule } from './modules/tenants/tenants.module';
 
@@ -29,6 +33,10 @@ import { TenantsModule } from './modules/tenants/tenants.module';
     TenantsModule,
     InvitationsModule,
     DashboardModule,
+    PropertiesModule,
+    LeadsModule,
+    AiModule,
+    ConversationsModule,
     HealthModule,
   ],
   providers: [

@@ -87,7 +87,7 @@ export function Overview() {
                   aria-label="Setup progress"
                 >
                   <div
-                    className="h-full rounded-full bg-brand-fg"
+                    className="h-full rounded-full bg-gradient-to-r from-brand-fg to-gold"
                     style={{ width: `${(data.setup.completed / data.setup.total) * 100}%` }}
                   />
                 </div>
@@ -130,6 +130,16 @@ export function Overview() {
                         <Link href="/dashboard/team">Invite team</Link>
                       </Button>
                     )}
+                    {!step.completed && step.key === 'properties' && (
+                      <Button asChild size="sm" variant="secondary">
+                        <Link href="/dashboard/properties">Add listings</Link>
+                      </Button>
+                    )}
+                    {!step.completed && step.key === 'ai_employee' && (
+                      <Button asChild size="sm" variant="secondary">
+                        <Link href="/dashboard/ai-employee">Open test chat</Link>
+                      </Button>
+                    )}
                   </li>
                 ))}
               </ol>
@@ -151,13 +161,13 @@ export function Overview() {
             <Skeleton className="h-32" />
           )}
           <p className="text-sm text-fg-muted">
-            The AI employee is not available yet. You will configure its name, voice and channels
-            here once it launches.{' '}
+            Chat with it as if you were a buyer and watch it qualify the lead from your own
+            listings.{' '}
             <Link
               href="/dashboard/ai-employee"
               className="font-semibold text-brand-fg hover:underline"
             >
-              See what’s planned
+              Start a test chat
             </Link>
           </p>
         </div>

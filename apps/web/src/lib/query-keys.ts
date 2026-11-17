@@ -6,4 +6,11 @@ export const queryKeys = {
   overview: ['dashboard', 'overview'] as const,
   members: (params: string) => ['team', 'members', params] as const,
   invitations: (params: string) => ['team', 'invitations', params] as const,
+  properties: (params: string) => ['properties', 'list', params] as const,
+  property: (id: string) => ['properties', 'detail', id] as const,
+  leads: (params: string) => ['leads', 'list', params] as const,
+  lead: (id: string) => ['leads', 'detail', id] as const,
+  conversations: (params: string) => ['conversations', 'list', params] as const,
+  conversation: (id: string) => ['conversations', 'detail', id] as const,
+  activeMembers: ['team', 'members', 'active-all'] as const,
 };

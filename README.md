@@ -4,18 +4,21 @@ A multi-tenant SaaS platform that gives Indian real estate brokers, agencies, bu
 
 > **Never miss a property enquiry. Turn more enquiries into qualified buyers and site visits.**
 
-## Status: Phase 1 — Foundation
+## Status: Phase 2B — AI employee (test chat), properties and leads
 
-| Implemented                                                       | Placeholder (clearly labelled in the UI)                  |
-| ----------------------------------------------------------------- | --------------------------------------------------------- |
-| Business registration, login, refresh-token rotation, logout      | AI employee (chat, voice, WhatsApp, calls)                |
-| Multi-tenant isolation, memberships, multiple businesses per user | Leads, conversations, properties, site visits, follow-ups |
-| Role-based access (Owner, Admin, Manager, Sales agent, Viewer)    | Analytics, integrations                                   |
-| Onboarding, business profile, preferences                         | Email delivery of invitations                             |
-| Team management: invitations, role changes, disabling members     | Password reset, profile editing, 2FA                      |
-| Audit log, dashboard overview with real data                      |                                                           |
+| Implemented                                                                  | Not yet (clearly labelled in the UI)       |
+| ---------------------------------------------------------------------------- | ------------------------------------------ |
+| Premium public site (navy & gold, 4K photography, trust-led copy)            | WhatsApp Business channel (next release)   |
+| Registration, login, refresh-token rotation, multi-tenant isolation, roles   | Voice calls                                |
+| Onboarding, business profile, team invitations, audit log                    | Site-visit calendar, follow-ups, analytics |
+| Property inventory: list, search, filter, add, edit, archive                 | Email delivery of invitations              |
+| Lead pipeline: list, filter, add, edit, stage rules, assignment              | Password reset, profile editing, 2FA       |
+| **AI sales employee in a test chat** (Claude or offline fake provider)       |                                            |
+| AI fills in the lead (budget, city, BHK…), scores it, suggests real listings |                                            |
+| Human handoff (discounts, legal, complaints) and one-click AI on/off         |                                            |
 
-No AI functionality exists yet, and the UI says so.
+The AI only talks to buyers inside the dashboard's test chat today. It works without an API key
+(`LLM_PROVIDER=fake`); set `LLM_PROVIDER=anthropic` and `ANTHROPIC_API_KEY` for real replies.
 
 ## Technology
 
@@ -29,7 +32,8 @@ No AI functionality exists yet, and the UI says so.
 ## Project structure
 
 ```
-apps/api            NestJS API (auth, tenants, memberships, invitations, roles, audit, dashboard, health)
+apps/api            NestJS API (auth, tenants, memberships, invitations, roles, audit, dashboard,
+                    properties, leads, conversations, ai, health)
 apps/web            Next.js app (public site + dashboard) and Playwright tests
 packages/shared-types   enums, API types and the role/permission matrix shared by both apps
 packages/eslint-config  shared lint rules
@@ -89,3 +93,5 @@ All are listed with safe placeholders in [`.env.example`](.env.example). The API
 - [Database design](docs/database-design.md) — ER diagram, tables, constraints, RLS plan
 - [API design](docs/api-design.md) — conventions, error codes, every endpoint
 - [Setup guide](docs/setup-guide.md) — local development, tests, Docker, troubleshooting
+- [Design system](docs/design-system.md) — navy & gold palette, typography, photography and the psychology behind them
+- Decisions: [properties & leads](docs/decisions/0001-properties-and-leads.md) · [AI sales employee](docs/decisions/0002-ai-sales-employee.md)

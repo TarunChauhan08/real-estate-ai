@@ -45,8 +45,27 @@ export const envSchema = z
     INVITATION_TTL_HOURS: z.coerce.number().int().min(1).max(720).default(72),
     /** `dev_link` returns the accept link to the inviter (non-production only); `none` returns nothing. */
     INVITATION_DELIVERY: z.enum(['dev_link', 'none']).default('none'),
+
+    /** `fake` = deterministic offline replies (tests, demos without a key); `anthropic` = Claude. */
+    LLM_PROVIDER: z.enum(['fake', 'anthropic']).default('fake'),
+    ANTHROPIC_API_KEY: z
+      .string()
+      .optional()
+      .transform((value) => (value ? value : undefined)),
+    ANTHROPIC_MODEL: z.string().min(1).default('claude-sonnet-5-5'),
+    ANTHROPIC_BASE_URL: z.string().url().default('https://api.anthropic.com'),
+    LLM_TIMEOUT_MS: z.coerce.number().int().min(1000).max(120000).default(30000),
+    /** How many earlier messages the AI sees on each turn. */
+    AI_HISTORY_MESSAGES: z.coerce.number().int().min(2).max(60).default(20),
   })
   .superRefine((env, ctx) => {
+    if (env.LLM_PROVIDER === 'anthropic' && !env.ANTHROPIC_API_KEY) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['ANTHROPIC_API_KEY'],
+        message: 'is required when LLM_PROVIDER=anthropic',
+      });
+    }
     if (env.NODE_ENV === 'production' && !env.COOKIE_SECURE) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,

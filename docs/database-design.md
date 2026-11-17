@@ -152,3 +152,24 @@ RLS is intentionally **not** enabled yet (see `architecture.md`). When it is:
 3. Wrap each request's queries in an interactive transaction that first runs `SELECT set_config('app.tenant_id', $1, true)` (a Prisma client extension can do this centrally).
 4. Give auth flows that legitimately cross tenants (login, membership resolution, invitation acceptance) an explicit, audited bypass role.
 5. Re-run the tenant-isolation e2e suite with RLS on; add tests that issue raw unscoped queries and expect zero rows.
+
+## Phase 2A tables: `properties` and `leads`
+
+- Both carry `tenant_id` and every index starts with it.
+- Money is `BIGINT` whole rupees (no float rounding; fits 100 crore+). `MAX_PRICE_RUPEES` caps input.
+- `leads.phone` is E.164 with `UNIQUE (tenant_id, phone)` and a CHECK on the format.
+- CHECK constraints: `properties_price_positive`, `properties_bedrooms_range`, `leads_budget_order`, `leads_phone_e164`.
+- No hard deletes: properties are ARCHIVED; leads end as LOST/WON.
+- `leads.assigned_to_id` points at `memberships` (tenant-scoped), `ON DELETE SET NULL`.
+
+## Phase 2B tables: `conversations` and `messages`
+
+- `conversations`: one thread with one lead on one channel (`WEB_TEST` today; `WHATSAPP`, `VOICE` later).
+  `ai_enabled = false` means a human has taken over. `last_message_at` drives the inbox order.
+- `messages`: `role` is BUYER, AI, AGENT (team member) or SYSTEM (e.g. "AI paused").
+  AI messages store `model`, token counts and `latency_ms` (cost tracking) and a JSONB `metadata`
+  with the prompt version, what was extracted, and which listings were shown and suggested — the raw
+  material for the future eval pipeline.
+- Both carry `tenant_id`; messages cascade-delete with their conversation; conversations never
+  delete leads (`RESTRICT`).
+- CHECK constraints: `messages_content_not_blank`, `messages_content_length` (≤ 8000).

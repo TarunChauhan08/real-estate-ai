@@ -16,5 +16,15 @@ export const AuditAction = {
   INVITATION_ACCEPTED: 'invitation.accepted',
   MEMBER_ROLE_CHANGED: 'member.role_changed',
   MEMBER_STATUS_CHANGED: 'member.status_changed',
+  PROPERTY_CREATED: 'property.created',
+  PROPERTY_UPDATED: 'property.updated',
+  PROPERTY_STATUS_CHANGED: 'property.status_changed',
+  LEAD_CREATED: 'lead.created',
+  LEAD_UPDATED: 'lead.updated',
+  LEAD_STATUS_CHANGED: 'lead.status_changed',
+  LEAD_ASSIGNED: 'lead.assigned',
+  CONVERSATION_STARTED: 'conversation.started',
+  CONVERSATION_UPDATED: 'conversation.updated',
+  CONVERSATION_HANDED_OFF: 'conversation.handed_off',
 } as const;
 export type AuditAction = (typeof AuditAction)[keyof typeof AuditAction];

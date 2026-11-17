@@ -35,3 +35,4 @@ Thumbs.db
 .vscode/*
 !.vscode/extensions.json
 apps/api/src/generated/
+.design-preview/

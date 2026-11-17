@@ -9,7 +9,9 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        primary: 'bg-brand text-white hover:bg-brand-hover',
+        primary: 'bg-brand text-white shadow-sm hover:bg-brand-hover',
+        gold: 'bg-gold text-brand-deep shadow-sm hover:bg-gold-light',
+        glass: 'border border-white/25 bg-white/10 text-white backdrop-blur hover:bg-white/20',
         secondary: 'border border-line-strong bg-white text-fg hover:bg-canvas',
         ghost: 'text-fg-secondary hover:bg-subtle',
         danger: 'bg-danger text-white hover:bg-danger/90',
@@ -19,6 +21,7 @@ const buttonVariants = cva(
         sm: 'h-8 px-3',
         md: 'h-10 px-4',
         lg: 'h-11 px-5 text-[15px]',
+        xl: 'h-13 px-7 text-base',
         icon: 'size-9',
       },
     },
