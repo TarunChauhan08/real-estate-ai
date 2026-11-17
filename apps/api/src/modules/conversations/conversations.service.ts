@@ -24,8 +24,10 @@ import { LLMError, type LLMMessage } from '../ai/llm/llm-provider';
 import { type PromptProperty } from '../ai/sales-agent/prompt';
 import { SalesAgentService } from '../ai/sales-agent/sales-agent.service';
 import { AuditService } from '../audit/audit.service';
+import { SiteVisitsService } from '../site-visits/site-visits.service';
 import { AuditAction } from '../audit/audit-actions';
 import { type TenantContext } from '../auth/auth-context';
+import { isInsideReplyWindow, REPLY_WINDOW_MS } from '../whatsapp/reply-window';
 import { WhatsAppDeliveryService } from '../whatsapp/whatsapp-delivery.service';
 import { type ConversationQueryDto } from './dto/conversation-query.dto';
 import { type SendMessageDto } from './dto/send-message.dto';
@@ -35,7 +37,6 @@ import { type LeadSnapshot, PLACEHOLDER_LEAD_NAME, planLeadUpdate } from './lead
 
 const MAX_MESSAGES_RETURNED = 200;
 const MAX_CANDIDATE_PROPERTIES = 6;
-const REPLY_WINDOW_MS = WHATSAPP_REPLY_WINDOW_HOURS * 60 * 60 * 1000;
 
 const summaryInclude = {
   lead: { select: { id: true, name: true, phone: true, status: true, temperature: true } },
@@ -86,6 +87,7 @@ export class ConversationsService {
     private readonly agent: SalesAgentService,
     private readonly config: AppConfigService,
     private readonly whatsapp: WhatsAppDeliveryService,
+    private readonly siteVisits: SiteVisitsService,
   ) {}
 
   async list(
@@ -456,6 +458,17 @@ export class ConversationsService {
         );
       }
 
+      // The buyer asked to visit: put it in the team's queue to confirm a slot.
+      const siteVisitId = result.siteVisitRequested
+        ? await this.siteVisits.recordAiRequest(tx, {
+            tenantId,
+            leadId: lead.id,
+            conversationId: conversation.id,
+            preference: result.siteVisitPreference,
+            propertyId: result.suggestedPropertyIds[0] ?? null,
+          })
+        : null;
+
       const ai = await tx.message.create({
         data: {
           tenantId,
@@ -476,6 +489,8 @@ export class ConversationsService {
             suggestedPropertyIds: result.suggestedPropertyIds,
             candidatePropertyIds: context.input.properties.map((p) => p.id),
             siteVisitRequested: result.siteVisitRequested,
+            siteVisitPreference: result.siteVisitPreference,
+            siteVisitId,
             handoff: result.handoff,
             leadFieldsUpdated: Object.keys(patch),
           },
@@ -724,10 +739,6 @@ function toPrismaPatch(patch: ReturnType<typeof planLeadUpdate>): Prisma.LeadUnc
     budgetMin: budgetMin === undefined ? undefined : budgetMin === null ? null : BigInt(budgetMin),
     budgetMax: budgetMax === undefined ? undefined : budgetMax === null ? null : BigInt(budgetMax),
   };
-}
-
-function isInsideReplyWindow(lastBuyerMessageAt: Date | null): boolean {
-  return lastBuyerMessageAt !== null && Date.now() - lastBuyerMessageAt.getTime() < REPLY_WINDOW_MS;
 }
 
 function toMessageDto(row: MessageRow): MessageDto {

@@ -24,6 +24,9 @@ export const Permission = {
   CONVERSATIONS_READ: 'conversations:read',
   /** Start test chats, send messages, switch the AI on or off for a conversation. */
   CONVERSATIONS_WRITE: 'conversations:write',
+  SITE_VISITS_READ: 'site_visits:read',
+  /** Book, confirm, reschedule, cancel and record the outcome of site visits. */
+  SITE_VISITS_WRITE: 'site_visits:write',
   /** Connect or disconnect messaging channels (WhatsApp). Owners and admins only. */
   CHANNELS_MANAGE: 'channels:manage',
 } as const;
@@ -53,6 +56,8 @@ export const ROLE_PERMISSIONS: Record<MembershipRole, readonly Permission[]> = {
     Permission.LEADS_ASSIGN,
     Permission.CONVERSATIONS_READ,
     Permission.CONVERSATIONS_WRITE,
+    Permission.SITE_VISITS_READ,
+    Permission.SITE_VISITS_WRITE,
   ],
   SALES_AGENT: [
     Permission.TENANT_READ,
@@ -64,6 +69,8 @@ export const ROLE_PERMISSIONS: Record<MembershipRole, readonly Permission[]> = {
     Permission.LEADS_WRITE,
     Permission.CONVERSATIONS_READ,
     Permission.CONVERSATIONS_WRITE,
+    Permission.SITE_VISITS_READ,
+    Permission.SITE_VISITS_WRITE,
   ],
   VIEWER: [
     Permission.TENANT_READ,
@@ -73,6 +80,7 @@ export const ROLE_PERMISSIONS: Record<MembershipRole, readonly Permission[]> = {
     Permission.PROPERTIES_READ,
     Permission.LEADS_READ,
     Permission.CONVERSATIONS_READ,
+    Permission.SITE_VISITS_READ,
   ],
 };
 

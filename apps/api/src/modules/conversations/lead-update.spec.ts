@@ -26,6 +26,7 @@ const decision = (overrides: Partial<AgentDecision> = {}): AgentDecision => ({
   qualified: false,
   suggestedPropertyIds: [],
   siteVisitRequested: false,
+  siteVisitPreference: null,
   handoff: { requested: false, reason: null },
   ...overrides,
 });

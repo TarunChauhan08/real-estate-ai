@@ -7,3 +7,4 @@ export * from './permissions';
 export * from './property';
 export * from './team';
 export * from './tenant';
+export * from './site-visit';
