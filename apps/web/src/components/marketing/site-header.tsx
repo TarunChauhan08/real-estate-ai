@@ -58,7 +58,7 @@ export function SiteHeader() {
             <Link href="/login">Sign in</Link>
           </Button>
           <Button asChild variant={solid ? 'primary' : 'gold'} size="md">
-            <Link href="/register">Get started free</Link>
+            <Link href="/register">Get started</Link>
           </Button>
         </div>
         <button
@@ -91,7 +91,7 @@ export function SiteHeader() {
               <Link href="/login">Sign in</Link>
             </Button>
             <Button asChild>
-              <Link href="/register">Get started free</Link>
+              <Link href="/register">Get started</Link>
             </Button>
           </div>
         </div>

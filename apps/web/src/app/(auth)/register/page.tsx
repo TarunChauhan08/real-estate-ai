@@ -4,9 +4,9 @@ import { GuestOnly } from '@/features/auth/guest-only';
 import { RegisterForm } from '@/features/auth/register-form';
 
 export const metadata: Metadata = {
-  title: 'Start free — AI sales agent for real estate',
+  title: 'Create your account — AI sales agent for real estate',
   description:
-    'Create your free account, add your listings and test your AI sales agent for real estate before any buyer sees it.',
+    'Create your account, add your listings and test your AI sales agent for real estate before any buyer sees it.',
   alternates: { canonical: '/register' },
   openGraph: { images: [OG_IMAGE] },
 };

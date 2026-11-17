@@ -34,7 +34,7 @@ import { SOLUTIONS } from '@/lib/marketing-content';
 
 const TITLE = 'AI Sales Agent for Real Estate in India | WhatsApp & Hinglish';
 const DESCRIPTION =
-  'AI sales agent for Indian real estate: answers every property enquiry on WhatsApp in Hindi, English and Hinglish, qualifies buyers and books site visits. Start free.';
+  'AI sales agent for Indian real estate: answers every property enquiry on WhatsApp in Hindi, English and Hinglish, qualifies buyers and lines up site visits for your team.';
 
 export const metadata: Metadata = {
   title: { absolute: TITLE },
@@ -174,8 +174,8 @@ const FAQ = [
     a: 'Yes. Connect your number through the official WhatsApp Business (Cloud) API and the AI replies to buyers in seconds, from your own listings. Your team sees every chat and can step in at any time. Voice calls are next.',
   },
   {
-    q: 'What does it cost?',
-    a: 'We are onboarding early-access businesses now and setting pricing with them. Register to start free, or request a demo and we will walk you through it.',
+    q: 'How do we get it for our business?',
+    a: 'Request a demo and we will walk you through it with your own listings. You can also create an account and test the AI yourself before any buyer sees it.',
   },
   {
     q: 'Can we run it on our own servers?',
@@ -183,7 +183,7 @@ const FAQ = [
   },
 ];
 
-function GoldCta({ label = 'Get started free' }: { label?: string }) {
+function GoldCta({ label = 'Get started' }: { label?: string }) {
   return (
     <Button asChild variant="gold" size="xl" className="group">
       <Link href="/register">
@@ -240,7 +240,7 @@ export default function HomePage() {
               </div>
               <ul className="mt-10 flex flex-wrap gap-x-7 gap-y-3 text-sm text-brand-soft-2">
                 {[
-                  'No credit card needed',
+                  'Your own listings only',
                   'Test it yourself in minutes',
                   'Switch it off any time',
                 ].map((t) => (

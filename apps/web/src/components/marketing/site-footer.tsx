@@ -62,7 +62,7 @@ export function SiteFooter() {
             </li>
             <li>
               <Link href="/register" className="hover:text-white">
-                Get started free
+                Get started
               </Link>
             </li>
             <li>

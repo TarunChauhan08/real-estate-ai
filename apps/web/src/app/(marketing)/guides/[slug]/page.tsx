@@ -121,7 +121,7 @@ export default async function GuidePage({ params }: { params: Promise<{ slug: st
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
               <Button asChild variant="gold" size="lg">
-                <Link href="/register">Get started free</Link>
+                <Link href="/register">Get started</Link>
               </Button>
               {related[0] && (
                 <Button asChild variant="glass" size="lg">

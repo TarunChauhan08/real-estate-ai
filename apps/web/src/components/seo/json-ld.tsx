@@ -48,12 +48,6 @@ export const softwareLd = (): Json => ({
   inLanguage: ['en-IN', 'hi-IN'],
   availableLanguage: ['English', 'Hindi', 'Hinglish'],
   areaServed: { '@type': 'Country', name: 'India' },
-  offers: {
-    '@type': 'Offer',
-    price: '0',
-    priceCurrency: 'INR',
-    description: 'Free early access while pricing is set with our first customers',
-  },
   publisher: { '@id': `${SITE_URL}/#organization` },
 });
 

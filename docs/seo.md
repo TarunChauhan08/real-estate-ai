@@ -49,5 +49,5 @@ estate", "how to respond to 99acres leads", "WhatsApp 24 hour rule".
 ## Later
 
 - Hindi versions of the key pages (`hreflang="hi-IN"`), since many buyers and brokers search in Hindi.
-- Customer stories and a pricing page — both are pages people search for before buying.
+- Customer stories — buyers search for proof before they contact a vendor.
 - Comparison pages ("vs spreadsheets", "vs a basic WhatsApp chatbot"), written fairly.

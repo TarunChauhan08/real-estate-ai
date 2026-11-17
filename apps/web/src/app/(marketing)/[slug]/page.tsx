@@ -73,7 +73,7 @@ export default async function SolutionPage({ params }: { params: Promise<{ slug:
             <div className="mt-9 flex flex-wrap gap-3">
               <Button asChild variant="gold" size="xl" className="group">
                 <Link href="/register">
-                  Get started free
+                  Get started
                   <ArrowRight className="transition-transform group-hover:translate-x-0.5" />
                 </Link>
               </Button>
@@ -209,7 +209,7 @@ export default async function SolutionPage({ params }: { params: Promise<{ slug:
               sees it.
             </p>
             <Button asChild variant="gold" size="xl" className="mt-9">
-              <Link href="/register">Get started free</Link>
+              <Link href="/register">Get started</Link>
             </Button>
           </div>
         </section>
