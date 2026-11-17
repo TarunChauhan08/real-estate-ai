@@ -13,8 +13,9 @@ import {
   type MemberDto,
   Permission,
   PURCHASE_TIMELINE_LABELS,
+  type SiteVisitDto,
 } from '@rea/shared-types';
-import { ArrowLeft, MessagesSquare, Pencil, Phone } from 'lucide-react';
+import { ArrowLeft, CalendarPlus, MessagesSquare, Pencil, Phone } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -30,6 +31,8 @@ import { queryKeys } from '@/lib/query-keys';
 import { formatDate, formatDateTime } from '@/lib/utils';
 import { formatBudget } from './format';
 import { LeadStatusBadge, TemperatureBadge } from './lead-badges';
+import { VisitCard } from '../site-visits/site-visits-view';
+import { VisitDialog, type VisitDialogMode } from '../site-visits/visit-dialog';
 import { LeadFormDialog } from './lead-form-dialog';
 
 const LANGUAGE: Record<string, string> = { en: 'English', hi: 'Hindi', hinglish: 'Hinglish' };
@@ -83,7 +86,9 @@ export function LeadDetail({ id }: { id: string }) {
   const canWrite = usePermission(Permission.LEADS_WRITE);
   const canAssign = usePermission(Permission.LEADS_ASSIGN);
   const canChat = usePermission(Permission.CONVERSATIONS_WRITE);
+  const canBookVisits = usePermission(Permission.SITE_VISITS_WRITE);
   const [editing, setEditing] = useState(false);
+  const [visitDialog, setVisitDialog] = useState<VisitDialogMode | null>(null);
 
   const lead = useQuery({
     queryKey: queryKeys.lead(id),
@@ -92,6 +97,10 @@ export function LeadDetail({ id }: { id: string }) {
   const conversations = useQuery({
     queryKey: queryKeys.conversations(`leadId=${id}`),
     queryFn: () => apiPage<ConversationSummaryDto>(`/conversations?leadId=${id}&pageSize=20`),
+  });
+  const visits = useQuery({
+    queryKey: queryKeys.siteVisits(`leadId=${id}`),
+    queryFn: () => apiPage<SiteVisitDto>(`/site-visits?leadId=${id}&pageSize=20`),
   });
   const members = useQuery({
     queryKey: queryKeys.activeMembers,
@@ -230,6 +239,34 @@ export function LeadDetail({ id }: { id: string }) {
               </p>
             )}
           </Panel>
+
+          <Panel aria-label="Site visits">
+            <PanelHeader
+              title="Site visits"
+              actions={
+                canBookVisits && (
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    onClick={() => setVisitDialog({ kind: 'book', leadId: l.id, leadName: l.name })}
+                  >
+                    <CalendarPlus /> Book a visit
+                  </Button>
+                )
+              }
+            />
+            {visits.data?.data.length ? (
+              <ul className="space-y-4 p-5">
+                {visits.data.data.map((v) => (
+                  <VisitCard key={v.id} visit={v} onEdit={setVisitDialog} />
+                ))}
+              </ul>
+            ) : (
+              <p className="px-5 py-6 text-sm text-fg-muted">
+                {visits.isLoading ? 'Loading…' : 'No site visits yet.'}
+              </p>
+            )}
+          </Panel>
         </div>
 
         <Panel className="h-fit">
@@ -288,6 +325,7 @@ export function LeadDetail({ id }: { id: string }) {
         </Panel>
       </div>
 
+      <VisitDialog mode={visitDialog} onOpenChange={(open) => !open && setVisitDialog(null)} />
       {canWrite && (
         <LeadFormDialog
           lead={l}

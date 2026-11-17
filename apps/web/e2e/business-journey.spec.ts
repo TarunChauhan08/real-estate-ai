@@ -26,7 +26,8 @@ test.describe('Owner journey', () => {
     // Released modules are links; future ones are visibly unavailable.
     const nav = page.getByRole('navigation', { name: 'Main' });
     await expect(nav.getByRole('link', { name: 'Leads' })).toHaveCount(1);
-    await expect(nav.getByRole('link', { name: 'Site Visits' })).toHaveCount(0);
+    await expect(nav.getByRole('link', { name: 'Site Visits' })).toHaveCount(1);
+    await expect(nav.getByRole('link', { name: 'Follow-ups' })).toHaveCount(0);
 
     // Update the business profile from Settings.
     await navigate(page, 'Settings');

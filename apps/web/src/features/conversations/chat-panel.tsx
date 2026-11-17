@@ -10,9 +10,11 @@ import {
   type MessageDto,
   Permission,
   type PropertyDto,
+  type SiteVisitDto,
 } from '@rea/shared-types';
 import {
   Bot,
+  CalendarCheck,
   Building2,
   Check,
   CheckCheck,
@@ -33,6 +35,7 @@ import { Textarea } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { LeadFacts } from '@/features/leads/lead-detail';
 import { LeadStatusBadge, TemperatureBadge } from '@/features/leads/lead-badges';
+import { VisitDialog, type VisitDialogMode } from '@/features/site-visits/visit-dialog';
 import { usePermission } from '@/hooks/use-permission';
 import { api, ApiError, apiPage } from '@/lib/api-client';
 import { queryKeys } from '@/lib/query-keys';
@@ -188,6 +191,16 @@ export function ChatPanel({ id }: { id: string }) {
     queryFn: () => api<LeadDto>(`/leads/${leadId}`),
     enabled: Boolean(leadId),
   });
+  // A visit the buyer asked for and the team has not confirmed yet.
+  const visitRequest = useQuery({
+    queryKey: queryKeys.siteVisits(`scope=requested&leadId=${leadId ?? ''}`),
+    queryFn: () =>
+      apiPage<SiteVisitDto>(`/site-visits?scope=requested&leadId=${leadId}&pageSize=1`),
+    enabled: Boolean(leadId),
+    refetchInterval: 15_000,
+  });
+  const canConfirmVisits = usePermission(Permission.SITE_VISITS_WRITE);
+  const [visitDialog, setVisitDialog] = useState<VisitDialogMode | null>(null);
   const inventory = useQuery({
     queryKey: queryKeys.properties('chat-lookup'),
     queryFn: () => apiPage<PropertyDto>('/properties?pageSize=100'),
@@ -326,6 +339,33 @@ export function ChatPanel({ id }: { id: string }) {
             </div>
           )}
         </header>
+
+        {visitRequest.data?.data[0] && (
+          <div
+            className="flex flex-wrap items-center justify-between gap-3 border-b border-line bg-attention-soft px-5 py-3"
+            role="status"
+          >
+            <p className="flex items-center gap-2 text-sm text-attention-fg">
+              <CalendarCheck className="size-4 shrink-0" aria-hidden />
+              <span>
+                <strong>Site visit requested</strong>
+                {visitRequest.data.data[0].requestedSlot
+                  ? ` · “${visitRequest.data.data[0].requestedSlot}”`
+                  : ''}
+              </span>
+            </p>
+            {canConfirmVisits && (
+              <Button
+                size="sm"
+                onClick={() =>
+                  setVisitDialog({ kind: 'confirm', visit: visitRequest.data!.data[0]! })
+                }
+              >
+                Confirm a time
+              </Button>
+            )}
+          </div>
+        )}
 
         <div className="min-h-0 flex-1 overflow-y-auto bg-canvas px-4 py-6 sm:px-6">
           {c.messages.length === 0 && !pending ? (
@@ -476,6 +516,7 @@ export function ChatPanel({ id }: { id: string }) {
             )}
           </footer>
         )}
+        <VisitDialog mode={visitDialog} onOpenChange={(open) => !open && setVisitDialog(null)} />
       </section>
 
       <aside
