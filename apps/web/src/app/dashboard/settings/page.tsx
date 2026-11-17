@@ -5,6 +5,7 @@ import { Suspense } from 'react';
 import { PageHeader } from '@/components/layout/dashboard-shell';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BusinessProfileTab } from '@/features/settings/business-profile-tab';
+import { DataTab } from '@/features/settings/data-tab';
 import { AccountTab, SecurityTab, TeamTab } from '@/features/settings/other-tabs';
 import { PreferencesTab } from '@/features/settings/preferences-tab';
 
@@ -14,6 +15,7 @@ const TABS = [
   { value: 'team', label: 'Team' },
   { value: 'preferences', label: 'Preferences' },
   { value: 'security', label: 'Security' },
+  { value: 'data', label: 'Your data' },
 ] as const;
 
 function SettingsTabs() {
@@ -49,6 +51,9 @@ function SettingsTabs() {
       </TabsContent>
       <TabsContent value="security">
         <SecurityTab />
+      </TabsContent>
+      <TabsContent value="data">
+        <DataTab />
       </TabsContent>
     </Tabs>
   );

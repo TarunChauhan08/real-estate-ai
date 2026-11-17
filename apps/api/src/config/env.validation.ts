@@ -122,6 +122,21 @@ export const envSchema = z
     SITE_VISIT_REMINDER_MINUTES: z.coerce.number().int().min(15).max(1440).default(180),
     /** How often to look for due reminders. 0 turns the reminder loop off (tests). */
     SITE_VISIT_REMINDER_INTERVAL_MS: z.coerce.number().int().min(0).max(3600000).default(60000),
+
+    /** Days between an owner asking to delete their business and the permanent purge. */
+    TENANT_DELETION_GRACE_DAYS: z.coerce.number().int().min(1).max(90).default(30),
+    /** How often to purge businesses whose deletion date has passed. 0 turns it off (tests). */
+    TENANT_PURGE_INTERVAL_MS: z.coerce.number().int().min(0).max(86400000).default(3600000),
+
+    /** Optional error tracking. Errors are sent to Sentry only when this is set. */
+    SENTRY_DSN: z
+      .string()
+      .url()
+      .optional()
+      .or(z.literal('').transform(() => undefined)),
+    SENTRY_ENVIRONMENT: z.string().max(40).optional(),
+    /** Share of requests traced for performance (0 = errors only). */
+    SENTRY_TRACES_SAMPLE_RATE: z.coerce.number().min(0).max(1).default(0),
   })
   .superRefine((env, ctx) => {
     if (env.LLM_PROVIDER === 'anthropic' && !env.ANTHROPIC_API_KEY) {

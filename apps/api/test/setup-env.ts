@@ -25,4 +25,6 @@ process.env.DATA_ENCRYPTION_KEY = Buffer.alloc(32, 42).toString('base64');
 process.env.WHATSAPP_REPLY_DEBOUNCE_MS = '150';
 // Tests call the reminder job directly instead of waiting for its timer.
 process.env.SITE_VISIT_REMINDER_INTERVAL_MS = '0';
+process.env.TENANT_PURGE_INTERVAL_MS = '0';
+process.env.SENTRY_DSN = '';
 process.env.CONTACT_NOTIFICATION_EMAIL = 'sales@vendor.example';

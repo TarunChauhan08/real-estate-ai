@@ -16,6 +16,7 @@ const tenantSelect = {
   name: true,
   slug: true,
   status: true,
+  deletionScheduledAt: true,
   createdAt: true,
   updatedAt: true,
 } as const;
@@ -220,10 +221,15 @@ export class TenantsService {
   }
 
   private toTenantDto(
-    tenant: { createdAt: Date; updatedAt: Date } & Omit<TenantDto, 'createdAt' | 'updatedAt'>,
+    tenant: { createdAt: Date; updatedAt: Date; deletionScheduledAt: Date | null } & Omit<
+      TenantDto,
+      'createdAt' | 'updatedAt' | 'deletionScheduledFor'
+    >,
   ): TenantDto {
+    const { deletionScheduledAt, ...rest } = tenant;
     return {
-      ...tenant,
+      ...rest,
+      deletionScheduledFor: deletionScheduledAt?.toISOString() ?? null,
       createdAt: tenant.createdAt.toISOString(),
       updatedAt: tenant.updatedAt.toISOString(),
     };

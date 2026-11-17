@@ -7,6 +7,7 @@ import { AppConfigService } from './config/app-config.service';
 import { AppConfigModule } from './config/config.module';
 import { DatabaseModule } from './database/database.module';
 import { AiModule } from './modules/ai/ai.module';
+import { BusinessDataModule } from './modules/business-data/business-data.module';
 import { AuditModule } from './modules/audit/audit.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
@@ -48,6 +49,7 @@ import { MailModule } from './modules/mail/mail.module';
     ConversationsModule,
     WhatsAppWebhookModule,
     HealthModule,
+    BusinessDataModule,
   ],
   providers: [
     // Global guards run in this order for every request:

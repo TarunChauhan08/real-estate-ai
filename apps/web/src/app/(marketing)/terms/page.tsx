@@ -93,8 +93,8 @@ export default function TermsPage() {
       <h2>6. Your data</h2>
       <p>
         You own the data you and your buyers put into the Service. You give us permission to process
-        it only to provide, secure and support the Service. You can ask for an export or deletion of
-        your business’s data at any time.
+        it only to provide, secure and support the Service. An owner can download a full export of
+        the business’s data, or delete the business, at any time from Settings → Your data.
       </p>
 
       <h2>7. Third-party services</h2>
