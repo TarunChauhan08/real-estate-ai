@@ -21,17 +21,27 @@ import {
 } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Logo } from '@/components/brand/logo';
+import { OG_IMAGE } from '@/lib/site';
+import { FaqList } from '@/components/marketing/faq-list';
 import { Photo } from '@/components/marketing/photo';
 import { ChatPreview, LeadPreview, PipelinePreview } from '@/components/marketing/product-preview';
+import { SiteFooter } from '@/components/marketing/site-footer';
 import { SiteHeader } from '@/components/marketing/site-header';
+import { faqLd, JsonLd, organizationLd, softwareLd, websiteLd } from '@/components/seo/json-ld';
 import { Button } from '@/components/ui/button';
 import { DEMO_REQUEST_EMAIL } from '@/lib/env';
+import { SOLUTIONS } from '@/lib/marketing-content';
+
+const TITLE = 'AI Sales Agent for Real Estate in India | WhatsApp & Hinglish';
+const DESCRIPTION =
+  'AI sales agent for Indian real estate: answers every property enquiry on WhatsApp in Hindi, English and Hinglish, qualifies buyers and lines up site visits for your team.';
 
 export const metadata: Metadata = {
-  title: 'AI Sales Employee for Indian Real Estate',
-  description:
-    'An AI sales employee that answers every property enquiry in Hindi, English and Hinglish, qualifies buyers and books site visits — for brokers, agencies, builders and developers.',
+  title: { absolute: TITLE },
+  description: DESCRIPTION,
+  alternates: { canonical: '/' },
+  openGraph: { title: TITLE, description: DESCRIPTION, url: '/', images: [OG_IMAGE] },
+  twitter: { card: 'summary_large_image', images: [OG_IMAGE.url] },
 };
 
 /*
@@ -164,8 +174,8 @@ const FAQ = [
     a: 'Yes. Connect your number through the official WhatsApp Business (Cloud) API and the AI replies to buyers in seconds, from your own listings. Your team sees every chat and can step in at any time. Voice calls are next.',
   },
   {
-    q: 'What does it cost?',
-    a: 'We are onboarding early-access businesses now and setting pricing with them. Register to start free, or request a demo and we will walk you through it.',
+    q: 'How do we get it for our business?',
+    a: 'Request a demo and we will walk you through it with your own listings. You can also create an account and test the AI yourself before any buyer sees it.',
   },
   {
     q: 'Can we run it on our own servers?',
@@ -173,7 +183,7 @@ const FAQ = [
   },
 ];
 
-function GoldCta({ label = 'Get started free' }: { label?: string }) {
+function GoldCta({ label = 'Get started' }: { label?: string }) {
   return (
     <Button asChild variant="gold" size="xl" className="group">
       <Link href="/register">
@@ -188,6 +198,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-white">
       <SiteHeader />
+      <JsonLd data={[organizationLd(), websiteLd(), softwareLd(), faqLd(FAQ)]} />
 
       <main>
         {/* 1 — Hero: audience + outcome + one action, over a 4K photograph */}
@@ -204,14 +215,22 @@ export default function HomePage() {
 
           <div className="mx-auto grid max-w-7xl items-center gap-14 px-5 pb-24 pt-36 sm:px-8 lg:grid-cols-[1.15fr_1fr] lg:pb-32 lg:pt-44">
             <div className="animate-rise">
-              <p className="eyebrow eyebrow-inverted">AI sales employee for Indian real estate</p>
-              <h1 className="mt-6 font-display text-[2.6rem] font-medium leading-[1.05] tracking-tight text-white sm:text-6xl lg:text-[4.2rem]">
-                Every enquiry answered.
-                <span className="block text-gold-light">Every serious buyer on your calendar.</span>
+              {/* The search phrase leads the H1; the promise follows in display type. */}
+              <h1>
+                <span className="eyebrow eyebrow-inverted">
+                  AI sales agent for real estate in India
+                </span>
+                <span className="mt-6 block font-display text-[2.6rem] font-medium leading-[1.05] tracking-tight text-white sm:text-6xl lg:text-[4.2rem]">
+                  Every enquiry answered.
+                  <span className="block text-gold-light">
+                    Every serious buyer on your calendar.
+                  </span>
+                </span>
               </h1>
               <p className="mt-7 max-w-xl text-lg leading-relaxed text-brand-soft-2">
-                An AI employee that talks to your buyers in Hindi, English and Hinglish, qualifies
-                them, and books site visits — so your team spends its day closing, not chasing.
+                An AI employee that talks to your buyers on WhatsApp in Hindi, English and Hinglish,
+                qualifies them, and lines up site visits — so your team spends its day closing, not
+                chasing.
               </p>
               <div className="mt-10 flex flex-wrap items-center gap-3">
                 <GoldCta />
@@ -221,7 +240,7 @@ export default function HomePage() {
               </div>
               <ul className="mt-10 flex flex-wrap gap-x-7 gap-y-3 text-sm text-brand-soft-2">
                 {[
-                  'No credit card needed',
+                  'Your own listings only',
                   'Test it yourself in minutes',
                   'Switch it off any time',
                 ].map((t) => (
@@ -391,6 +410,56 @@ export default function HomePage() {
           </div>
         </section>
 
+        {/* Solutions: one page per need, linked so visitors and search engines can go deeper */}
+        <section id="solutions" className="scroll-mt-20 border-t border-line bg-canvas">
+          <div className="mx-auto max-w-7xl px-5 py-24 sm:px-8 lg:py-28">
+            <div className="max-w-2xl">
+              <p className="eyebrow">Solutions</p>
+              <h2 className="mt-5 font-display text-4xl font-medium leading-tight tracking-tight text-brand sm:text-5xl">
+                Built for every kind of property business.
+              </h2>
+            </div>
+            <ul className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {SOLUTIONS.map((s) => (
+                <li key={s.slug}>
+                  <Link
+                    href={`/${s.slug}`}
+                    className="group flex h-full flex-col rounded-[20px] border border-line bg-white p-7 shadow-[var(--shadow-soft)] transition hover:shadow-[var(--shadow-lift)]"
+                  >
+                    <span className="text-lg font-semibold text-fg group-hover:text-brand-fg">
+                      {s.label}
+                    </span>
+                    <span className="mt-2 flex-1 leading-relaxed text-fg-muted">
+                      {s.description}
+                    </span>
+                    <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-fg">
+                      Learn more
+                      <ArrowRight
+                        className="size-4 transition-transform group-hover:translate-x-0.5"
+                        aria-hidden
+                      />
+                    </span>
+                  </Link>
+                </li>
+              ))}
+              <li>
+                <Link
+                  href="/guides"
+                  className="group flex h-full flex-col justify-between rounded-[20px] bg-brand p-7 text-white shadow-[var(--shadow-soft)]"
+                >
+                  <span className="text-lg font-semibold">Guides for brokers and builders</span>
+                  <span className="mt-2 leading-relaxed text-brand-soft-2">
+                    Answering portal leads, qualifying buyers, and WhatsApp’s 24-hour rule.
+                  </span>
+                  <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-gold-light">
+                    Read the guides <ArrowRight className="size-4" aria-hidden />
+                  </span>
+                </Link>
+              </li>
+            </ul>
+          </div>
+        </section>
+
         {/* 5 — Trust: photo + guarantees about control and data */}
         <section id="trust" className="scroll-mt-20 bg-canvas">
           <div className="mx-auto grid max-w-7xl gap-14 px-5 py-24 sm:px-8 lg:grid-cols-2 lg:items-center lg:py-32">
@@ -445,22 +514,7 @@ export default function HomePage() {
                 </Button>
               )}
             </div>
-            <div className="divide-y divide-line border-y border-line">
-              {FAQ.map(({ q, a }) => (
-                <details key={q} className="group py-6 [&_summary::-webkit-details-marker]:hidden">
-                  <summary className="flex cursor-pointer list-none items-center justify-between gap-6 text-lg font-semibold text-fg">
-                    {q}
-                    <span
-                      className="flex size-8 shrink-0 items-center justify-center rounded-full border border-line text-brand transition-transform group-open:rotate-45"
-                      aria-hidden
-                    >
-                      +
-                    </span>
-                  </summary>
-                  <p className="mt-3 max-w-2xl leading-relaxed text-fg-muted">{a}</p>
-                </details>
-              ))}
-            </div>
+            <FaqList items={FAQ} />
           </div>
         </section>
 
@@ -493,28 +547,7 @@ export default function HomePage() {
         </section>
       </main>
 
-      <footer className="bg-brand-deep text-brand-line">
-        <div className="mx-auto flex max-w-7xl flex-col gap-8 px-5 py-12 sm:px-8 md:flex-row md:items-center md:justify-between">
-          <Logo inverted />
-          <nav aria-label="Footer" className="flex flex-wrap gap-x-8 gap-y-3 text-sm">
-            <a href="#how-it-works" className="hover:text-white">
-              How it works
-            </a>
-            <a href="#trust" className="hover:text-white">
-              Trust & security
-            </a>
-            <a href="#faq" className="hover:text-white">
-              FAQ
-            </a>
-            <Link href="/login" className="hover:text-white">
-              Sign in
-            </Link>
-          </nav>
-        </div>
-        <div className="mx-auto max-w-7xl border-t border-white/10 px-5 py-6 text-xs sm:px-8">
-          © {new Date().getFullYear()} AI Real Estate Sales Employee · Photography from Unsplash
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

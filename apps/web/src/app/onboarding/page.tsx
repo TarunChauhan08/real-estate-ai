@@ -3,7 +3,10 @@ import { Logo } from '@/components/brand/logo';
 import { RequireAuth } from '@/features/auth/require-auth';
 import { OnboardingForm } from '@/features/onboarding/onboarding-form';
 
-export const metadata: Metadata = { title: 'Set up your business' };
+export const metadata: Metadata = {
+  title: 'Set up your business',
+  robots: { index: false, follow: false },
+};
 
 export default function OnboardingPage() {
   return (

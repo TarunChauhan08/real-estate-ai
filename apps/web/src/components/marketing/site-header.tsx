@@ -7,11 +7,13 @@ import { Logo } from '@/components/brand/logo';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
+// Absolute paths so the header works on every public page, not only the home page.
 const LINKS = [
-  { href: '#how-it-works', label: 'How it works' },
-  { href: '#product', label: 'Product' },
-  { href: '#trust', label: 'Trust & security' },
-  { href: '#faq', label: 'FAQ' },
+  { href: '/#how-it-works', label: 'How it works' },
+  { href: '/#solutions', label: 'Solutions' },
+  { href: '/whatsapp-ai-for-real-estate', label: 'WhatsApp AI' },
+  { href: '/guides', label: 'Guides' },
+  { href: '/#faq', label: 'FAQ' },
 ];
 
 /** Transparent over the hero photo, turns solid white once the visitor scrolls. */
@@ -34,12 +36,12 @@ export function SiteHeader() {
       )}
     >
       <div className="mx-auto flex h-18 max-w-7xl items-center justify-between gap-6 px-5 sm:px-8">
-        <Link href="/" aria-label="Home">
+        <Link href="/">
           <Logo inverted={!solid} />
         </Link>
         <nav aria-label="Sections" className="hidden items-center gap-8 lg:flex">
           {LINKS.map((link) => (
-            <a
+            <Link
               key={link.href}
               href={link.href}
               className={cn(
@@ -48,7 +50,7 @@ export function SiteHeader() {
               )}
             >
               {link.label}
-            </a>
+            </Link>
           ))}
         </nav>
         <div className="hidden items-center gap-2 sm:flex">
@@ -56,7 +58,7 @@ export function SiteHeader() {
             <Link href="/login">Sign in</Link>
           </Button>
           <Button asChild variant={solid ? 'primary' : 'gold'} size="md">
-            <Link href="/register">Get started free</Link>
+            <Link href="/register">Get started</Link>
           </Button>
         </div>
         <button
@@ -74,13 +76,13 @@ export function SiteHeader() {
           <ul className="space-y-1">
             {LINKS.map((link) => (
               <li key={link.href}>
-                <a
+                <Link
                   href={link.href}
                   onClick={() => setOpen(false)}
                   className="block rounded-md px-2 py-2.5 text-[15px] font-medium text-fg-secondary"
                 >
                   {link.label}
-                </a>
+                </Link>
               </li>
             ))}
           </ul>
@@ -89,7 +91,7 @@ export function SiteHeader() {
               <Link href="/login">Sign in</Link>
             </Button>
             <Button asChild>
-              <Link href="/register">Get started free</Link>
+              <Link href="/register">Get started</Link>
             </Button>
           </div>
         </div>
