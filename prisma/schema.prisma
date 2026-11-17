@@ -102,16 +102,18 @@ model BusinessProfile {
 
 /// A person who can sign in. Users are global; access to a tenant comes from a Membership.
 model User {
-  id           String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name         String     @db.VarChar(120)
+  id              String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name            String     @db.VarChar(120)
   /// Stored lower-cased and trimmed.
-  email        String     @unique @db.VarChar(254)
+  email           String     @unique @db.VarChar(254)
   /// Argon2id hash. Never returned by the API.
-  passwordHash String     @map("password_hash") @db.VarChar(255)
-  status       UserStatus @default(ACTIVE)
-  lastLoginAt  DateTime?  @map("last_login_at") @db.Timestamptz(3)
-  createdAt    DateTime   @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt    DateTime   @updatedAt @map("updated_at") @db.Timestamptz(3)
+  passwordHash    String     @map("password_hash") @db.VarChar(255)
+  status          UserStatus @default(ACTIVE)
+  /// Set when the user proves they own the email address.
+  emailVerifiedAt DateTime?  @map("email_verified_at") @db.Timestamptz(3)
+  lastLoginAt     DateTime?  @map("last_login_at") @db.Timestamptz(3)
+  createdAt       DateTime   @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime   @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   memberships               Membership[]
   refreshSessions           RefreshSession[]
@@ -122,6 +124,7 @@ model User {
   conversationsStarted      Conversation[]    @relation("ConversationCreatedBy")
   whatsAppAccountsConnected WhatsAppAccount[] @relation("WhatsAppAccountConnectedBy")
   siteVisitsCreated         SiteVisit[]       @relation("SiteVisitCreatedBy")
+  tokens                    UserToken[]
 
   @@map("users")
 }
@@ -562,4 +565,29 @@ model SiteVisit {
   @@index([tenantId, leadId])
   @@index([status, scheduledAt])
   @@map("site_visits")
+}
+
+// ---------------------------------------------------------------------------
+// Account security: one-time tokens for password reset and email verification.
+// Only a SHA-256 hash is stored; the token itself exists only in the email.
+// ---------------------------------------------------------------------------
+
+enum UserTokenPurpose {
+  PASSWORD_RESET
+  EMAIL_VERIFICATION
+}
+
+model UserToken {
+  id        String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String           @map("user_id") @db.Uuid
+  purpose   UserTokenPurpose
+  tokenHash String           @unique @map("token_hash") @db.Char(64)
+  expiresAt DateTime         @map("expires_at") @db.Timestamptz(3)
+  usedAt    DateTime?        @map("used_at") @db.Timestamptz(3)
+  createdAt DateTime         @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, purpose])
+  @@map("user_tokens")
 }

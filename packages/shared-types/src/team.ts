@@ -32,8 +32,9 @@ export interface InvitationDto {
  * INVITATION_DELIVERY=dev_link, the accept link is returned once so it can be shared manually.
  */
 export interface InvitationDelivery {
-  status: 'not_sent';
-  reason: string;
+  /** `sent` = emailed to the invitee; `not_sent` = share the link yourself (reason says why). */
+  status: 'sent' | 'not_sent';
+  reason: string | null;
   devAcceptUrl?: string;
 }
 

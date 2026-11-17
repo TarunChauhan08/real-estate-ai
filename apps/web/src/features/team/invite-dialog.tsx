@@ -87,9 +87,16 @@ export function InviteDialog({ actorRole }: { actorRole: MembershipRole }) {
       >
         {result ? (
           <div className="space-y-4">
-            <Alert tone="warning" title="No email was sent">
-              {result.delivery.reason}
-            </Alert>
+            {result.delivery.status === 'sent' ? (
+              <Alert tone="success" title="Invitation emailed">
+                We sent {result.invitation.email} a link to join. It works once and expires on{' '}
+                {formatDateTime(result.invitation.expiresAt)}.
+              </Alert>
+            ) : (
+              <Alert tone="warning" title="No email was sent">
+                {result.delivery.reason}
+              </Alert>
+            )}
             {result.delivery.devAcceptUrl ? (
               <div className="space-y-2">
                 <p className="text-sm text-fg-secondary">
@@ -116,12 +123,11 @@ export function InviteDialog({ actorRole }: { actorRole: MembershipRole }) {
                   This link is shown only now and only in development environments.
                 </p>
               </div>
-            ) : (
+            ) : result.delivery.status === 'not_sent' ? (
               <p className="text-sm text-fg-secondary">
-                The invitation for {result.invitation.email} is pending. Email delivery will be
-                enabled in a later release.
+                The invitation for {result.invitation.email} is pending.
               </p>
-            )}
+            ) : null}
             <div className="flex justify-end">
               <Button variant="secondary" onClick={() => close(false)}>
                 Done

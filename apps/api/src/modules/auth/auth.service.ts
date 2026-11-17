@@ -10,6 +10,7 @@ import { AuditAction } from '../audit/audit-actions';
 import { MembershipsService } from '../memberships/memberships.service';
 import { type AuthContext, type TenantContext } from './auth-context';
 import { type LoginDto } from './dto/login.dto';
+import { AccountService } from './account.service';
 import { type RegisterDto } from './dto/register.dto';
 import { PasswordService } from './password.service';
 import { SessionsService } from './sessions.service';
@@ -34,6 +35,7 @@ export class AuthService {
     private readonly sessions: SessionsService,
     private readonly memberships: MembershipsService,
     private readonly audit: AuditService,
+    private readonly account: AccountService,
   ) {}
 
   /**
@@ -117,6 +119,8 @@ export class AuthService {
         };
       });
 
+      // Best effort: a mail problem must never block signing up.
+      await this.account.sendVerification(result.userId).catch(() => undefined);
       return {
         session: await this.buildSession(result.userId, result.familyId, result.context),
         refreshToken: result.refreshToken,
@@ -291,10 +295,15 @@ export class AuthService {
   private async loadUser(userId: string) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
-      select: { id: true, name: true, email: true },
+      select: { id: true, name: true, email: true, emailVerifiedAt: true },
     });
     if (!user) throw Errors.unauthenticated();
-    return user;
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      emailVerified: user.emailVerifiedAt !== null,
+    };
   }
 
   private async loadActiveTenant(context: TenantContext | null): Promise<ActiveTenant | null> {

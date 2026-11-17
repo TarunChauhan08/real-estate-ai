@@ -97,6 +97,21 @@ export const envSchema = z
      */
     WHATSAPP_REPLY_DEBOUNCE_MS: z.coerce.number().int().min(0).max(15000).default(2500),
 
+    /** `fake` = emails are logged (development) or kept in memory (tests); `resend` = sent via Resend. */
+    MAIL_PROVIDER: z.enum(['fake', 'resend']).default('fake'),
+    RESEND_API_KEY: z
+      .string()
+      .optional()
+      .transform((value) => (value ? value : undefined)),
+    /** Sender, e.g. `AI Real Estate Sales Employee <noreply@yourdomain.in>` (domain verified in Resend). */
+    MAIL_FROM: z.string().min(3).default('AI Real Estate Sales Employee <noreply@example.com>'),
+    MAIL_REPLY_TO: z
+      .string()
+      .optional()
+      .transform((value) => (value ? value : undefined)),
+    PASSWORD_RESET_TTL_MINUTES: z.coerce.number().int().min(10).max(1440).default(60),
+    EMAIL_VERIFICATION_TTL_HOURS: z.coerce.number().int().min(1).max(168).default(48),
+
     /** Remind buyers on WhatsApp this many minutes before a confirmed site visit. */
     SITE_VISIT_REMINDER_MINUTES: z.coerce.number().int().min(15).max(1440).default(180),
     /** How often to look for due reminders. 0 turns the reminder loop off (tests). */
@@ -120,6 +135,21 @@ export const envSchema = z
           });
         }
       }
+    }
+    if (env.MAIL_PROVIDER === 'resend' && !env.RESEND_API_KEY) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['RESEND_API_KEY'],
+        message: 'is required when MAIL_PROVIDER=resend',
+      });
+    }
+    if (env.NODE_ENV === 'production' && env.MAIL_PROVIDER === 'fake') {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['MAIL_PROVIDER'],
+        message:
+          'must be a real provider in production (password resets and invitations need email)',
+      });
     }
     if (env.NODE_ENV === 'production' && !env.DATA_ENCRYPTION_KEY) {
       ctx.addIssue({

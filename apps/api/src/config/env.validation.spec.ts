@@ -12,6 +12,8 @@ const production = {
   NODE_ENV: 'production',
   COOKIE_SECURE: 'true',
   DATA_ENCRYPTION_KEY: KEY,
+  MAIL_PROVIDER: 'resend',
+  RESEND_API_KEY: 're_test_key',
 };
 
 describe('validateEnv', () => {
@@ -95,5 +97,11 @@ describe('validateEnv', () => {
         WHATSAPP_VERIFY_TOKEN: 'a-long-random-verify-token',
       }),
     ).not.toThrow();
+  });
+
+  it('needs a Resend key for Resend, and real email in production', () => {
+    expect(() => validateEnv({ ...valid, MAIL_PROVIDER: 'resend' })).toThrow(/RESEND_API_KEY/);
+    expect(() => validateEnv({ ...production, MAIL_PROVIDER: 'fake' })).toThrow(/MAIL_PROVIDER/);
+    expect(validateEnv(valid).MAIL_PROVIDER).toBe('fake');
   });
 });

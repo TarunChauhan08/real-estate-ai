@@ -4,6 +4,12 @@ export interface UserSummary {
   id: string;
   name: string;
   email: string;
+  /** False until the user follows the link in the verification email. */
+  emailVerified: boolean;
+}
+
+export interface SendVerificationResponse {
+  alreadyVerified: boolean;
 }
 
 export interface ActiveTenant {

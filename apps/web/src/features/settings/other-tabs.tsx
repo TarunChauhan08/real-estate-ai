@@ -1,6 +1,7 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import {
   type MeResponse,
   MembershipRole,
@@ -11,13 +12,19 @@ import {
 import { Check, Minus } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
+import { z } from 'zod';
 import { Alert } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Panel, PanelHeader } from '@/components/ui/panel';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Field } from '@/components/ui/field';
 import { useAuth } from '@/features/auth/auth-provider';
-import { api } from '@/lib/api-client';
+import { PasswordInput } from '@/features/auth/password-input';
+import { passwordSchema } from '@/features/auth/schemas';
+import { api, ApiError, applyFieldErrors } from '@/lib/api-client';
 import { queryKeys } from '@/lib/query-keys';
 
 export function AccountTab() {
@@ -34,7 +41,14 @@ export function AccountTab() {
           </div>
           <div>
             <dt className="text-xs text-fg-muted">Email</dt>
-            <dd className="mt-1 text-sm font-medium text-fg">{me.data.user.email}</dd>
+            <dd className="mt-1 flex items-center gap-2 text-sm font-medium text-fg">
+              {me.data.user.email}
+              {me.data.user.emailVerified ? (
+                <Badge tone="success">Confirmed</Badge>
+              ) : (
+                <Badge tone="warning">Not confirmed</Badge>
+              )}
+            </dd>
           </div>
         </dl>
         <p className="border-t border-subtle px-5 py-3 text-xs text-fg-muted">
@@ -126,6 +140,74 @@ export function TeamTab() {
   );
 }
 
+const changeSchema = z
+  .object({
+    currentPassword: z.string().min(1, 'Enter your current password'),
+    newPassword: passwordSchema,
+    confirm: z.string(),
+  })
+  .refine((v) => v.newPassword === v.confirm, {
+    path: ['confirm'],
+    message: 'The passwords do not match',
+  });
+type ChangeValues = z.infer<typeof changeSchema>;
+
+function ChangePasswordForm() {
+  const form = useForm<ChangeValues>({
+    resolver: zodResolver(changeSchema),
+    defaultValues: { currentPassword: '', newPassword: '', confirm: '' },
+  });
+  const change = useMutation({
+    mutationFn: (v: ChangeValues) =>
+      api('/auth/password/change', {
+        method: 'POST',
+        body: { currentPassword: v.currentPassword, newPassword: v.newPassword },
+      }),
+    onSuccess: () => {
+      form.reset();
+      toast.success('Password changed. Other devices have been signed out.');
+    },
+    onError: (e) => {
+      if (!applyFieldErrors(e, form.setError))
+        toast.error(e instanceof ApiError ? e.message : 'The password was not changed');
+    },
+  });
+  return (
+    <form
+      noValidate
+      className="grid gap-4 sm:max-w-md"
+      onSubmit={form.handleSubmit((v) => change.mutate(v))}
+    >
+      <Field label="Current password" error={form.formState.errors.currentPassword?.message}>
+        {(c) => (
+          <PasswordInput
+            {...c}
+            autoComplete="current-password"
+            {...form.register('currentPassword')}
+          />
+        )}
+      </Field>
+      <Field
+        label="New password"
+        hint="At least 10 characters, with a letter and a number."
+        error={form.formState.errors.newPassword?.message}
+      >
+        {(c) => (
+          <PasswordInput {...c} autoComplete="new-password" {...form.register('newPassword')} />
+        )}
+      </Field>
+      <Field label="Repeat new password" error={form.formState.errors.confirm?.message}>
+        {(c) => <PasswordInput {...c} autoComplete="new-password" {...form.register('confirm')} />}
+      </Field>
+      <div>
+        <Button type="submit" loading={change.isPending}>
+          Change password
+        </Button>
+      </div>
+    </form>
+  );
+}
+
 export function SecurityTab() {
   const { signOut } = useAuth();
   const router = useRouter();
@@ -148,9 +230,16 @@ export function SecurityTab() {
             Sign out
           </Button>
         </div>
-        <Alert tone="info" title="Password changes and two-factor sign-in are not available yet">
-          They are planned for a later release. Sessions expire automatically if they are not used
-          for a while.
+        <div className="border-t border-line pt-5">
+          <p className="text-sm font-medium text-fg">Change password</p>
+          <p className="mb-4 text-sm text-fg-muted">
+            You stay signed in here; every other device is signed out.
+          </p>
+          <ChangePasswordForm />
+        </div>
+        <Alert tone="info" title="Two-factor sign-in is not available yet">
+          It is planned for a later release. Sessions expire automatically if they are not used for
+          a while.
         </Alert>
       </div>
     </Panel>

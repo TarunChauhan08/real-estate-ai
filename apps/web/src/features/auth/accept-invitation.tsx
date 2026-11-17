@@ -5,7 +5,6 @@ import { type InvitationPreview, ROLE_LABELS, type SessionResponse } from '@rea/
 import { MailX } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { EmptyState } from '@/components/states/states';
 import { Alert } from '@/components/ui/alert';
@@ -16,17 +15,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { api, ApiError, applyFieldErrors } from '@/lib/api-client';
 import { useAuth } from './auth-provider';
 import { PasswordInput } from './password-input';
-
-/** Reads the token from the URL fragment (never sent to servers) and removes it from the address bar. */
-function useFragmentToken(): string | null | undefined {
-  const [token, setToken] = useState<string | null | undefined>(undefined);
-  useEffect(() => {
-    const value = new URLSearchParams(window.location.hash.slice(1)).get('token');
-    setToken(value);
-    if (value) window.history.replaceState(null, '', window.location.pathname);
-  }, []);
-  return token;
-}
+import { useFragmentToken } from './use-fragment-token';
 
 interface Values {
   name: string;

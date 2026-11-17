@@ -23,7 +23,6 @@ export function LoginForm() {
   const [formError, setFormError] = useState<string | null>(
     () => getConnectionError()?.message ?? null,
   );
-  const [showReset, setShowReset] = useState(false);
   const {
     register,
     handleSubmit,
@@ -64,21 +63,10 @@ export function LoginForm() {
       </Field>
 
       <div className="-mt-2 flex justify-end">
-        <button
-          type="button"
-          className="text-sm font-medium text-brand-fg hover:underline"
-          onClick={() => setShowReset((v) => !v)}
-          aria-expanded={showReset}
-        >
+        <Link href="/forgot-password" className="text-sm font-medium text-brand-fg hover:underline">
           Forgot password?
-        </button>
+        </Link>
       </div>
-      {showReset && (
-        <Alert tone="info" title="Password reset is not available yet">
-          Self-service password reset is coming in a later release. Until then, ask your business
-          owner or contact support.
-        </Alert>
-      )}
 
       <Button type="submit" size="lg" className="w-full" loading={isSubmitting}>
         Sign in

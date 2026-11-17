@@ -6,18 +6,20 @@ A multi-tenant SaaS platform that gives Indian real estate brokers, agencies, bu
 
 > **Never miss a property enquiry. Turn more enquiries into qualified buyers and site visits.**
 
-## Status: Phase 3 — WhatsApp channel
+## Status: Phase 4 — site visits and account security
 
 | Implemented                                                                  | Not yet (clearly labelled in the UI)          |
 | ---------------------------------------------------------------------------- | --------------------------------------------- |
-| Premium public site (navy & gold, 4K photography, trust-led copy)            | WhatsApp template messages (24 h+ follow-ups) |
+| Premium public site with solution pages, guides and SEO                      | WhatsApp template messages (24 h+ follow-ups) |
 | Registration, login, refresh-token rotation, multi-tenant isolation, roles   | Voice calls, voice-note transcription         |
-| Onboarding, business profile, team invitations, audit log                    | Site-visit calendar, follow-ups, analytics    |
-| Property inventory: list, search, filter, add, edit, archive                 | Email delivery of invitations                 |
-| Lead pipeline: list, filter, add, edit, stage rules, assignment              | Password reset, profile editing, 2FA          |
-| **AI sales employee** (Claude or offline fake provider)                      | Meta Embedded Signup (one-click connect)      |
+| Password reset, email verification, password change, invitation emails       | Follow-ups, analytics                         |
+| Onboarding, business profile, team invitations, audit log                    | Profile editing, two-factor sign-in           |
+| Property inventory: list, search, filter, add, edit, archive                 | Meta Embedded Signup (one-click connect)      |
+| Lead pipeline: list, filter, add, edit, stage rules, assignment              |                                               |
+| **AI sales employee** (Claude or offline fake provider)                      |                                               |
 | **WhatsApp Business (Meta Cloud API)**: buyers message, the AI replies       |                                               |
 | WhatsApp inbox: live updates, delivery ticks, team replies, 24-hour window   |                                               |
+| **Site visits**: AI takes requests, team confirms, buyer told and reminded   |                                               |
 | AI fills in the lead (budget, city, BHK…), scores it, suggests real listings |                                               |
 | Human handoff (discounts, legal, complaints) and one-click AI on/off         |                                               |
 
@@ -75,6 +77,7 @@ All are listed with safe placeholders in [`.env.example`](.env.example). The API
 | `COOKIE_SECURE`, `COOKIE_DOMAIN`                                        | Refresh cookie (secure must be `true` in production)            |
 | `RATE_LIMIT_TTL_SECONDS`, `RATE_LIMIT_MAX`, `AUTH_RATE_LIMIT_MAX`       | Rate limiting                                                   |
 | `INVITATION_TTL_HOURS`, `INVITATION_DELIVERY`                           | Invitations (`dev_link` is development-only)                    |
+| `MAIL_PROVIDER`, `RESEND_API_KEY`, `MAIL_FROM`                          | Email (`fake` prints to the log; `resend` in production)        |
 | `LLM_PROVIDER`, `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL`                  | AI employee (`fake` works offline)                              |
 | `DATA_ENCRYPTION_KEY`                                                   | Encrypts stored secrets such as WhatsApp tokens (production)    |
 | `WHATSAPP_PROVIDER`, `WHATSAPP_APP_SECRET`, `WHATSAPP_VERIFY_TOKEN`     | WhatsApp (`fake` = demo mode; `cloud` = Meta Cloud API)         |
