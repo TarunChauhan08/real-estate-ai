@@ -1,0 +1,129 @@
+name: CI
+
+# Runs on every pull request and on main. A PR should only be merged when all jobs are green.
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  # Safe, throw-away values for CI only. Real secrets never live in this file.
+  DATABASE_URL: postgresql://realestate:realestate@localhost:5432/realestate_dev?schema=public
+  TEST_DATABASE_URL: postgresql://realestate:realestate@localhost:5432/realestate_test?schema=public
+  CORS_ORIGINS: http://localhost:3000
+  WEB_APP_URL: http://localhost:3000
+  JWT_ACCESS_SECRET: ci-only-jwt-secret-not-used-anywhere-else-0123456789
+  COOKIE_SECURE: 'false'
+  INVITATION_DELIVERY: dev_link
+  LLM_PROVIDER: fake
+  WHATSAPP_PROVIDER: fake
+  NEXT_PUBLIC_API_URL: http://localhost:4000/api/v1
+  NEXT_TELEMETRY_DISABLED: '1'
+
+jobs:
+  checks:
+    name: Format, lint, typecheck, unit tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm format:check
+      - run: pnpm typecheck
+      - run: pnpm lint
+      - run: pnpm --filter @rea/api test:unit
+
+  api-e2e:
+    name: API end-to-end tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: realestate
+          POSTGRES_PASSWORD: realestate
+          POSTGRES_DB: realestate_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U realestate" --health-interval 5s --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build:packages
+      # Jest's global setup applies every migration to the test database first.
+      - run: pnpm --filter @rea/api test:e2e
+        env:
+          CI: 'true'
+
+  build:
+    name: Production build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+
+  browser-e2e:
+    name: Browser tests (Playwright)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: realestate
+          POSTGRES_PASSWORD: realestate
+          POSTGRES_DB: realestate_dev
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U realestate" --health-interval 5s --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build:packages
+      - run: pnpm db:deploy
+      - run: pnpm --filter @rea/web exec playwright install --with-deps chromium
+      # Playwright starts the API and web app itself (see apps/web/playwright.config.ts).
+      - run: pnpm --filter @rea/web test:e2e
+        env:
+          CI: 'true'
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: |
+            apps/web/playwright-report
+            apps/web/test-results
+          retention-days: 7
