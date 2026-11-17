@@ -27,3 +27,20 @@ describe('Health (e2e)', () => {
     expect(res.body.error.requestId).toBeDefined();
   });
 });
+
+describe('Readiness (e2e)', () => {
+  let app: INestApplication;
+
+  beforeAll(async () => {
+    app = await createTestApp();
+  });
+
+  afterAll(async () => {
+    await app.close();
+  });
+
+  it('GET /api/v1/health/ready reports the database as up', async () => {
+    const res = await request(app.getHttpServer()).get('/api/v1/health/ready').expect(200);
+    expect(res.body.data).toEqual({ status: 'ready', checks: { database: 'up' } });
+  });
+});
