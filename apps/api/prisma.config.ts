@@ -10,6 +10,7 @@ export default defineConfig({
   schema: path.resolve(__dirname, '../../prisma/schema.prisma'),
   migrations: {
     path: path.resolve(__dirname, '../../prisma/migrations'),
+    seed: 'ts-node --transpile-only src/database/seed.ts',
   },
   datasource: {
     url: env('DATABASE_URL'),

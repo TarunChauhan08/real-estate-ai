@@ -24,7 +24,8 @@
     "db:deploy": "pnpm --filter @rea/api run db:deploy",
     "db:reset": "pnpm --filter @rea/api run db:reset",
     "db:studio": "pnpm --filter @rea/api run db:studio",
-    "db:test:prepare": "pnpm --filter @rea/api run db:test:prepare"
+    "db:test:prepare": "pnpm --filter @rea/api run db:test:prepare",
+    "db:seed": "pnpm --filter @rea/api run db:seed"
   },
   "devDependencies": {
     "prettier": "3.10.1"

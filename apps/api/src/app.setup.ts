@@ -6,8 +6,9 @@ import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { ResponseEnvelopeInterceptor } from './common/interceptors/response-envelope.interceptor';
 import { createValidationPipe } from './common/pipes/validation.pipe';
 import { AppConfigService } from './config/app-config.service';
+import { API_PREFIX } from './common/constants';
 
-export const API_PREFIX = 'api/v1';
+export { API_PREFIX };
 
 /**
  * Applies global HTTP configuration. Shared by `main.ts` and the e2e test harness
@@ -15,6 +16,9 @@ export const API_PREFIX = 'api/v1';
  */
 export function configureApp(app: INestApplication): void {
   const config = app.get(AppConfigService);
+
+  const trustProxyHops = config.get('TRUST_PROXY_HOPS');
+  if (trustProxyHops > 0) app.getHttpAdapter().getInstance().set('trust proxy', trustProxyHops);
 
   app.setGlobalPrefix(API_PREFIX);
   app.use(helmet());

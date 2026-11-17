@@ -1,29 +1,66 @@
 import { z } from 'zod';
 
 const booleanString = z
-  .enum(['true', 'false'])
+  .enum(['true', 'false', ''])
   .default('false')
   .transform((value) => value === 'true');
+
+const commaList = z
+  .string()
+  .min(1)
+  .transform((value) =>
+    value
+      .split(',')
+      .map((item) => item.trim())
+      .filter(Boolean),
+  );
 
 /**
  * Every environment variable the API reads is declared and validated here.
  * The process refuses to start if any required value is missing or malformed.
  */
-export const envSchema = z.object({
-  NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
-  API_PORT: z.coerce.number().int().positive().default(4000),
-  DATABASE_URL: z.string().url().startsWith('postgresql://'),
-  CORS_ORIGINS: z
-    .string()
-    .min(1)
-    .transform((value) =>
-      value
-        .split(',')
-        .map((origin) => origin.trim())
-        .filter(Boolean),
-    ),
-  WEB_APP_URL: z.string().url(),
-});
+export const envSchema = z
+  .object({
+    NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
+    API_PORT: z.coerce.number().int().positive().default(4000),
+    /** Number of reverse-proxy hops to trust for client IPs (rate limiting). 0 = none. */
+    TRUST_PROXY_HOPS: z.coerce.number().int().min(0).max(5).default(0),
+    DATABASE_URL: z.string().url().startsWith('postgresql://'),
+    CORS_ORIGINS: commaList,
+    WEB_APP_URL: z.string().url(),
+
+    JWT_ACCESS_SECRET: z.string().min(32, 'must be at least 32 characters'),
+    JWT_ACCESS_TTL_SECONDS: z.coerce.number().int().min(60).max(3600).default(900),
+    REFRESH_TOKEN_TTL_DAYS: z.coerce.number().int().min(1).max(90).default(30),
+    COOKIE_SECURE: booleanString,
+    COOKIE_DOMAIN: z
+      .string()
+      .optional()
+      .transform((value) => (value ? value : undefined)),
+
+    RATE_LIMIT_TTL_SECONDS: z.coerce.number().int().positive().default(60),
+    RATE_LIMIT_MAX: z.coerce.number().int().positive().default(120),
+    AUTH_RATE_LIMIT_MAX: z.coerce.number().int().positive().default(10),
+
+    INVITATION_TTL_HOURS: z.coerce.number().int().min(1).max(720).default(72),
+    INVITATION_DELIVERY: z.enum(['log', 'none']).default('log'),
+  })
+  .superRefine((env, ctx) => {
+    if (env.NODE_ENV === 'production' && !env.COOKIE_SECURE) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['COOKIE_SECURE'],
+        message: 'must be true in production',
+      });
+    }
+    if (env.NODE_ENV === 'production' && /replace-with|change-me|local-dev/i.test(env.JWT_ACCESS_SECRET)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['JWT_ACCESS_SECRET'],
+        message: 'must be a real random secret in production',
+      });
+    }
+  });
 
 export type Env = z.infer<typeof envSchema>;
 
@@ -38,5 +75,3 @@ export function validateEnv(raw: Record<string, unknown>): Env {
   }
   return result.data;
 }
-
-export { booleanString };
