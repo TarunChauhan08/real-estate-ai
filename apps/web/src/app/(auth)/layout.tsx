@@ -16,14 +16,18 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         </Link>
         <div className="mt-auto max-w-md">
           <p className="text-[28px] font-semibold leading-[1.2] tracking-tight">
-            Never miss a property enquiry. Turn more enquiries into qualified buyers and site visits.
+            Never miss a property enquiry. Turn more enquiries into qualified buyers and site
+            visits.
           </p>
           <p className="mt-4 text-sm leading-relaxed text-brand-line">
             Your AI sales employee will speak with buyers the way they write to you.
           </p>
           <ul className="mt-8 space-y-3" aria-label="Supported languages">
             {LANGUAGES.map((item) => (
-              <li key={item.label} className="rounded-[var(--radius-control)] border border-white/10 bg-white/5 px-4 py-3">
+              <li
+                key={item.label}
+                className="rounded-[var(--radius-control)] border border-white/10 bg-white/5 px-4 py-3"
+              >
                 <p className="text-[15px] leading-snug">{item.script}</p>
                 <p className="mt-1 text-xs text-brand-line">{item.label}</p>
               </li>
@@ -35,7 +39,9 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         <Link href="/" className="w-fit lg:hidden">
           <Logo />
         </Link>
-        <div className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center py-10">{children}</div>
+        <div className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center py-10">
+          {children}
+        </div>
       </main>
     </div>
   );

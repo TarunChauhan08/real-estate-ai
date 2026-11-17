@@ -18,7 +18,9 @@
  *   neutrals   sage, a green-tinted grey that Radix pairs with teal
  */
 @theme {
-  --font-sans: 'Manrope Variable', 'Noto Sans Devanagari Variable', 'Segoe UI', ui-sans-serif, system-ui, sans-serif;
+  --font-sans:
+    'Manrope Variable', 'Noto Sans Devanagari Variable', 'Segoe UI', ui-sans-serif, system-ui,
+    sans-serif;
 
   /* Neutrals (sage) */
   --color-canvas: #f7f9f8; /* sage 2  — app background */

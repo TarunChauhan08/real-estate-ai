@@ -1,7 +1,12 @@
 'use client';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { type InvitationDto, invitableRoles, type InvitationStatus, ROLE_LABELS } from '@rea/shared-types';
+import {
+  type InvitationDto,
+  invitableRoles,
+  type InvitationStatus,
+  ROLE_LABELS,
+} from '@rea/shared-types';
 import { Mail } from 'lucide-react';
 import { toast } from 'sonner';
 import { EmptyState, ErrorState } from '@/components/states/states';
@@ -36,17 +41,22 @@ export function InvitationsList() {
     queryFn: () => apiPage<InvitationDto>(`/tenants/current/invitations?${params}`),
   });
   const revoke = useMutation({
-    mutationFn: (id: string) => api<InvitationDto>(`/tenants/current/invitations/${id}/revoke`, { method: 'POST' }),
+    mutationFn: (id: string) =>
+      api<InvitationDto>(`/tenants/current/invitations/${id}/revoke`, { method: 'POST' }),
     onSuccess: (inv) => {
       toast.success(`Invitation for ${inv.email} withdrawn`);
       void queryClient.invalidateQueries({ queryKey: ['team'] });
     },
-    onError: (error) => toast.error(error instanceof ApiError ? error.message : 'Could not withdraw the invitation'),
+    onError: (error) =>
+      toast.error(error instanceof ApiError ? error.message : 'Could not withdraw the invitation'),
   });
 
   return (
     <Panel>
-      <PanelHeader title="Invitations" description="People you have invited to join this business" />
+      <PanelHeader
+        title="Invitations"
+        description="People you have invited to join this business"
+      />
       {invitations.isError ? (
         <div className="p-5">
           <ErrorState error={invitations.error} onRetry={() => void invitations.refetch()} />
@@ -57,7 +67,11 @@ export function InvitationsList() {
           <Skeleton className="h-10" />
         </div>
       ) : invitations.data.data.length === 0 ? (
-        <EmptyState icon={Mail} title="No invitations yet" description="Invite your sales team so they can work leads and site visits with you." />
+        <EmptyState
+          icon={Mail}
+          title="No invitations yet"
+          description="Invite your sales team so they can work leads and site visits with you."
+        />
       ) : (
         <ul className="divide-y divide-subtle">
           {invitations.data.data.map((inv) => (
@@ -71,16 +85,18 @@ export function InvitationsList() {
                 </p>
               </div>
               <Badge tone={STATUS_TONE[inv.status]}>{STATUS_LABEL[inv.status]}</Badge>
-              {inv.status === 'PENDING' && actorRole && invitableRoles(actorRole).includes(inv.role) && (
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  loading={revoke.isPending && revoke.variables === inv.id}
-                  onClick={() => revoke.mutate(inv.id)}
-                >
-                  Withdraw
-                </Button>
-              )}
+              {inv.status === 'PENDING' &&
+                actorRole &&
+                invitableRoles(actorRole).includes(inv.role) && (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    loading={revoke.isPending && revoke.variables === inv.id}
+                    onClick={() => revoke.mutate(inv.id)}
+                  >
+                    Withdraw
+                  </Button>
+                )}
             </li>
           ))}
         </ul>

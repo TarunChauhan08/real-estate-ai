@@ -20,7 +20,11 @@ export const registerSchema = z.object({
   email: z.string().trim().min(1, 'Enter your business email').email('Enter a valid email address'),
   password: passwordSchema,
   businessName: z.string().trim().min(2, 'Enter your business name').max(120),
-  businessType: z.nativeEnum(BusinessType, { errorMap: () => ({ message: 'Choose your business type' }) }),
-  acceptTerms: z.literal(true, { errorMap: () => ({ message: 'Accept the terms to create your account' }) }),
+  businessType: z.nativeEnum(BusinessType, {
+    errorMap: () => ({ message: 'Choose your business type' }),
+  }),
+  acceptTerms: z.literal(true, {
+    errorMap: () => ({ message: 'Accept the terms to create your account' }),
+  }),
 });
 export type RegisterValues = z.infer<typeof registerSchema>;

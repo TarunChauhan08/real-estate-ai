@@ -22,7 +22,12 @@ export class AppException extends HttpException {
 
 export const Errors = {
   validation: (details: FieldError[]) =>
-    new AppException(HttpStatus.BAD_REQUEST, 'VALIDATION_FAILED', 'Request validation failed', details),
+    new AppException(
+      HttpStatus.BAD_REQUEST,
+      'VALIDATION_FAILED',
+      'Request validation failed',
+      details,
+    ),
   unauthenticated: (message = 'Authentication required') =>
     new AppException(HttpStatus.UNAUTHORIZED, 'UNAUTHENTICATED', message),
   invalidCredentials: () =>

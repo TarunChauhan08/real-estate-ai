@@ -1,4 +1,14 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, Req, Res, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Post,
+  Req,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiCookieAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { type MeResponse, type SessionResponse } from '@rea/shared-types';
 import { type Request, type Response } from 'express';
@@ -33,7 +43,10 @@ export class AuthController {
   @Public()
   @StrictRateLimit()
   @Post('register')
-  @ApiOperation({ summary: 'Register a business: creates owner user, tenant, profile, settings and OWNER membership' })
+  @ApiOperation({
+    summary:
+      'Register a business: creates owner user, tenant, profile, settings and OWNER membership',
+  })
   async register(
     @Body() dto: RegisterDto,
     @Req() req: Request,
@@ -63,11 +76,17 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiCookieAuth('rea_refresh')
   @ApiOperation({ summary: 'Rotate the refresh-token cookie and issue a new access token' })
-  async refresh(@Req() req: Request, @Res({ passthrough: true }) res: Response): Promise<SessionResponse> {
+  async refresh(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<SessionResponse> {
     const token = readRefreshCookie(req);
     if (!token) throw Errors.unauthenticated('No refresh token');
     try {
-      return this.respond(res, await this.auth.refresh(token, { userAgent: req.get('user-agent') }));
+      return this.respond(
+        res,
+        await this.auth.refresh(token, { userAgent: req.get('user-agent') }),
+      );
     } catch (error) {
       // Keep the cookie on a benign concurrent-refresh race; clear it on any real failure.
       const code = (error as { code?: string }).code;
@@ -98,7 +117,10 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Switch the active tenant to another business the user belongs to' })
-  switchTenant(@CurrentAuth() auth: AuthContext, @Body() dto: SwitchTenantDto): Promise<SessionResponse> {
+  switchTenant(
+    @CurrentAuth() auth: AuthContext,
+    @Body() dto: SwitchTenantDto,
+  ): Promise<SessionResponse> {
     return this.auth.switchTenant(auth, dto.tenantId);
   }
 

@@ -51,7 +51,8 @@ export class JwtAuthGuard implements CanActivate {
       tenant = await this.memberships.verifyTokenMembership(claims.sub, claims.tid, claims.mid);
       // Membership was suspended/removed or tenant suspended: force the client to refresh,
       // which re-resolves the user's tenant context from scratch.
-      if (!tenant) throw Errors.unauthenticated('Tenant access has changed; please refresh your session');
+      if (!tenant)
+        throw Errors.unauthenticated('Tenant access has changed; please refresh your session');
     }
 
     req.auth = { userId: claims.sub, familyId: claims.fam, tenant };

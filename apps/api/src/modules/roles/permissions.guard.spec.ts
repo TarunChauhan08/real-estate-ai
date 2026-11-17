@@ -14,7 +14,11 @@ function contextFor(auth: AuthContext | undefined, required?: Permission[]): Exe
   } as unknown as ExecutionContext;
 }
 
-const asRole = (role: MembershipRole): AuthContext => ({ userId: 'u', familyId: 'f', tenant: { tenantId: 't', membershipId: 'm', role } });
+const asRole = (role: MembershipRole): AuthContext => ({
+  userId: 'u',
+  familyId: 'f',
+  tenant: { tenantId: 't', membershipId: 'm', role },
+});
 
 describe('PermissionsGuard', () => {
   const guard = new PermissionsGuard(new Reflector());
@@ -25,7 +29,9 @@ describe('PermissionsGuard', () => {
 
   it('rejects users without an active tenant', () => {
     const auth: AuthContext = { userId: 'u', familyId: 'f', tenant: null };
-    expect(() => guard.canActivate(contextFor(auth, [Permission.TENANT_READ]))).toThrow(/No active business/);
+    expect(() => guard.canActivate(contextFor(auth, [Permission.TENANT_READ]))).toThrow(
+      /No active business/,
+    );
   });
 
   it.each([

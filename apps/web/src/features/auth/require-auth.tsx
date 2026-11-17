@@ -13,7 +13,13 @@ import { useAuth } from './auth-provider';
  * Client-side gate for private screens. It improves navigation only — every API call is
  * authorised by the backend regardless of what the browser renders.
  */
-export function RequireAuth({ children, allowPending = false }: { children: React.ReactNode; allowPending?: boolean }) {
+export function RequireAuth({
+  children,
+  allowPending = false,
+}: {
+  children: React.ReactNode;
+  allowPending?: boolean;
+}) {
   const { status, session, signOut } = useAuth();
   const router = useRouter();
   const pathname = usePathname();

@@ -1,7 +1,14 @@
 import { type INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { createTestApp } from './app.factory';
-import { PASSWORD, bearer, extractRefreshCookie, login, registerBusiness, uniqueEmail } from './utils/auth';
+import {
+  PASSWORD,
+  bearer,
+  extractRefreshCookie,
+  login,
+  registerBusiness,
+  uniqueEmail,
+} from './utils/auth';
 import { prismaOf, resetDatabase } from './utils/db';
 
 describe('Authentication (e2e)', () => {
@@ -36,11 +43,17 @@ describe('Authentication (e2e)', () => {
       expect(body.accessToken).toEqual(expect.any(String));
       expect(body.expiresIn).toBe(900);
       expect(body.user).toEqual({ id: expect.any(String), name: 'Rahul Sharma', email });
-      expect(body.activeTenant).toMatchObject({ name: 'Noida Homes Brokerage', status: 'PENDING', role: 'OWNER' });
+      expect(body.activeTenant).toMatchObject({
+        name: 'Noida Homes Brokerage',
+        status: 'PENDING',
+        role: 'OWNER',
+      });
       expect(body.activeTenant.slug).toMatch(/^noida-homes-brokerage-[0-9a-f]{6}$/);
       expect(JSON.stringify(res.body)).not.toMatch(/passwordHash|tokenHash|\$argon2/);
 
-      const cookie = (res.headers['set-cookie'] as unknown as string[]).find((c) => c.startsWith('rea_refresh='))!;
+      const cookie = (res.headers['set-cookie'] as unknown as string[]).find((c) =>
+        c.startsWith('rea_refresh='),
+      )!;
       expect(cookie).toMatch(/HttpOnly/);
       expect(cookie).toMatch(/SameSite=Strict/);
       expect(cookie).toMatch(/Path=\/api\/v1\/auth/);
@@ -58,8 +71,14 @@ describe('Authentication (e2e)', () => {
       ]);
       expect(user.passwordHash).toMatch(/^\$argon2id\$/);
       expect(profile).toMatchObject({ businessType: 'BROKERAGE', country: 'IN' });
-      expect(settings).toMatchObject({ timezone: 'Asia/Kolkata', locale: 'en-IN', currency: 'INR' });
-      expect(memberships).toEqual([expect.objectContaining({ userId: user.id, role: 'OWNER', status: 'ACTIVE' })]);
+      expect(settings).toMatchObject({
+        timezone: 'Asia/Kolkata',
+        locale: 'en-IN',
+        currency: 'INR',
+      });
+      expect(memberships).toEqual([
+        expect.objectContaining({ userId: user.id, role: 'OWNER', status: 'ACTIVE' }),
+      ]);
       expect(sessions).toHaveLength(1);
       expect(sessions[0]!.tokenHash).toMatch(/^[0-9a-f]{64}$/);
       expect(audits.map((a) => a.action)).toEqual(['tenant.created', 'auth.registered']);
@@ -120,8 +139,12 @@ describe('Authentication (e2e)', () => {
 
     it('rejects a wrong password and an unknown email with the same response', async () => {
       const owner = await registerBusiness(app);
-      const wrong = await http().post('/api/v1/auth/login').send({ email: owner.email, password: 'Wr0ng-password' });
-      const unknown = await http().post('/api/v1/auth/login').send({ email: uniqueEmail(), password: PASSWORD });
+      const wrong = await http()
+        .post('/api/v1/auth/login')
+        .send({ email: owner.email, password: 'Wr0ng-password' });
+      const unknown = await http()
+        .post('/api/v1/auth/login')
+        .send({ email: uniqueEmail(), password: PASSWORD });
       expect(wrong.status).toBe(401);
       expect(unknown.status).toBe(401);
       expect(wrong.body.error.code).toBe('INVALID_CREDENTIALS');
@@ -130,9 +153,15 @@ describe('Authentication (e2e)', () => {
 
     it('rejects a disabled account (after verifying the password)', async () => {
       const owner = await registerBusiness(app);
-      await prismaOf(app).user.update({ where: { email: owner.email }, data: { status: 'DISABLED' } });
+      await prismaOf(app).user.update({
+        where: { email: owner.email },
+        data: { status: 'DISABLED' },
+      });
 
-      const res = await http().post('/api/v1/auth/login').send({ email: owner.email, password: PASSWORD }).expect(403);
+      const res = await http()
+        .post('/api/v1/auth/login')
+        .send({ email: owner.email, password: PASSWORD })
+        .expect(403);
       expect(res.body.error.code).toBe('ACCOUNT_DISABLED');
 
       // Existing sessions stop working too.
@@ -143,7 +172,10 @@ describe('Authentication (e2e)', () => {
   describe('POST /auth/refresh', () => {
     it('rotates the refresh token and issues a new access token', async () => {
       const owner = await registerBusiness(app);
-      const res = await http().post('/api/v1/auth/refresh').set('Cookie', owner.refreshCookie).expect(200);
+      const res = await http()
+        .post('/api/v1/auth/refresh')
+        .set('Cookie', owner.refreshCookie)
+        .expect(200);
       const rotated = extractRefreshCookie(res.headers['set-cookie']);
 
       expect(rotated).not.toBe(owner.refreshCookie);
@@ -162,8 +194,14 @@ describe('Authentication (e2e)', () => {
 
     it('treats an immediate second use of a rotated token as a race, not theft', async () => {
       const owner = await registerBusiness(app);
-      const first = await http().post('/api/v1/auth/refresh').set('Cookie', owner.refreshCookie).expect(200);
-      const race = await http().post('/api/v1/auth/refresh').set('Cookie', owner.refreshCookie).expect(401);
+      const first = await http()
+        .post('/api/v1/auth/refresh')
+        .set('Cookie', owner.refreshCookie)
+        .expect(200);
+      const race = await http()
+        .post('/api/v1/auth/refresh')
+        .set('Cookie', owner.refreshCookie)
+        .expect(401);
       expect(race.body.error.code).toBe('REFRESH_RACE');
       // The legitimate successor still works.
       await http()
@@ -174,7 +212,10 @@ describe('Authentication (e2e)', () => {
 
     it('detects reuse of a rotated token and revokes the whole session family', async () => {
       const owner = await registerBusiness(app);
-      const rotatedRes = await http().post('/api/v1/auth/refresh').set('Cookie', owner.refreshCookie).expect(200);
+      const rotatedRes = await http()
+        .post('/api/v1/auth/refresh')
+        .set('Cookie', owner.refreshCookie)
+        .expect(200);
       const successor = extractRefreshCookie(rotatedRes.headers['set-cookie']);
 
       // Age the rotation beyond the grace window, as if an attacker replayed a stolen token later.
@@ -197,7 +238,10 @@ describe('Authentication (e2e)', () => {
 
     it('rejects missing, unknown and revoked tokens and clears the cookie', async () => {
       await http().post('/api/v1/auth/refresh').expect(401);
-      const unknown = await http().post('/api/v1/auth/refresh').set('Cookie', 'rea_refresh=not-a-real-token').expect(401);
+      const unknown = await http()
+        .post('/api/v1/auth/refresh')
+        .set('Cookie', 'rea_refresh=not-a-real-token')
+        .expect(401);
       expect(String(unknown.headers['set-cookie'])).toMatch(/rea_refresh=;/);
 
       const owner = await registerBusiness(app);
@@ -221,7 +265,10 @@ describe('Authentication (e2e)', () => {
       const owner = await registerBusiness(app);
       await http().get('/api/v1/auth/me').set(bearer(owner)).expect(200);
 
-      const res = await http().post('/api/v1/auth/logout').set('Cookie', owner.refreshCookie).expect(204);
+      const res = await http()
+        .post('/api/v1/auth/logout')
+        .set('Cookie', owner.refreshCookie)
+        .expect(204);
       expect(String(res.headers['set-cookie'])).toMatch(/rea_refresh=;.*Expires=Thu, 01 Jan 1970/);
 
       await http().get('/api/v1/auth/me').set(bearer(owner)).expect(401);
@@ -241,7 +288,10 @@ describe('Authentication (e2e)', () => {
       const owner = await registerBusiness(app, { businessName: 'Premium Property Consultants' });
       const res = await http().get('/api/v1/auth/me').set(bearer(owner)).expect(200);
       expect(res.body.data.user.email).toBe(owner.email);
-      expect(res.body.data.activeTenant).toMatchObject({ name: 'Premium Property Consultants', role: 'OWNER' });
+      expect(res.body.data.activeTenant).toMatchObject({
+        name: 'Premium Property Consultants',
+        role: 'OWNER',
+      });
       expect(res.body.data.memberships).toHaveLength(1);
     });
 

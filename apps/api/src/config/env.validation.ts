@@ -61,7 +61,10 @@ export const envSchema = z
         message: 'dev_link is not allowed in production',
       });
     }
-    if (env.NODE_ENV === 'production' && /replace-with|change-me|local-dev/i.test(env.JWT_ACCESS_SECRET)) {
+    if (
+      env.NODE_ENV === 'production' &&
+      /replace-with|change-me|local-dev/i.test(env.JWT_ACCESS_SECRET)
+    ) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ['JWT_ACCESS_SECRET'],

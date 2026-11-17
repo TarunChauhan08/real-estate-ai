@@ -15,7 +15,8 @@ export class InvitationDeliveryService {
   deliver(token: string): InvitationDelivery {
     const delivery: InvitationDelivery = {
       status: 'not_sent',
-      reason: 'Email delivery is not configured. Share the invitation link with the invitee yourself.',
+      reason:
+        'Email delivery is not configured. Share the invitation link with the invitee yourself.',
     };
     if (this.config.get('INVITATION_DELIVERY') === 'dev_link' && !this.config.isProduction) {
       // A URL fragment is never sent to servers, so the token does not end up in access logs.

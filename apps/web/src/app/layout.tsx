@@ -3,8 +3,12 @@ import { Providers } from './providers';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: { default: 'AI Real Estate Sales Employee', template: '%s · AI Real Estate Sales Employee' },
-  description: 'Never miss a property enquiry. Turn more enquiries into qualified buyers and site visits.',
+  title: {
+    default: 'AI Real Estate Sales Employee',
+    template: '%s · AI Real Estate Sales Employee',
+  },
+  description:
+    'Never miss a property enquiry. Turn more enquiries into qualified buyers and site visits.',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -1,4 +1,14 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  ParseUUIDPipe,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { type CreateInvitationResponse, type InvitationDto, Permission } from '@rea/shared-types';
 import { CurrentAuth, CurrentTenant } from '../../common/decorators/current-auth.decorator';
@@ -18,7 +28,9 @@ export class InvitationsController {
 
   @Post()
   @RequirePermissions(Permission.MEMBERS_INVITE)
-  @ApiOperation({ summary: 'Invite someone to the active business. Delivery status is reported honestly.' })
+  @ApiOperation({
+    summary: 'Invite someone to the active business. Delivery status is reported honestly.',
+  })
   create(
     @CurrentTenant() ctx: TenantContext,
     @CurrentAuth() auth: AuthContext,
@@ -30,7 +42,10 @@ export class InvitationsController {
   @Get()
   @RequirePermissions(Permission.MEMBERS_INVITE)
   @ApiOperation({ summary: 'List invitations for the active business' })
-  list(@CurrentTenant() ctx: TenantContext, @Query() query: InvitationQueryDto): Promise<Paginated<InvitationDto>> {
+  list(
+    @CurrentTenant() ctx: TenantContext,
+    @Query() query: InvitationQueryDto,
+  ): Promise<Paginated<InvitationDto>> {
     return this.invitations.list(ctx, query);
   }
 
@@ -41,7 +56,8 @@ export class InvitationsController {
   revoke(
     @CurrentTenant() ctx: TenantContext,
     @CurrentAuth() auth: AuthContext,
-    @Param('id', new ParseUUIDPipe({ exceptionFactory: () => Errors.notFound('Invitation') })) id: string,
+    @Param('id', new ParseUUIDPipe({ exceptionFactory: () => Errors.notFound('Invitation') }))
+    id: string,
   ): Promise<InvitationDto> {
     return this.invitations.revoke(ctx, auth.userId, id);
   }

@@ -24,7 +24,10 @@ function SettingsTabs() {
   const tab = TABS.some((t) => t.value === requested) ? requested! : 'business';
 
   return (
-    <Tabs value={tab} onValueChange={(value) => router.replace(`${pathname}?tab=${value}`, { scroll: false })}>
+    <Tabs
+      value={tab}
+      onValueChange={(value) => router.replace(`${pathname}?tab=${value}`, { scroll: false })}
+    >
       <TabsList>
         {TABS.map((t) => (
           <TabsTrigger key={t.value} value={t.value}>
@@ -54,7 +57,10 @@ function SettingsTabs() {
 export default function SettingsPage() {
   return (
     <>
-      <PageHeader title="Settings" description="Manage your business, your account and how your workspace behaves." />
+      <PageHeader
+        title="Settings"
+        description="Manage your business, your account and how your workspace behaves."
+      />
       <Suspense>
         <SettingsTabs />
       </Suspense>

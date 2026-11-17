@@ -22,11 +22,16 @@ describe('Team management and invitations (e2e)', () => {
   const http = () => request(app.getHttpServer());
 
   function invite(session: TestSession, email: string, role: string) {
-    return http().post('/api/v1/tenants/current/invitations').set(bearer(session)).send({ email, role });
+    return http()
+      .post('/api/v1/tenants/current/invitations')
+      .set(bearer(session))
+      .send({ email, role });
   }
 
   async function memberIdOf(email: string, tid = tenantId): Promise<string> {
-    const m = await prismaOf(app).membership.findFirstOrThrow({ where: { tenantId: tid, user: { email } } });
+    const m = await prismaOf(app).membership.findFirstOrThrow({
+      where: { tenantId: tid, user: { email } },
+    });
     return m.id;
   }
 
@@ -46,13 +51,21 @@ describe('Team management and invitations (e2e)', () => {
       const email = uniqueEmail('agent');
       const res = await invite(owner, email, 'SALES_AGENT').expect(201);
 
-      expect(res.body.data.invitation).toMatchObject({ email, role: 'SALES_AGENT', status: 'PENDING' });
+      expect(res.body.data.invitation).toMatchObject({
+        email,
+        role: 'SALES_AGENT',
+        status: 'PENDING',
+      });
       expect(res.body.data.invitation.invitedBy.name).toBe('Olivia Owner');
       expect(res.body.data.delivery.status).toBe('not_sent');
-      expect(res.body.data.delivery.devAcceptUrl).toMatch(/^http:\/\/localhost:3000\/accept-invitation#token=[\w-]{43}$/);
+      expect(res.body.data.delivery.devAcceptUrl).toMatch(
+        /^http:\/\/localhost:3000\/accept-invitation#token=[\w-]{43}$/,
+      );
 
       const token = tokenFrom(res.body.data.delivery.devAcceptUrl);
-      const stored = await prismaOf(app).invitation.findUniqueOrThrow({ where: { id: res.body.data.invitation.id } });
+      const stored = await prismaOf(app).invitation.findUniqueOrThrow({
+        where: { id: res.body.data.invitation.id },
+      });
       expect(stored.tokenHash).toMatch(/^[0-9a-f]{64}$/);
       expect(stored.tokenHash).not.toContain(token);
       expect(JSON.stringify(res.body.data.invitation)).not.toContain('tokenHash');
@@ -64,9 +77,17 @@ describe('Team management and invitations (e2e)', () => {
       const token = tokenFrom(created.body.data.delivery.devAcceptUrl);
 
       const preview = await http().post('/api/v1/invitations/preview').send({ token }).expect(200);
-      expect(preview.body.data).toMatchObject({ tenantName: 'Team Realty', email, role: 'SALES_AGENT', accountExists: false });
+      expect(preview.body.data).toMatchObject({
+        tenantName: 'Team Realty',
+        email,
+        role: 'SALES_AGENT',
+        accountExists: false,
+      });
 
-      const weak = await http().post('/api/v1/invitations/accept').send({ token, name: 'New Agent', password: 'weak' }).expect(400);
+      const weak = await http()
+        .post('/api/v1/invitations/accept')
+        .send({ token, name: 'New Agent', password: 'weak' })
+        .expect(400);
       expect(weak.body.error.details[0].field).toBe('password');
 
       const accepted = await http()
@@ -77,10 +98,16 @@ describe('Team management and invitations (e2e)', () => {
       expect(String(accepted.headers['set-cookie'])).toMatch(/rea_refresh=/);
       await http().get('/api/v1/tenants/current').set(bearer(accepted.body.data)).expect(200);
 
-      const reuse = await http().post('/api/v1/invitations/accept').send({ token, name: 'Again', password: PASSWORD }).expect(409);
+      const reuse = await http()
+        .post('/api/v1/invitations/accept')
+        .send({ token, name: 'Again', password: PASSWORD })
+        .expect(409);
       expect(reuse.body.error.code).toBe('INVITATION_USED');
 
-      const listed = await http().get('/api/v1/tenants/current/invitations?status=ACCEPTED').set(bearer(owner)).expect(200);
+      const listed = await http()
+        .get('/api/v1/tenants/current/invitations?status=ACCEPTED')
+        .set(bearer(owner))
+        .expect(200);
       expect(listed.body.data.map((i: { email: string }) => i.email)).toContain(email);
     });
 
@@ -92,8 +119,14 @@ describe('Team management and invitations (e2e)', () => {
       const preview = await http().post('/api/v1/invitations/preview').send({ token }).expect(200);
       expect(preview.body.data.accountExists).toBe(true);
 
-      await http().post('/api/v1/invitations/accept').send({ token, password: 'Wr0ng-password' }).expect(401);
-      const accepted = await http().post('/api/v1/invitations/accept').send({ token, password: PASSWORD }).expect(200);
+      await http()
+        .post('/api/v1/invitations/accept')
+        .send({ token, password: 'Wr0ng-password' })
+        .expect(401);
+      const accepted = await http()
+        .post('/api/v1/invitations/accept')
+        .send({ token, password: PASSWORD })
+        .expect(200);
       expect(accepted.body.data.activeTenant).toMatchObject({ id: tenantId, role: 'VIEWER' });
 
       const me = await http().get('/api/v1/auth/me').set(bearer(accepted.body.data)).expect(200);
@@ -108,7 +141,10 @@ describe('Team management and invitations (e2e)', () => {
       // Re-inviting the same email supersedes the first invitation.
       const second = await invite(owner, email, 'VIEWER').expect(201);
       const secondToken = tokenFrom(second.body.data.delivery.devAcceptUrl);
-      const superseded = await http().post('/api/v1/invitations/preview').send({ token: firstToken }).expect(410);
+      const superseded = await http()
+        .post('/api/v1/invitations/preview')
+        .send({ token: firstToken })
+        .expect(410);
       expect(superseded.body.error.code).toBe('INVITATION_REVOKED');
 
       await prismaOf(app).invitation.update({
@@ -121,7 +157,10 @@ describe('Team management and invitations (e2e)', () => {
         .expect(410);
       expect(expired.body.error.code).toBe('INVITATION_EXPIRED');
 
-      const unknown = await http().post('/api/v1/invitations/preview').send({ token: 'x'.repeat(43) }).expect(404);
+      const unknown = await http()
+        .post('/api/v1/invitations/preview')
+        .send({ token: 'x'.repeat(43) })
+        .expect(404);
       expect(unknown.body.error.code).toBe('INVITATION_INVALID');
       await http().post('/api/v1/invitations/preview').send({ token: 'bad token!' }).expect(400);
     });
@@ -129,12 +168,21 @@ describe('Team management and invitations (e2e)', () => {
     it('revokes a pending invitation', async () => {
       const created = await invite(owner, uniqueEmail('revoke'), 'MANAGER').expect(201);
       const id = created.body.data.invitation.id;
-      const revoked = await http().post(`/api/v1/tenants/current/invitations/${id}/revoke`).set(bearer(owner)).expect(200);
+      const revoked = await http()
+        .post(`/api/v1/tenants/current/invitations/${id}/revoke`)
+        .set(bearer(owner))
+        .expect(200);
       expect(revoked.body.data.status).toBe('REVOKED');
-      await http().post(`/api/v1/tenants/current/invitations/${id}/revoke`).set(bearer(owner)).expect(409);
+      await http()
+        .post(`/api/v1/tenants/current/invitations/${id}/revoke`)
+        .set(bearer(owner))
+        .expect(409);
 
       const token = tokenFrom(created.body.data.delivery.devAcceptUrl);
-      await http().post('/api/v1/invitations/accept').send({ token, name: 'Nope', password: PASSWORD }).expect(410);
+      await http()
+        .post('/api/v1/invitations/accept')
+        .send({ token, name: 'Nope', password: PASSWORD })
+        .expect(410);
     });
 
     it('enforces who can invite which role', async () => {
@@ -164,23 +212,40 @@ describe('Team management and invitations (e2e)', () => {
 
   describe('members', () => {
     it('lists members with pagination, filters and search', async () => {
-      const res = await http().get('/api/v1/tenants/current/members?pageSize=2').set(bearer(owner)).expect(200);
+      const res = await http()
+        .get('/api/v1/tenants/current/members?pageSize=2')
+        .set(bearer(owner))
+        .expect(200);
       expect(res.body.data).toHaveLength(2);
       expect(res.body.meta.total).toBeGreaterThanOrEqual(4);
-      expect(res.body.data[0]).toMatchObject({ email: owner.email, role: 'OWNER', isCurrentUser: true });
+      expect(res.body.data[0]).toMatchObject({
+        email: owner.email,
+        role: 'OWNER',
+        isCurrentUser: true,
+      });
       expect(Object.keys(res.body.data[0]).sort()).toEqual(
         ['email', 'id', 'isCurrentUser', 'joinedAt', 'name', 'role', 'status', 'userId'].sort(),
       );
 
-      const owners = await http().get('/api/v1/tenants/current/members?role=OWNER').set(bearer(owner)).expect(200);
+      const owners = await http()
+        .get('/api/v1/tenants/current/members?role=OWNER')
+        .set(bearer(owner))
+        .expect(200);
       expect(owners.body.data).toHaveLength(1);
-      const search = await http().get('/api/v1/tenants/current/members?q=olivia').set(bearer(owner)).expect(200);
+      const search = await http()
+        .get('/api/v1/tenants/current/members?q=olivia')
+        .set(bearer(owner))
+        .expect(200);
       expect(search.body.data.map((m: { email: string }) => m.email)).toEqual([owner.email]);
     });
 
     it('owner can change roles; the change applies on the member’s next request', async () => {
       const agent = await addMemberAndLogin(app, tenantId, 'SALES_AGENT');
-      await http().patch('/api/v1/tenants/current/settings').set(bearer(agent)).send({ locale: 'hi-IN' }).expect(403);
+      await http()
+        .patch('/api/v1/tenants/current/settings')
+        .set(bearer(agent))
+        .send({ locale: 'hi-IN' })
+        .expect(403);
 
       const id = await memberIdOf(agent.email);
       const res = await http()
@@ -191,8 +256,14 @@ describe('Team management and invitations (e2e)', () => {
       expect(res.body.data.role).toBe('MANAGER');
 
       // Same access token, new role from the database.
-      await http().patch('/api/v1/tenants/current/settings').set(bearer(agent)).send({ locale: 'en-IN' }).expect(200);
-      const audit = await prismaOf(app).auditLog.findFirst({ where: { action: 'member.role_changed', entityId: id } });
+      await http()
+        .patch('/api/v1/tenants/current/settings')
+        .set(bearer(agent))
+        .send({ locale: 'en-IN' })
+        .expect(200);
+      const audit = await prismaOf(app).auditLog.findFirst({
+        where: { action: 'member.role_changed', entityId: id },
+      });
       expect(audit?.metadata).toMatchObject({ from: 'SALES_AGENT', to: 'MANAGER' });
     });
 
@@ -208,7 +279,11 @@ describe('Team management and invitations (e2e)', () => {
       const admin = await addMemberAndLogin(app, tenantId, 'ADMIN');
       const adminId = await memberIdOf(admin.email);
       // An admin cannot promote themselves…
-      await http().patch(`/api/v1/tenants/current/members/${adminId}/role`).set(bearer(admin)).send({ role: 'OWNER' }).expect(403);
+      await http()
+        .patch(`/api/v1/tenants/current/members/${adminId}/role`)
+        .set(bearer(admin))
+        .send({ role: 'OWNER' })
+        .expect(403);
       // …touch the owner…
       const onOwner = await http()
         .patch(`/api/v1/tenants/current/members/${ownerId}/status`)
@@ -234,19 +309,35 @@ describe('Team management and invitations (e2e)', () => {
         .set(bearer(manager))
         .send({ role: 'VIEWER' })
         .expect(403);
-      await http().patch(`/api/v1/tenants/current/members/${viewerId}/role`).set(bearer(viewer)).send({ role: 'OWNER' }).expect(403);
+      await http()
+        .patch(`/api/v1/tenants/current/members/${viewerId}/role`)
+        .set(bearer(viewer))
+        .send({ role: 'OWNER' })
+        .expect(403);
 
-      const roles = await prismaOf(app).membership.findMany({ where: { id: { in: [adminId, viewerId, ownerId] } } });
+      const roles = await prismaOf(app).membership.findMany({
+        where: { id: { in: [adminId, viewerId, ownerId] } },
+      });
       expect(roles.map((r) => r.role).sort()).toEqual(['ADMIN', 'OWNER', 'VIEWER']);
     });
 
     it('owners may appoint and manage co-owners while one active owner always remains', async () => {
       const coOwner = await addMemberAndLogin(app, tenantId, 'ADMIN');
       const coOwnerId = await memberIdOf(coOwner.email);
-      await http().patch(`/api/v1/tenants/current/members/${coOwnerId}/role`).set(bearer(owner)).send({ role: 'OWNER' }).expect(200);
-      await http().patch(`/api/v1/tenants/current/members/${coOwnerId}/role`).set(bearer(owner)).send({ role: 'ADMIN' }).expect(200);
+      await http()
+        .patch(`/api/v1/tenants/current/members/${coOwnerId}/role`)
+        .set(bearer(owner))
+        .send({ role: 'OWNER' })
+        .expect(200);
+      await http()
+        .patch(`/api/v1/tenants/current/members/${coOwnerId}/role`)
+        .set(bearer(owner))
+        .send({ role: 'ADMIN' })
+        .expect(200);
 
-      const activeOwners = await prismaOf(app).membership.count({ where: { tenantId, role: 'OWNER', status: 'ACTIVE' } });
+      const activeOwners = await prismaOf(app).membership.count({
+        where: { tenantId, role: 'OWNER', status: 'ACTIVE' },
+      });
       expect(activeOwners).toBe(1);
     });
 
@@ -264,12 +355,23 @@ describe('Team management and invitations (e2e)', () => {
       const relogin = await login(app, agent.email);
       expect(relogin.activeTenant).toBeNull();
 
-      await http().patch(`/api/v1/tenants/current/members/${id}/status`).set(bearer(owner)).send({ status: 'ACTIVE' }).expect(200);
-      const refreshed = await http().post('/api/v1/auth/refresh').set('Cookie', relogin.refreshCookie).expect(200);
+      await http()
+        .patch(`/api/v1/tenants/current/members/${id}/status`)
+        .set(bearer(owner))
+        .send({ status: 'ACTIVE' })
+        .expect(200);
+      const refreshed = await http()
+        .post('/api/v1/auth/refresh')
+        .set('Cookie', relogin.refreshCookie)
+        .expect(200);
       expect(refreshed.body.data.activeTenant.id).toBe(tenantId);
       expect(extractRefreshCookie(refreshed.headers['set-cookie'])).toBeDefined();
 
-      await http().patch(`/api/v1/tenants/current/members/${id}/status`).set(bearer(owner)).send({ status: 'INVITED' }).expect(400);
+      await http()
+        .patch(`/api/v1/tenants/current/members/${id}/status`)
+        .set(bearer(owner))
+        .send({ status: 'INVITED' })
+        .expect(400);
     });
   });
 
@@ -280,10 +382,18 @@ describe('Team management and invitations (e2e)', () => {
       const bAgentId = await memberIdOf(bAgent.email, b.activeTenant!.id);
       const bInvite = await invite(b, uniqueEmail(), 'VIEWER').expect(201);
 
-      const members = await http().get('/api/v1/tenants/current/members?pageSize=100').set(bearer(owner)).expect(200);
+      const members = await http()
+        .get('/api/v1/tenants/current/members?pageSize=100')
+        .set(bearer(owner))
+        .expect(200);
       expect(members.body.data.map((m: { id: string }) => m.id)).not.toContain(bAgentId);
-      const invitations = await http().get('/api/v1/tenants/current/invitations?pageSize=100').set(bearer(owner)).expect(200);
-      expect(invitations.body.data.map((i: { id: string }) => i.id)).not.toContain(bInvite.body.data.invitation.id);
+      const invitations = await http()
+        .get('/api/v1/tenants/current/invitations?pageSize=100')
+        .set(bearer(owner))
+        .expect(200);
+      expect(invitations.body.data.map((i: { id: string }) => i.id)).not.toContain(
+        bInvite.body.data.invitation.id,
+      );
 
       const role = await http()
         .patch(`/api/v1/tenants/current/members/${bAgentId}/role`)
@@ -301,14 +411,22 @@ describe('Team management and invitations (e2e)', () => {
         .set(bearer(owner))
         .expect(404);
 
-      const untouched = await prismaOf(app).membership.findUniqueOrThrow({ where: { id: bAgentId } });
+      const untouched = await prismaOf(app).membership.findUniqueOrThrow({
+        where: { id: bAgentId },
+      });
       expect(untouched).toMatchObject({ role: 'SALES_AGENT', status: 'ACTIVE' });
-      const invitation = await prismaOf(app).invitation.findUniqueOrThrow({ where: { id: bInvite.body.data.invitation.id } });
+      const invitation = await prismaOf(app).invitation.findUniqueOrThrow({
+        where: { id: bInvite.body.data.invitation.id },
+      });
       expect(invitation.revokedAt).toBeNull();
     });
 
     it('returns 404 for malformed member IDs', async () => {
-      await http().patch('/api/v1/tenants/current/members/not-a-uuid/role').set(bearer(owner)).send({ role: 'VIEWER' }).expect(404);
+      await http()
+        .patch('/api/v1/tenants/current/members/not-a-uuid/role')
+        .set(bearer(owner))
+        .send({ role: 'VIEWER' })
+        .expect(404);
     });
   });
 });

@@ -1,0 +1,121 @@
+# API design
+
+Base URL: `http://localhost:4000/api/v1` · Interactive docs (non-production): `/api/v1/docs` (Swagger UI).
+
+## Conventions
+
+**Success**
+
+```json
+{ "data": { ... } }
+{ "data": [ ... ], "meta": { "page": 1, "pageSize": 20, "total": 42, "totalPages": 3 } }
+```
+
+**Error** — always this shape, with a stable `code` clients can branch on:
+
+```json
+{
+  "error": {
+    "code": "VALIDATION_FAILED",
+    "message": "Request validation failed",
+    "details": [{ "field": "password", "message": "Password must contain a number" }],
+    "requestId": "3f0c…"
+  }
+}
+```
+
+- Every response carries `x-request-id` (an incoming well-formed one is reused). Server logs use the same ID; 5xx responses never include internals.
+- **Authentication:** `Authorization: Bearer <accessToken>`. Refresh/logout use the `rea_refresh` HttpOnly cookie (send requests with `credentials: 'include'`).
+- **Validation:** unknown body fields are rejected (`400`), not ignored. Strings are trimmed; emails lower-cased.
+- **Pagination:** `?page=1&pageSize=20` (max 100) on list endpoints.
+- **Rate limits:** global per-IP limit (`RATE_LIMIT_MAX` per `RATE_LIMIT_TTL_SECONDS`); credential endpoints also have a strict limit (`AUTH_RATE_LIMIT_MAX`). Exceeding returns `429 RATE_LIMITED`.
+
+| Status | Typical codes                                                                                     |
+| ------ | ------------------------------------------------------------------------------------------------- |
+| 400    | `VALIDATION_FAILED`                                                                               |
+| 401    | `UNAUTHENTICATED`, `INVALID_CREDENTIALS`, `REFRESH_RACE` (retry refresh once)                     |
+| 403    | `FORBIDDEN`, `ACCOUNT_DISABLED`, `ROLE_NOT_ASSIGNABLE`, `INSUFFICIENT_ROLE`, `CANNOT_MODIFY_SELF` |
+| 404    | `NOT_FOUND`, `INVITATION_INVALID`                                                                 |
+| 409    | `EMAIL_TAKEN`, `ALREADY_MEMBER`, `INVITATION_USED`, `INVITATION_NOT_PENDING`, `LAST_OWNER`        |
+| 410    | `INVITATION_EXPIRED`, `INVITATION_REVOKED`                                                        |
+| 429    | `RATE_LIMITED`                                                                                    |
+
+## Endpoints
+
+Legend: 🌐 public · 🔒 authenticated · _permission_ required in the active tenant.
+
+### Health
+
+| Method | Path            | Access | Description                                   |
+| ------ | --------------- | ------ | --------------------------------------------- |
+| GET    | `/health`       | 🌐     | Liveness — process is up                      |
+| GET    | `/health/ready` | 🌐     | Readiness — database reachable (`503` if not) |
+
+### Auth
+
+| Method | Path                  | Access          | Description                                                                                                                                                                  |
+| ------ | --------------------- | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| POST   | `/auth/register`      | 🌐 strict limit | `{ name, email, password, businessName, businessType, acceptTerms: true }` → creates user, tenant (`PENDING`), profile, settings, OWNER membership, session. `201` + session |
+| POST   | `/auth/login`         | 🌐 strict limit | `{ email, password }` → session                                                                                                                                              |
+| POST   | `/auth/refresh`       | 🌐 cookie       | Rotates the refresh cookie → session                                                                                                                                         |
+| POST   | `/auth/logout`        | 🌐 cookie       | Revokes the session family, clears cookie → `204`                                                                                                                            |
+| GET    | `/auth/me`            | 🔒              | User, active tenant (with role) and all usable memberships                                                                                                                   |
+| POST   | `/auth/switch-tenant` | 🔒              | `{ tenantId }` → session in that tenant (must be an active member)                                                                                                           |
+
+Session response:
+
+```json
+{
+  "data": {
+    "accessToken": "eyJ…",
+    "expiresIn": 900,
+    "user": { "id": "…", "name": "Asha Verma", "email": "asha@noidahomes.in" },
+    "activeTenant": {
+      "id": "…",
+      "name": "Noida Homes",
+      "slug": "noida-homes-3fa2c1",
+      "status": "ACTIVE",
+      "membershipId": "…",
+      "role": "OWNER"
+    }
+  }
+}
+```
+
+### Current tenant
+
+| Method | Path                          | Permission        | Description                                                                                                                       |
+| ------ | ----------------------------- | ----------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/tenants/current`            | `tenant:read`     | Business (id, name, slug, status)                                                                                                 |
+| PATCH  | `/tenants/current`            | `tenant:update`   | `{ name }`                                                                                                                        |
+| GET    | `/tenants/current/profile`    | `tenant:read`     | Business type, phone, website, city, state, country                                                                               |
+| PATCH  | `/tenants/current/profile`    | `tenant:update`   | Any subset; empty string clears optional fields; bare domains become `https://`                                                   |
+| GET    | `/tenants/current/settings`   | `settings:read`   | timezone, locale, currency, preferredLanguage                                                                                     |
+| PATCH  | `/tenants/current/settings`   | `settings:update` | IANA timezone; locale `en-IN`/`hi-IN`; currency `INR`; language `en`/`hi`/`hinglish`                                              |
+| POST   | `/tenants/current/onboarding` | `tenant:update`   | `{ businessName, businessType, phone?, website?, city, state, timezone, preferredLanguage }` → saves all and sets status `ACTIVE` |
+
+### Team
+
+| Method | Path                                      | Permission       | Description                                                           |
+| ------ | ----------------------------------------- | ---------------- | --------------------------------------------------------------------- |
+| GET    | `/tenants/current/members`                | `members:read`   | `?role=&status=&q=&page=&pageSize=`                                   |
+| PATCH  | `/tenants/current/members/:id/role`       | `members:manage` | `{ role }` — hierarchy, self and last-owner rules apply               |
+| PATCH  | `/tenants/current/members/:id/status`     | `members:manage` | `{ status: "ACTIVE" \| "SUSPENDED" }`                                 |
+| POST   | `/tenants/current/invitations`            | `members:invite` | `{ email, role }` → `{ invitation, delivery }`                        |
+| GET    | `/tenants/current/invitations`            | `members:invite` | `?status=PENDING\|ACCEPTED\|EXPIRED\|REVOKED`                         |
+| POST   | `/tenants/current/invitations/:id/revoke` | `members:invite` | Withdraw a pending invitation                                         |
+| POST   | `/invitations/preview`                    | 🌐 strict limit  | `{ token }` → `{ tenantName, email, role, expiresAt, accountExists }` |
+| POST   | `/invitations/accept`                     | 🌐 strict limit  | `{ token, password, name? }` → session in the invited tenant          |
+
+`:id` values are membership/invitation IDs **scoped to the caller's tenant** — IDs from another tenant return `404`.
+
+**Invitation delivery.** No email provider is configured in Phase 1, so `delivery.status` is always `"not_sent"` with a reason. When `INVITATION_DELIVERY=dev_link` (rejected by env validation in production), `delivery.devAcceptUrl` contains the accept link — e.g. `http://localhost:3000/accept-invitation#token=…`. The token is in the URL fragment so it is never sent to a server or written to access logs. New invitees choose a name and password; existing users confirm their current password.
+
+### Dashboard and audit
+
+| Method | Path                  | Permission       | Description                                                                                                                      |
+| ------ | --------------------- | ---------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/dashboard/overview` | `dashboard:read` | Real team counts, setup progress; metrics for unbuilt modules are `{ "status": "not_available", "reason": "…" }` — never numbers |
+| GET    | `/audit-logs`         | `audit:read`     | Newest first; `?action=&entityType=&actorId=&from=&to=&page=&pageSize=`                                                          |
+
+Audit actions: `auth.registered`, `auth.login`, `auth.login_failed`, `auth.logout`, `auth.refresh_reuse_detected`, `auth.tenant_switched`, `tenant.created`, `tenant.updated`, `tenant.onboarding_completed`, `business_profile.updated`, `tenant_settings.updated`, `invitation.created`, `invitation.revoked`, `invitation.accepted`, `member.role_changed`, `member.status_changed`. Metadata never contains passwords, tokens or hashes (enforced by a scrubber and a unit test).

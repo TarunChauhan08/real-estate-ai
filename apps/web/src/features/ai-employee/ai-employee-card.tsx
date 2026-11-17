@@ -5,7 +5,13 @@ import { cn } from '@/lib/utils';
  * The AI employee presented as a staff ID card. In Phase 1 it is intentionally blank:
  * nothing is configured and no AI is running.
  */
-export function AiEmployeeIdCard({ businessName, compact = false }: { businessName: string; compact?: boolean }) {
+export function AiEmployeeIdCard({
+  businessName,
+  compact = false,
+}: {
+  businessName: string;
+  compact?: boolean;
+}) {
   return (
     <div
       className={cn(
@@ -23,7 +29,9 @@ export function AiEmployeeIdCard({ businessName, compact = false }: { businessNa
         </div>
         <div className="min-w-0 flex-1">
           <p className="text-xs font-medium text-fg-muted">{businessName}</p>
-          <p className="mt-0.5 text-lg font-bold tracking-tight text-fg-muted">Unnamed AI employee</p>
+          <p className="mt-0.5 text-lg font-bold tracking-tight text-fg-muted">
+            Unnamed AI employee
+          </p>
           <p className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-attention-soft px-2.5 py-1 text-xs font-semibold text-attention-fg">
             <span className="size-1.5 rounded-full bg-attention" aria-hidden />
             Not configured, not active

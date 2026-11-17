@@ -3,10 +3,13 @@ import * as Db from '../generated/prisma/enums';
 
 /** Guards against the shared-types enums drifting from the database enums. */
 describe('shared-types enums match Prisma enums', () => {
-  it.each(['TenantStatus', 'UserStatus', 'BusinessType', 'MembershipRole', 'MembershipStatus'] as const)(
-    '%s',
-    (name) => {
-      expect(Object.values(Shared[name]).sort()).toEqual(Object.values(Db[name]).sort());
-    },
-  );
+  it.each([
+    'TenantStatus',
+    'UserStatus',
+    'BusinessType',
+    'MembershipRole',
+    'MembershipStatus',
+  ] as const)('%s', (name) => {
+    expect(Object.values(Shared[name]).sort()).toEqual(Object.values(Db[name]).sort());
+  });
 });

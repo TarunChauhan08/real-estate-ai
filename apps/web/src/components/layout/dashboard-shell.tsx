@@ -14,7 +14,12 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       </aside>
 
       {menuOpen && (
-        <div className="fixed inset-0 z-40 lg:hidden" role="dialog" aria-modal="true" aria-label="Navigation">
+        <div
+          className="fixed inset-0 z-40 lg:hidden"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Navigation"
+        >
           <div className="absolute inset-0 bg-brand-deep/40" onClick={() => setMenuOpen(false)} />
           <div className="absolute inset-y-0 left-0 w-72">
             <SidebarNav onNavigate={() => setMenuOpen(false)} />
@@ -31,12 +36,22 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       )}
 
       <Topbar onOpenMenu={() => setMenuOpen(true)} />
-      <main className="mx-auto w-full min-w-0 max-w-6xl px-4 py-8 sm:px-6 lg:px-10">{children}</main>
+      <main className="mx-auto w-full min-w-0 max-w-6xl px-4 py-8 sm:px-6 lg:px-10">
+        {children}
+      </main>
     </div>
   );
 }
 
-export function PageHeader({ title, description, actions }: { title: string; description?: string; actions?: React.ReactNode }) {
+export function PageHeader({
+  title,
+  description,
+  actions,
+}: {
+  title: string;
+  description?: string;
+  actions?: React.ReactNode;
+}) {
   return (
     <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
       <div>

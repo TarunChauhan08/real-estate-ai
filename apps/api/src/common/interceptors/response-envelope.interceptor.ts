@@ -1,4 +1,9 @@
-import { type CallHandler, type ExecutionContext, Injectable, type NestInterceptor } from '@nestjs/common';
+import {
+  type CallHandler,
+  type ExecutionContext,
+  Injectable,
+  type NestInterceptor,
+} from '@nestjs/common';
 import { type ApiSuccess, type PaginationMeta } from '@rea/shared-types';
 import { type Observable, map } from 'rxjs';
 
@@ -22,7 +27,10 @@ export class Paginated<T> {
 /** Wraps every successful handler result in the standard `{ data }` envelope. */
 @Injectable()
 export class ResponseEnvelopeInterceptor implements NestInterceptor {
-  intercept(_context: ExecutionContext, next: CallHandler): Observable<ApiSuccess<unknown> | undefined> {
+  intercept(
+    _context: ExecutionContext,
+    next: CallHandler,
+  ): Observable<ApiSuccess<unknown> | undefined> {
     return next.handle().pipe(
       map((result: unknown) => {
         if (result === undefined) return undefined;

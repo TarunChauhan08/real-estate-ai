@@ -28,14 +28,21 @@ export function DialogContent({
           className,
         )}
       >
-        <DialogPrimitive.Title className="text-lg font-semibold text-fg">{title}</DialogPrimitive.Title>
+        <DialogPrimitive.Title className="text-lg font-semibold text-fg">
+          {title}
+        </DialogPrimitive.Title>
         {description ? (
-          <DialogPrimitive.Description className="mt-1 text-sm text-fg-muted">{description}</DialogPrimitive.Description>
+          <DialogPrimitive.Description className="mt-1 text-sm text-fg-muted">
+            {description}
+          </DialogPrimitive.Description>
         ) : (
           <DialogPrimitive.Description className="sr-only">{title}</DialogPrimitive.Description>
         )}
         <div className="mt-5">{children}</div>
-        <DialogPrimitive.Close className="absolute right-4 top-4 rounded-md p-1 text-fg-muted hover:bg-subtle" aria-label="Close">
+        <DialogPrimitive.Close
+          className="absolute right-4 top-4 rounded-md p-1 text-fg-muted hover:bg-subtle"
+          aria-label="Close"
+        >
           <X className="size-4" />
         </DialogPrimitive.Close>
       </DialogPrimitive.Content>

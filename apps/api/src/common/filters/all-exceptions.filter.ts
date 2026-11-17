@@ -46,7 +46,12 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
     if (exception instanceof AppException) {
       status = exception.getStatus();
-      body = { code: exception.code, message: exception.message, details: exception.details, requestId };
+      body = {
+        code: exception.code,
+        message: exception.message,
+        details: exception.details,
+        requestId,
+      };
     } else if (exception instanceof HttpException) {
       status = exception.getStatus();
       const response = exception.getResponse();
@@ -63,7 +68,10 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
     if (status >= 500) {
       const err = exception instanceof Error ? exception : new Error(String(exception));
-      this.logger.error(`[${requestId}] ${req.method} ${req.path} -> ${err.name}: ${err.message}`, err.stack);
+      this.logger.error(
+        `[${requestId}] ${req.method} ${req.path} -> ${err.name}: ${err.message}`,
+        err.stack,
+      );
     }
 
     if (body.details === undefined) delete body.details;

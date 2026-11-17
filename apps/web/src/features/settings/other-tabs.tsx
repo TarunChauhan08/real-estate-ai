@@ -42,7 +42,10 @@ export function AccountTab() {
         </p>
       </Panel>
       <Panel>
-        <PanelHeader title="Your businesses" description="Switch between them from the business menu at the top of the page." />
+        <PanelHeader
+          title="Your businesses"
+          description="Switch between them from the business menu at the top of the page."
+        />
         <ul className="divide-y divide-subtle">
           {me.data.memberships.map((m) => (
             <li key={m.membershipId} className="flex items-center gap-3 px-5 py-3 text-sm">
@@ -80,11 +83,18 @@ export function TeamTab() {
           </Button>
         }
       />
-      <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="Roles and permissions table">
+      <div
+        className="overflow-x-auto"
+        tabIndex={0}
+        role="region"
+        aria-label="Roles and permissions table"
+      >
         <table className="w-full text-sm">
           <thead className="border-b border-line text-xs text-fg-muted">
             <tr>
-              <th scope="col" className="px-5 py-2.5 text-left font-medium">Permission</th>
+              <th scope="col" className="px-5 py-2.5 text-left font-medium">
+                Permission
+              </th>
               {ROLES.map((role) => (
                 <th key={role} scope="col" className="px-3 py-2.5 text-center font-medium">
                   {ROLE_LABELS[role]}
@@ -139,7 +149,8 @@ export function SecurityTab() {
           </Button>
         </div>
         <Alert tone="info" title="Password changes and two-factor sign-in are not available yet">
-          They are planned for a later release. Sessions expire automatically if they are not used for a while.
+          They are planned for a later release. Sessions expire automatically if they are not used
+          for a while.
         </Alert>
       </div>
     </Panel>

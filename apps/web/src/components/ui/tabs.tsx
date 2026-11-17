@@ -27,5 +27,10 @@ export function TabsTrigger({ className, ...props }: TabsPrimitive.TabsTriggerPr
 }
 
 export function TabsContent({ className, ...props }: TabsPrimitive.TabsContentProps) {
-  return <TabsPrimitive.Content className={cn('pt-6 focus-visible:outline-none', className)} {...props} />;
+  return (
+    <TabsPrimitive.Content
+      className={cn('pt-6 focus-visible:outline-none', className)}
+      {...props}
+    />
+  );
 }

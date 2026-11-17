@@ -25,12 +25,18 @@ import { api, ApiError } from '@/lib/api-client';
 import { queryKeys } from '@/lib/query-keys';
 
 type Values = Pick<TenantSettingsDto, 'timezone' | 'locale' | 'currency' | 'preferredLanguage'>;
-const LOCALE_LABELS: Record<string, string> = { 'en-IN': 'English (India)', 'hi-IN': 'हिन्दी (भारत)' };
+const LOCALE_LABELS: Record<string, string> = {
+  'en-IN': 'English (India)',
+  'hi-IN': 'हिन्दी (भारत)',
+};
 
 export function PreferencesTab() {
   const canEdit = usePermission(Permission.SETTINGS_UPDATE);
   const queryClient = useQueryClient();
-  const settings = useQuery({ queryKey: queryKeys.settings, queryFn: () => api<TenantSettingsDto>('/tenants/current/settings') });
+  const settings = useQuery({
+    queryKey: queryKeys.settings,
+    queryFn: () => api<TenantSettingsDto>('/tenants/current/settings'),
+  });
   const form = useForm<Values>();
 
   useEffect(() => {
@@ -41,12 +47,14 @@ export function PreferencesTab() {
   }, [settings.data, form]);
 
   const save = useMutation({
-    mutationFn: (values: Values) => api<TenantSettingsDto>('/tenants/current/settings', { method: 'PATCH', body: values }),
+    mutationFn: (values: Values) =>
+      api<TenantSettingsDto>('/tenants/current/settings', { method: 'PATCH', body: values }),
     onSuccess: (data) => {
       toast.success('Preferences saved');
       queryClient.setQueryData(queryKeys.settings, data);
     },
-    onError: (error) => toast.error(error instanceof ApiError ? error.message : 'Preferences were not saved'),
+    onError: (error) =>
+      toast.error(error instanceof ApiError ? error.message : 'Preferences were not saved'),
   });
 
   if (settings.isError) return <ErrorState error={settings.error} />;
@@ -57,9 +65,14 @@ export function PreferencesTab() {
 
   return (
     <Panel>
-      <PanelHeader title="Preferences" description="Regional formats and the default conversation language." />
+      <PanelHeader
+        title="Preferences"
+        description="Regional formats and the default conversation language."
+      />
       <form onSubmit={form.handleSubmit((v) => save.mutate(v))} className="space-y-5 p-5">
-        {!canEdit && <Alert tone="info">Only owners, admins and managers can change preferences.</Alert>}
+        {!canEdit && (
+          <Alert tone="info">Only owners, admins and managers can change preferences.</Alert>
+        )}
         <fieldset disabled={!canEdit} className="grid gap-5 sm:grid-cols-2">
           <Field label="Time zone">
             {(c) => (

@@ -10,7 +10,7 @@ import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Field } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
-import { api, ApiError } from '@/lib/api-client';
+import { api, ApiError, getConnectionError } from '@/lib/api-client';
 import { useAuth } from './auth-provider';
 import { PasswordInput } from './password-input';
 import { homeFor, safeNext } from './routing';
@@ -20,7 +20,9 @@ export function LoginForm() {
   const { signIn } = useAuth();
   const router = useRouter();
   const next = safeNext(useSearchParams().get('next'));
-  const [formError, setFormError] = useState<string | null>(null);
+  const [formError, setFormError] = useState<string | null>(
+    () => getConnectionError()?.message ?? null,
+  );
   const [showReset, setShowReset] = useState(false);
   const {
     register,
@@ -43,26 +45,38 @@ export function LoginForm() {
     <form onSubmit={onSubmit} noValidate className="space-y-5">
       <div>
         <h1 className="text-2xl font-bold tracking-tight text-fg">Sign in</h1>
-        <p className="mt-1 text-sm text-fg-muted">Welcome back. Sign in to your business workspace.</p>
+        <p className="mt-1 text-sm text-fg-muted">
+          Welcome back. Sign in to your business workspace.
+        </p>
       </div>
 
       {formError && <Alert tone="danger">{formError}</Alert>}
 
       <Field label="Email" error={errors.email?.message}>
-        {(control) => <Input {...control} type="email" autoComplete="email" autoFocus {...register('email')} />}
+        {(control) => (
+          <Input {...control} type="email" autoComplete="email" autoFocus {...register('email')} />
+        )}
       </Field>
       <Field label="Password" error={errors.password?.message}>
-        {(control) => <PasswordInput {...control} autoComplete="current-password" {...register('password')} />}
+        {(control) => (
+          <PasswordInput {...control} autoComplete="current-password" {...register('password')} />
+        )}
       </Field>
 
       <div className="-mt-2 flex justify-end">
-        <button type="button" className="text-sm font-medium text-brand-fg hover:underline" onClick={() => setShowReset((v) => !v)} aria-expanded={showReset}>
+        <button
+          type="button"
+          className="text-sm font-medium text-brand-fg hover:underline"
+          onClick={() => setShowReset((v) => !v)}
+          aria-expanded={showReset}
+        >
           Forgot password?
         </button>
       </div>
       {showReset && (
         <Alert tone="info" title="Password reset is not available yet">
-          Self-service password reset is coming in a later release. Until then, ask your business owner or contact support.
+          Self-service password reset is coming in a later release. Until then, ask your business
+          owner or contact support.
         </Alert>
       )}
 

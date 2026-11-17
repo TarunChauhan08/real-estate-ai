@@ -23,6 +23,12 @@ type SessionListener = (session: SessionResponse | null) => void;
  */
 let accessToken: string | null = null;
 let refreshInFlight: Promise<SessionResponse | null> | null = null;
+let lastRefreshError: ApiError | null = null;
+
+/** Set when the most recent session check failed because the API could not be reached. */
+export function getConnectionError(): ApiError | null {
+  return lastRefreshError;
+}
 const listeners = new Set<SessionListener>();
 
 export function onSessionChange(listener: SessionListener): () => void {
@@ -63,7 +69,11 @@ async function send(path: string, init: RequestInit & { json?: unknown }): Promi
       credentials: 'include',
     });
   } catch {
-    throw new ApiError(0, 'NETWORK_ERROR', 'Cannot reach the server. Check your connection and try again.');
+    throw new ApiError(
+      0,
+      'NETWORK_ERROR',
+      'Cannot reach the server. Check your connection and try again.',
+    );
   }
 }
 
@@ -74,7 +84,15 @@ async function send(path: string, init: RequestInit & { json?: unknown }): Promi
 export function refreshSession(): Promise<SessionResponse | null> {
   refreshInFlight ??= (async () => {
     for (let attempt = 0; attempt < 2; attempt += 1) {
-      const res = await send('/auth/refresh', { method: 'POST' });
+      let res: Response;
+      try {
+        res = await send('/auth/refresh', { method: 'POST' });
+      } catch (error) {
+        // API unreachable: resolve to signed-out rather than leaving the app waiting forever.
+        lastRefreshError = error instanceof ApiError ? error : null;
+        break;
+      }
+      lastRefreshError = null;
       if (res.ok) {
         const { data } = await parse<{ data: SessionResponse }>(res);
         setSession(data);
@@ -109,7 +127,10 @@ export async function api<T>(path: string, options: RequestOptions = {}): Promis
 }
 
 /** Like `api` but keeps pagination metadata. */
-export async function apiPage<T>(path: string): Promise<{ data: T[]; meta: { total: number; page: number; pageSize: number; totalPages: number } }> {
+export async function apiPage<T>(path: string): Promise<{
+  data: T[];
+  meta: { total: number; page: number; pageSize: number; totalPages: number };
+}> {
   let res = await send(path, { method: 'GET' });
   if (res.status === 401) {
     const session = await refreshSession();
@@ -119,7 +140,10 @@ export async function apiPage<T>(path: string): Promise<{ data: T[]; meta: { tot
 }
 
 /** Maps API field errors onto a react-hook-form `setError`. Returns true if any were applied. */
-export function applyFieldErrors(error: unknown, setError: (field: never, error: { message: string }) => void): boolean {
+export function applyFieldErrors(
+  error: unknown,
+  setError: (field: never, error: { message: string }) => void,
+): boolean {
   if (!(error instanceof ApiError) || error.details.length === 0) return false;
   for (const detail of error.details) setError(detail.field as never, { message: detail.message });
   return true;

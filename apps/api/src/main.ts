@@ -15,7 +15,8 @@ async function bootstrap(): Promise<void> {
 
   const logger = new Logger('Bootstrap');
   logger.log(`API listening on http://localhost:${port}/${API_PREFIX}`);
-  if (!config.isProduction) logger.log(`Swagger docs at http://localhost:${port}/${API_PREFIX}/docs`);
+  if (!config.isProduction)
+    logger.log(`Swagger docs at http://localhost:${port}/${API_PREFIX}/docs`);
 }
 
 void bootstrap();

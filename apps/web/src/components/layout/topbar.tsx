@@ -69,7 +69,9 @@ export function Topbar({ onOpenMenu }: { onOpenMenu: () => void }) {
           {memberships.map((m) => (
             <DropdownMenuItem key={m.membershipId} onSelect={() => void handleSwitch(m.tenant.id)}>
               <span className="flex-1 truncate">{m.tenant.name}</span>
-              {m.tenant.id === tenant.id && <Check className="text-brand-fg" aria-label="Current business" />}
+              {m.tenant.id === tenant.id && (
+                <Check className="text-brand-fg" aria-label="Current business" />
+              )}
             </DropdownMenuItem>
           ))}
           {memberships.length === 0 && <DropdownMenuItem disabled>Loading…</DropdownMenuItem>}

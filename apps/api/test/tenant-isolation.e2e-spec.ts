@@ -20,9 +20,16 @@ describe('Tenant isolation (e2e)', () => {
     app = await createTestApp();
     await resetDatabase(app);
     a = await registerBusiness(app, { businessName: 'Business A Realty' });
-    b = await registerBusiness(app, { businessName: 'Business B Developers', businessType: 'DEVELOPER' });
+    b = await registerBusiness(app, {
+      businessName: 'Business B Developers',
+      businessType: 'DEVELOPER',
+    });
     aTenantId = a.activeTenant!.id;
-    await http().patch('/api/v1/tenants/current/profile').set(bearer(b)).send({ city: 'Gurugram' }).expect(200);
+    await http()
+      .patch('/api/v1/tenants/current/profile')
+      .set(bearer(b))
+      .send({ city: 'Gurugram' })
+      .expect(200);
   });
 
   afterAll(async () => {
@@ -81,8 +88,15 @@ describe('Tenant isolation (e2e)', () => {
   });
 
   it('A’s writes only change A', async () => {
-    await http().patch('/api/v1/tenants/current/settings').set(bearer(a)).send({ preferredLanguage: 'hinglish' }).expect(200);
-    const bSettings = await http().get('/api/v1/tenants/current/settings').set(bearer(b)).expect(200);
+    await http()
+      .patch('/api/v1/tenants/current/settings')
+      .set(bearer(a))
+      .send({ preferredLanguage: 'hinglish' })
+      .expect(200);
+    const bSettings = await http()
+      .get('/api/v1/tenants/current/settings')
+      .set(bearer(b))
+      .expect(200);
     expect(bSettings.body.data.preferredLanguage).toBe('en');
   });
 
@@ -90,11 +104,15 @@ describe('Tenant isolation (e2e)', () => {
     // Simulates a token-minting bug: A's user with B's tenant and B's owner membership.
     const forged = await app.get(TokenService).signAccessToken({
       sub: a.user.id,
-      fam: (await prismaOf(app).refreshSession.findFirstOrThrow({ where: { userId: a.user.id } })).familyId,
+      fam: (await prismaOf(app).refreshSession.findFirstOrThrow({ where: { userId: a.user.id } }))
+        .familyId,
       tid: b.activeTenant!.id,
       mid: b.activeTenant!.membershipId,
     });
-    await http().get('/api/v1/tenants/current').set('Authorization', `Bearer ${forged}`).expect(401);
+    await http()
+      .get('/api/v1/tenants/current')
+      .set('Authorization', `Bearer ${forged}`)
+      .expect(401);
     await http()
       .patch('/api/v1/tenants/current')
       .set('Authorization', `Bearer ${forged}`)
@@ -106,9 +124,17 @@ describe('Tenant isolation (e2e)', () => {
     const { JwtService } = await import('@nestjs/jwt');
     const forged = await new JwtService().signAsync(
       { fam: 'x', tid: b.activeTenant!.id, mid: b.activeTenant!.membershipId },
-      { subject: b.user.id, secret: 'attacker-secret-attacker-secret-attacker', issuer: 'rea-api', audience: 'rea-web' },
+      {
+        subject: b.user.id,
+        secret: 'attacker-secret-attacker-secret-attacker',
+        issuer: 'rea-api',
+        audience: 'rea-web',
+      },
     );
-    await http().get('/api/v1/tenants/current').set('Authorization', `Bearer ${forged}`).expect(401);
+    await http()
+      .get('/api/v1/tenants/current')
+      .set('Authorization', `Bearer ${forged}`)
+      .expect(401);
   });
 
   it('refuses to switch into a business the user does not belong to', async () => {
@@ -123,7 +149,9 @@ describe('Tenant isolation (e2e)', () => {
   it('a user in both businesses can switch, and data follows the active membership only', async () => {
     const prisma = prismaOf(app);
     // Make A's owner a VIEWER in B (as if they had accepted an invitation).
-    await prisma.membership.create({ data: { tenantId: b.activeTenant!.id, userId: a.user.id, role: 'VIEWER' } });
+    await prisma.membership.create({
+      data: { tenantId: b.activeTenant!.id, userId: a.user.id, role: 'VIEWER' },
+    });
 
     const switched = await http()
       .post('/api/v1/auth/switch-tenant')
@@ -136,12 +164,23 @@ describe('Tenant isolation (e2e)', () => {
     const tenant = await http().get('/api/v1/tenants/current').set(bearer(inB)).expect(200);
     expect(tenant.body.data.id).toBe(b.activeTenant!.id);
     // Role in B is VIEWER, regardless of being OWNER in A.
-    await http().patch('/api/v1/tenants/current').set(bearer(inB)).send({ name: 'Nope' }).expect(403);
+    await http()
+      .patch('/api/v1/tenants/current')
+      .set(bearer(inB))
+      .send({ name: 'Nope' })
+      .expect(403);
 
     // The refresh session now continues in B.
-    const refreshed = await http().post('/api/v1/auth/refresh').set('Cookie', a.refreshCookie).expect(200);
+    const refreshed = await http()
+      .post('/api/v1/auth/refresh')
+      .set('Cookie', a.refreshCookie)
+      .expect(200);
     expect(refreshed.body.data.activeTenant.id).toBe(b.activeTenant!.id);
-    a = { ...a, ...refreshed.body.data, refreshCookie: extractRefreshCookie(refreshed.headers['set-cookie']) };
+    a = {
+      ...a,
+      ...refreshed.body.data,
+      refreshCookie: extractRefreshCookie(refreshed.headers['set-cookie']),
+    };
   });
 
   it('suspending a membership cuts off access on the very next request', async () => {
@@ -153,18 +192,30 @@ describe('Tenant isolation (e2e)', () => {
     await http().get('/api/v1/tenants/current').set(bearer(a)).expect(401);
 
     // Refreshing falls back to the user's remaining active business (A).
-    const refreshed = await http().post('/api/v1/auth/refresh').set('Cookie', a.refreshCookie).expect(200);
+    const refreshed = await http()
+      .post('/api/v1/auth/refresh')
+      .set('Cookie', a.refreshCookie)
+      .expect(200);
     expect(refreshed.body.data.activeTenant.id).toBe(aTenantId);
   });
 
   it('a suspended business is locked out entirely', async () => {
     const prisma = prismaOf(app);
-    await prisma.tenant.update({ where: { id: b.activeTenant!.id }, data: { status: 'SUSPENDED' } });
+    await prisma.tenant.update({
+      where: { id: b.activeTenant!.id },
+      data: { status: 'SUSPENDED' },
+    });
     await http().get('/api/v1/tenants/current').set(bearer(b)).expect(401);
 
-    const login = await http().post('/api/v1/auth/login').send({ email: b.email, password: 'Str0ng-Passw0rd!' }).expect(200);
+    const login = await http()
+      .post('/api/v1/auth/login')
+      .send({ email: b.email, password: 'Str0ng-Passw0rd!' })
+      .expect(200);
     expect(login.body.data.activeTenant).toBeNull();
-    const noTenant = await http().get('/api/v1/tenants/current').set(bearer(login.body.data)).expect(403);
+    const noTenant = await http()
+      .get('/api/v1/tenants/current')
+      .set(bearer(login.body.data))
+      .expect(403);
     expect(noTenant.body.error.message).toMatch(/No active business/);
   });
 });

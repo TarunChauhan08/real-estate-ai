@@ -52,13 +52,18 @@ const BUSINESSES: SeedBusiness[] = [
 ];
 
 async function main(): Promise<void> {
-  if (process.env.NODE_ENV === 'production') throw new Error('Refusing to seed a production database.');
+  if (process.env.NODE_ENV === 'production')
+    throw new Error('Refusing to seed a production database.');
   const url = process.env.DATABASE_URL;
   if (!url) throw new Error('DATABASE_URL is not set.');
 
   const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString: url }) });
   const password = process.env.SEED_PASSWORD ?? DEV_DEFAULT_PASSWORD;
-  const passwordHash = await argon2.hash(password, { type: argon2.argon2id, memoryCost: 19_456, timeCost: 2 });
+  const passwordHash = await argon2.hash(password, {
+    type: argon2.argon2id,
+    memoryCost: 19_456,
+    timeCost: 2,
+  });
 
   try {
     for (const business of BUSINESSES) {
@@ -71,9 +76,18 @@ async function main(): Promise<void> {
         await tx.businessProfile.upsert({
           where: { tenantId: tenant.id },
           update: {},
-          create: { tenantId: tenant.id, businessType: business.businessType, city: business.city, state: 'Uttar Pradesh' },
+          create: {
+            tenantId: tenant.id,
+            businessType: business.businessType,
+            city: business.city,
+            state: 'Uttar Pradesh',
+          },
         });
-        await tx.tenantSettings.upsert({ where: { tenantId: tenant.id }, update: {}, create: { tenantId: tenant.id } });
+        await tx.tenantSettings.upsert({
+          where: { tenantId: tenant.id },
+          update: {},
+          create: { tenantId: tenant.id },
+        });
 
         for (const member of business.members) {
           const user = await tx.user.upsert({
@@ -96,10 +110,13 @@ async function main(): Promise<void> {
   console.log('Seeded demo businesses:');
   for (const business of BUSINESSES) {
     console.log(`  ${business.name}`);
-    for (const member of business.members) console.log(`    ${member.role.padEnd(11)} ${member.email}`);
+    for (const member of business.members)
+      console.log(`    ${member.role.padEnd(11)} ${member.email}`);
   }
   console.log(
-    process.env.SEED_PASSWORD ? 'Password: value of SEED_PASSWORD' : `Password (development only): ${DEV_DEFAULT_PASSWORD}`,
+    process.env.SEED_PASSWORD
+      ? 'Password: value of SEED_PASSWORD'
+      : `Password (development only): ${DEV_DEFAULT_PASSWORD}`,
   );
 }
 

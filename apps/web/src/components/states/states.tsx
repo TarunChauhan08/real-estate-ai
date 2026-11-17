@@ -19,7 +19,10 @@ export function ErrorState({ error, onRetry }: { error: unknown; onRetry?: () =>
         : error.message
       : 'Something went wrong while loading this section.';
   return (
-    <div role="alert" className="flex flex-col items-start gap-3 rounded-[var(--radius-panel)] border border-danger/20 bg-danger-soft p-5">
+    <div
+      role="alert"
+      className="flex flex-col items-start gap-3 rounded-[var(--radius-panel)] border border-danger/20 bg-danger-soft p-5"
+    >
       <div className="flex items-center gap-2 text-sm font-semibold text-danger">
         <CircleAlert className="size-4" aria-hidden />
         Couldn’t load this section

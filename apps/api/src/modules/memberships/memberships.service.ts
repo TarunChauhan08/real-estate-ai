@@ -37,14 +37,20 @@ export class MembershipsService {
       select: { id: true, tenantId: true, role: true },
     });
     const chosen = memberships.find((m) => m.tenantId === preferredTenantId) ?? memberships[0];
-    return chosen ? { tenantId: chosen.tenantId, membershipId: chosen.id, role: chosen.role } : null;
+    return chosen
+      ? { tenantId: chosen.tenantId, membershipId: chosen.id, role: chosen.role }
+      : null;
   }
 
   /**
    * Validates the membership referenced by an access token against the database.
    * Returns null if it no longer exists, belongs to someone else, or is not usable.
    */
-  async verifyTokenMembership(userId: string, tenantId: string, membershipId: string): Promise<TenantContext | null> {
+  async verifyTokenMembership(
+    userId: string,
+    tenantId: string,
+    membershipId: string,
+  ): Promise<TenantContext | null> {
     const membership = await this.prisma.membership.findFirst({
       where: { id: membershipId, userId, tenantId, ...usableMembership },
       select: { id: true, tenantId: true, role: true },
@@ -55,7 +61,10 @@ export class MembershipsService {
   }
 
   async isUserActive(userId: string): Promise<boolean> {
-    const user = await this.prisma.user.findUnique({ where: { id: userId }, select: { status: true } });
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { status: true },
+    });
     return user?.status === UserStatus.ACTIVE;
   }
 

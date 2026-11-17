@@ -31,7 +31,8 @@ export const SUPPORTED_LOCALES = ['en-IN', 'hi-IN'] as const;
 export const SUPPORTED_CURRENCIES = ['INR'] as const;
 
 /** A metric whose source module is not built yet is reported as unavailable, never as a made-up number. */
-export type MetricValue = { status: 'available'; value: number } | { status: 'not_available'; reason: string };
+export type MetricValue =
+  { status: 'available'; value: number } | { status: 'not_available'; reason: string };
 
 export interface SetupStep {
   key: 'account_created' | 'business_profile' | 'team_invited' | 'ai_employee' | 'properties';

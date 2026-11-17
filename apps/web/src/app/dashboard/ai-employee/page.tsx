@@ -10,17 +10,29 @@ import { useAuth } from '@/features/auth/auth-provider';
 
 const CHANNELS = [
   { icon: Globe, name: 'Website chat', detail: 'Answer enquiries on your website, day and night.' },
-  { icon: MessageCircle, name: 'WhatsApp Business', detail: 'Reply to buyers through the official WhatsApp Business API.' },
-  { icon: Phone, name: 'Phone calls', detail: 'Take incoming calls and make permitted follow-up calls.' },
+  {
+    icon: MessageCircle,
+    name: 'WhatsApp Business',
+    detail: 'Reply to buyers through the official WhatsApp Business API.',
+  },
+  {
+    icon: Phone,
+    name: 'Phone calls',
+    detail: 'Take incoming calls and make permitted follow-up calls.',
+  },
 ];
 
 export default function AiEmployeePage() {
   const tenantName = useAuth().session?.activeTenant?.name ?? '';
   return (
     <>
-      <PageHeader title="AI Employee" description="The assistant that will talk to your buyers. Setup opens here when it launches." />
+      <PageHeader
+        title="AI Employee"
+        description="The assistant that will talk to your buyers. Setup opens here when it launches."
+      />
       <Alert tone="warning" title="Your AI employee is not configured or active" className="mb-6">
-        This module is in development. Nothing here talks to customers yet, and no settings on this page are saved.
+        This module is in development. Nothing here talks to customers yet, and no settings on this
+        page are saved.
       </Alert>
 
       <AiEmployeeIdCard businessName={tenantName} />

@@ -5,15 +5,30 @@ import { DEMO_REQUEST_EMAIL } from '@/lib/env';
 
 const CONVERSATION = [
   { from: 'buyer', text: 'Hi, mujhe Sector 150 mein 3 BHK chahiye. Budget 80 lakh hai.' },
-  { from: 'ai', text: 'Namaste! Sector 150 mein 80 lakh tak ke 3 BHK options hain. Ready-to-move chahiye ya under-construction bhi chalega?' },
+  {
+    from: 'ai',
+    text: 'Namaste! Sector 150 mein 80 lakh tak ke 3 BHK options hain. Ready-to-move chahiye ya under-construction bhi chalega?',
+  },
   { from: 'buyer', text: 'Ready to move. Is weekend site visit ho sakti hai?' },
-  { from: 'ai', text: 'Bilkul. Saturday 11 baje ya Sunday 4 baje — kaunsa time aapke liye theek rahega?' },
+  {
+    from: 'ai',
+    text: 'Bilkul. Saturday 11 baje ya Sunday 4 baje — kaunsa time aapke liye theek rahega?',
+  },
 ];
 
 const STEPS = [
-  { title: 'Every enquiry answered', body: 'Website chat, WhatsApp and phone calls get a reply in Hindi, English or Hinglish, at any hour.' },
-  { title: 'Buyers qualified for you', body: 'Budget, location, BHK and timeline are captured and scored, so your team calls the hot leads first.' },
-  { title: 'Site visits on the calendar', body: 'Matching properties from your verified inventory, then a visit booked with the right salesperson.' },
+  {
+    title: 'Every enquiry answered',
+    body: 'Website chat, WhatsApp and phone calls get a reply in Hindi, English or Hinglish, at any hour.',
+  },
+  {
+    title: 'Buyers qualified for you',
+    body: 'Budget, location, BHK and timeline are captured and scored, so your team calls the hot leads first.',
+  },
+  {
+    title: 'Site visits on the calendar',
+    body: 'Matching properties from your verified inventory, then a visit booked with the right salesperson.',
+  },
 ];
 
 export default function HomePage() {
@@ -40,13 +55,15 @@ export default function HomePage() {
               Never miss a property enquiry.
             </h1>
             <p className="mt-5 max-w-lg text-lg leading-relaxed text-fg-muted">
-              An AI sales employee for brokers, agencies, builders and developers in India. It talks to buyers, qualifies
-              them and books site visits, so your team spends its time closing.
+              An AI sales employee for brokers, agencies, builders and developers in India. It talks
+              to buyers, qualifies them and books site visits, so your team spends its time closing.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               {DEMO_REQUEST_EMAIL && (
                 <Button asChild size="lg">
-                  <a href={`mailto:${DEMO_REQUEST_EMAIL}?subject=${encodeURIComponent('Private demo request')}`}>
+                  <a
+                    href={`mailto:${DEMO_REQUEST_EMAIL}?subject=${encodeURIComponent('Private demo request')}`}
+                  >
                     Request a private demo
                   </a>
                 </Button>
@@ -56,12 +73,18 @@ export default function HomePage() {
               </Button>
             </div>
             <p className="mt-4 text-sm text-fg-muted">
-              The AI employee is in development. Business accounts and team management are available today.
+              The AI employee is in development. Business accounts and team management are available
+              today.
             </p>
           </div>
 
-          <figure className="rounded-[var(--radius-panel)] bg-brand p-5 sm:p-6" aria-label="Example conversation in Hinglish">
-            <figcaption className="mb-4 text-xs text-brand-line">Example of the planned conversation style</figcaption>
+          <figure
+            className="rounded-[var(--radius-panel)] bg-brand p-5 sm:p-6"
+            aria-label="Example conversation in Hinglish"
+          >
+            <figcaption className="mb-4 text-xs text-brand-line">
+              Example of the planned conversation style
+            </figcaption>
             <ul className="space-y-3">
               {CONVERSATION.map((msg, i) => (
                 <li key={i} className={msg.from === 'buyer' ? 'flex justify-end' : 'flex'}>
