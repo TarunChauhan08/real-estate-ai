@@ -76,6 +76,7 @@ model Tenant {
   conversations   Conversation[]
   messages        Message[]
   whatsAppAccount WhatsAppAccount?
+  siteVisits      SiteVisit[]
 
   @@map("tenants")
 }
@@ -120,6 +121,7 @@ model User {
   leadsCreated              Lead[]            @relation("LeadCreatedBy")
   conversationsStarted      Conversation[]    @relation("ConversationCreatedBy")
   whatsAppAccountsConnected WhatsAppAccount[] @relation("WhatsAppAccountConnectedBy")
+  siteVisitsCreated         SiteVisit[]       @relation("SiteVisitCreatedBy")
 
   @@map("users")
 }
@@ -137,7 +139,8 @@ model Membership {
   tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Restrict)
   user   User   @relation(fields: [userId], references: [id], onDelete: Restrict)
 
-  assignedLeads Lead[] @relation("LeadAssignedTo")
+  assignedLeads      Lead[]      @relation("LeadAssignedTo")
+  assignedSiteVisits SiteVisit[] @relation("SiteVisitAssignedTo")
 
   @@unique([tenantId, userId])
   @@index([userId])
@@ -342,8 +345,9 @@ model Property {
   createdAt        DateTime          @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt        DateTime          @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  tenant    Tenant @relation(fields: [tenantId], references: [id], onDelete: Restrict)
-  createdBy User?  @relation("PropertyCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  tenant     Tenant      @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  siteVisits SiteVisit[]
+  createdBy  User?       @relation("PropertyCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
 
   @@index([tenantId, status])
   @@index([tenantId, city, bedrooms])
@@ -387,6 +391,7 @@ model Lead {
   assignedTo    Membership?    @relation("LeadAssignedTo", fields: [assignedToId], references: [id], onDelete: SetNull)
   createdBy     User?          @relation("LeadCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
   conversations Conversation[]
+  siteVisits    SiteVisit[]
 
   @@unique([tenantId, phone])
   @@index([tenantId, status])
@@ -509,4 +514,52 @@ model WhatsAppAccount {
   connectedBy User?  @relation("WhatsAppAccountConnectedBy", fields: [connectedById], references: [id], onDelete: SetNull)
 
   @@map("whatsapp_accounts")
+}
+
+// ---------------------------------------------------------------------------
+// Phase 4 — site visits
+// The AI collects a buyer's preferred day/time (REQUESTED); a team member confirms an exact
+// slot (CONFIRMED), and the buyer is told on WhatsApp. Afterwards the visit is COMPLETED or
+// NO_SHOW. Visits are never deleted: CANCELLED keeps the history.
+// ---------------------------------------------------------------------------
+
+enum SiteVisitStatus {
+  REQUESTED
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+model SiteVisit {
+  id             String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId       String          @map("tenant_id") @db.Uuid
+  leadId         String          @map("lead_id") @db.Uuid
+  propertyId     String?         @map("property_id") @db.Uuid
+  /// Conversation the request came from, if any.
+  conversationId String?         @map("conversation_id") @db.Uuid
+  status         SiteVisitStatus @default(REQUESTED)
+  /// Exact slot. Null while REQUESTED without a confirmed time.
+  scheduledAt    DateTime?       @map("scheduled_at") @db.Timestamptz(3)
+  /// What the buyer asked for, in their words ("Saturday morning", "kal 5 baje").
+  requestedSlot  String?         @map("requested_slot") @db.VarChar(120)
+  notes          String?         @db.Text
+  /// Team member who will show the property (a membership, like lead assignment).
+  assignedToId   String?         @map("assigned_to_id") @db.Uuid
+  /// Set when the reminder was sent, so it is sent exactly once.
+  reminderSentAt DateTime?       @map("reminder_sent_at") @db.Timestamptz(3)
+  createdById    String?         @map("created_by_id") @db.Uuid
+  createdAt      DateTime        @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime        @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  tenant     Tenant      @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  lead       Lead        @relation(fields: [leadId], references: [id], onDelete: Restrict)
+  property   Property?   @relation(fields: [propertyId], references: [id], onDelete: SetNull)
+  assignedTo Membership? @relation("SiteVisitAssignedTo", fields: [assignedToId], references: [id], onDelete: SetNull)
+  createdBy  User?       @relation("SiteVisitCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([tenantId, status, scheduledAt])
+  @@index([tenantId, leadId])
+  @@index([status, scheduledAt])
+  @@map("site_visits")
 }

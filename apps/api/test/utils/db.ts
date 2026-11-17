@@ -8,7 +8,7 @@ export async function resetDatabase(app: INestApplication): Promise<void> {
   const name = rows[0]?.name ?? '';
   if (!name.includes('test')) throw new Error(`Refusing to reset non-test database "${name}"`);
   await prisma.$executeRawUnsafe(
-    'TRUNCATE TABLE whatsapp_accounts, messages, conversations, leads, properties, audit_logs, refresh_sessions, invitations, memberships, tenant_settings, business_profiles, users, tenants RESTART IDENTITY CASCADE',
+    'TRUNCATE TABLE site_visits, whatsapp_accounts, messages, conversations, leads, properties, audit_logs, refresh_sessions, invitations, memberships, tenant_settings, business_profiles, users, tenants RESTART IDENTITY CASCADE',
   );
 }
 

@@ -23,3 +23,5 @@ process.env.WHATSAPP_VERIFY_TOKEN = 'test-whatsapp-verify-token';
 process.env.DATA_ENCRYPTION_KEY = Buffer.alloc(32, 42).toString('base64');
 // Short, so a burst of webhooks sent together in a test is still answered once.
 process.env.WHATSAPP_REPLY_DEBOUNCE_MS = '150';
+// Tests call the reminder job directly instead of waiting for its timer.
+process.env.SITE_VISIT_REMINDER_INTERVAL_MS = '0';

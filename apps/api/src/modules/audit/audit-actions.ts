@@ -28,5 +28,10 @@ export const AuditAction = {
   CONVERSATION_HANDED_OFF: 'conversation.handed_off',
   WHATSAPP_CONNECTED: 'whatsapp.connected',
   WHATSAPP_DISCONNECTED: 'whatsapp.disconnected',
+  SITE_VISIT_REQUESTED: 'site_visit.requested',
+  SITE_VISIT_BOOKED: 'site_visit.booked',
+  SITE_VISIT_UPDATED: 'site_visit.updated',
+  SITE_VISIT_STATUS_CHANGED: 'site_visit.status_changed',
+  SITE_VISIT_BUYER_NOTIFIED: 'site_visit.buyer_notified',
 } as const;
 export type AuditAction = (typeof AuditAction)[keyof typeof AuditAction];

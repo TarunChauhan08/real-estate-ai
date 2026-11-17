@@ -72,7 +72,15 @@ export const RESPOND_TOOL: LLMTool = {
         description:
           'IDs from the INVENTORY list that you mentioned in this reply. Never invent IDs.',
       },
-      site_visit_requested: { type: 'boolean' },
+      site_visit_requested: {
+        type: 'boolean',
+        description: 'True when the buyer wants to visit a property.',
+      },
+      site_visit_preference: {
+        type: 'string',
+        description:
+          "The buyer's preferred day/time for the visit in their own words, e.g. 'Saturday 11am' or 'kal shaam'. Omit if not given.",
+      },
       handoff_to_human: { type: 'boolean' },
       handoff_reason: { type: 'string' },
     },
@@ -120,6 +128,7 @@ const rawSchema = z.object({
   qualified: z.boolean().catch(false),
   suggested_property_ids: z.array(z.string()).catch([]),
   site_visit_requested: z.boolean().catch(false),
+  site_visit_preference: z.string().trim().min(1).max(120).optional().catch(undefined),
   handoff_to_human: z.boolean().catch(false),
   handoff_reason: z.string().trim().max(300).optional().catch(undefined),
 });
@@ -150,6 +159,8 @@ export interface AgentDecision {
   qualified: boolean;
   suggestedPropertyIds: string[];
   siteVisitRequested: boolean;
+  /** The buyer's preferred visit slot in their words; only set when a visit was requested. */
+  siteVisitPreference: string | null;
   handoff: { requested: boolean; reason: string | null };
 }
 
@@ -197,6 +208,7 @@ export function parseAgentDecision(
     qualified: r.qualified,
     suggestedPropertyIds: [...new Set(r.suggested_property_ids.filter((id) => allowed.has(id)))],
     siteVisitRequested: r.site_visit_requested,
+    siteVisitPreference: r.site_visit_requested ? (r.site_visit_preference ?? null) : null,
     handoff: {
       requested: r.handoff_to_human,
       reason: r.handoff_to_human ? (r.handoff_reason ?? null) : null,

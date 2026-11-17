@@ -7,6 +7,7 @@ import {
   LeadTemperature,
   MembershipStatus,
   PropertyStatus,
+  SiteVisitStatus,
   TenantStatus,
 } from '../../generated/prisma/enums';
 import { type TenantContext } from '../auth/auth-context';
@@ -16,8 +17,7 @@ const available = (value: number): MetricValue => ({ status: 'available', value 
 
 /**
  * Dashboard overview built only from real data. Metrics owned by modules that do not
- * exist yet (calls, site visits) are reported as not available —
- * never as invented numbers.
+ * exist yet (calls) are reported as not available — never as invented numbers.
  */
 @Injectable()
 export class DashboardService {
@@ -36,6 +36,7 @@ export class DashboardService {
       activeProperties,
       conversations,
       aiReplies,
+      upcomingVisits,
     ] = await Promise.all([
       this.prisma.tenant.findUnique({
         where: { id: ctx.tenantId },
@@ -75,6 +76,16 @@ export class DashboardService {
       this.prisma.property.count({ where: { tenantId, status: { not: PropertyStatus.ARCHIVED } } }),
       this.prisma.conversation.count({ where: { tenantId } }),
       this.prisma.message.count({ where: { tenantId, role: 'AI' } }),
+      // Open requests plus confirmed visits that have not happened yet.
+      this.prisma.siteVisit.count({
+        where: {
+          tenantId,
+          OR: [
+            { status: SiteVisitStatus.REQUESTED },
+            { status: SiteVisitStatus.CONFIRMED, scheduledAt: { gte: now } },
+          ],
+        },
+      }),
     ]);
     if (!tenant) throw Errors.notFound('Business');
 
@@ -116,7 +127,7 @@ export class DashboardService {
       metrics: {
         totalLeads: available(totalLeads),
         qualifiedLeads: available(qualifiedLeads),
-        siteVisits: notAvailable('Site visit management is not yet available'),
+        siteVisits: available(upcomingVisits),
         conversations: available(conversations),
         aiCalls: notAvailable('AI voice is not yet available'),
         teamMembers: available(activeMembers),
