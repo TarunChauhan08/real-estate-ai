@@ -6,7 +6,7 @@
 // - snake_case table and column names; camelCase in TypeScript.
 // - Every tenant-owned table carries `tenant_id` and is indexed on it.
 // - Foreign keys use ON DELETE RESTRICT: business data is never cascade-deleted.
-//   Removing a tenant or user requires an explicit deletion process (future phase).
+//   Removing a tenant goes through BusinessDataService (scheduled deletion, then purge).
 // ---------------------------------------------------------------------------
 
 generator client {
@@ -57,13 +57,17 @@ enum MembershipStatus {
 
 /// A business using the platform. Root of tenant isolation.
 model Tenant {
-  id        String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name      String       @db.VarChar(120)
-  slug      String       @unique @db.VarChar(80)
+  id                    String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                  String       @db.VarChar(120)
+  slug                  String       @unique @db.VarChar(80)
   /// PENDING until onboarding is completed, then ACTIVE. SUSPENDED blocks all access.
-  status    TenantStatus @default(PENDING)
-  createdAt DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt DateTime     @updatedAt @map("updated_at") @db.Timestamptz(3)
+  status                TenantStatus @default(PENDING)
+  /// Set when the owner asks to delete the business. Data is purged permanently at this time
+  /// unless the owner cancels first.
+  deletionScheduledAt   DateTime?    @map("deletion_scheduled_at") @db.Timestamptz(3)
+  deletionRequestedById String?      @map("deletion_requested_by_id") @db.Uuid
+  createdAt             DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt             DateTime     @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   businessProfile BusinessProfile?
   settings        TenantSettings?
@@ -78,6 +82,7 @@ model Tenant {
   whatsAppAccount WhatsAppAccount?
   siteVisits      SiteVisit[]
 
+  @@index([deletionScheduledAt])
   @@map("tenants")
 }
 

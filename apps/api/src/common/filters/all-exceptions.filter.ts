@@ -9,6 +9,7 @@ import {
 import { type ApiErrorBody } from '@rea/shared-types';
 import { type Request, type Response } from 'express';
 import { AppException } from '../errors/app.exception';
+import { reportError } from '../../observability/error-reporting';
 
 const STATUS_CODES: Partial<Record<number, string>> = {
   400: 'BAD_REQUEST',
@@ -72,6 +73,12 @@ export class AllExceptionsFilter implements ExceptionFilter {
         `[${requestId}] ${req.method} ${req.path} -> ${err.name}: ${err.message}`,
         err.stack,
       );
+      reportError(err, {
+        requestId,
+        method: req.method,
+        // The route pattern (":id"), not the concrete path, so reports group well.
+        route: (req.route as { path?: string } | undefined)?.path ?? req.path,
+      });
     }
 
     if (body.details === undefined) delete body.details;

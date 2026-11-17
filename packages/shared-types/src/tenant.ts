@@ -5,6 +5,8 @@ export interface TenantDto {
   name: string;
   slug: string;
   status: TenantStatus;
+  /** When the business and all its data will be permanently deleted; null if not requested. */
+  deletionScheduledFor: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -99,4 +101,24 @@ export interface AiUsageSummary {
   languages: Record<string, number>;
   /** One entry per day in the period, oldest first, including days with no activity. */
   daily: AiUsageDay[];
+}
+
+export interface RequestBusinessDeletionRequest {
+  /** The owner's current password. */
+  password: string;
+  /** Must equal the business name exactly, as a typed confirmation. */
+  confirmBusinessName: string;
+}
+
+/** Everything a business has stored, as one JSON document. Format is versioned. */
+export interface BusinessDataExport {
+  format: 'rea-business-export/1';
+  exportedAt: string;
+  business: Record<string, unknown>;
+  members: Array<Record<string, unknown>>;
+  properties: Array<Record<string, unknown>>;
+  leads: Array<Record<string, unknown>>;
+  conversations: Array<Record<string, unknown>>;
+  siteVisits: Array<Record<string, unknown>>;
+  auditLog: Array<Record<string, unknown>>;
 }

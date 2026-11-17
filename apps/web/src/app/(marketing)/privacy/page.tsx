@@ -126,6 +126,10 @@ export default function PrivacyPage() {
           Customers’ data: as long as the business keeps it in the Service, and deleted when the
           business asks or closes its account, unless the law requires us to keep it longer.
         </li>
+        <li>
+          When an owner deletes a business, everything it stored is permanently deleted 30 days
+          later (the owner can cancel until then), and removed from backups as those expire.
+        </li>
         <li>Security and audit logs: for as long as needed to keep the Service secure.</li>
         <li>Sign-in links (password reset, email confirmation) expire within hours.</li>
       </ul>
