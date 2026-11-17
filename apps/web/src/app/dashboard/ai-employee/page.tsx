@@ -7,6 +7,7 @@ import { PageHeader } from '@/components/layout/dashboard-shell';
 import { Badge } from '@/components/ui/badge';
 import { Panel, PanelHeader } from '@/components/ui/panel';
 import { AiEmployeeIdCard } from '@/features/ai-employee/ai-employee-card';
+import { AiUsagePanel } from '@/features/ai-employee/ai-usage-panel';
 import { useAuth } from '@/features/auth/auth-provider';
 import { StartTestChat } from '@/features/conversations/start-test-chat';
 import { usePermission } from '@/hooks/use-permission';
@@ -44,6 +45,7 @@ export default function AiEmployeePage() {
   const canWriteConversations = usePermission(Permission.CONVERSATIONS_WRITE);
   const canWriteLeads = usePermission(Permission.LEADS_WRITE);
   const canChat = canWriteConversations && canWriteLeads;
+  const canSeeUsage = usePermission(Permission.DASHBOARD_READ);
   return (
     <>
       <PageHeader
@@ -68,6 +70,7 @@ export default function AiEmployeePage() {
               ))}
             </ul>
           </Panel>
+          {canSeeUsage && <AiUsagePanel />}
         </div>
         {canChat ? (
           <StartTestChat />

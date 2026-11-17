@@ -4,6 +4,7 @@ export const queryKeys = {
   profile: ['tenant', 'profile'] as const,
   settings: ['tenant', 'settings'] as const,
   overview: ['dashboard', 'overview'] as const,
+  aiUsage: (days: number) => ['dashboard', 'ai-usage', days] as const,
   members: (params: string) => ['team', 'members', params] as const,
   invitations: (params: string) => ['team', 'invitations', params] as const,
   properties: (params: string) => ['properties', 'list', params] as const,

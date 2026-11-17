@@ -1,0 +1,56 @@
+name: AI evals
+
+# Scores the AI employee against the Hinglish eval set with the real model.
+# Costs a little API usage, so it runs only when started by hand or when the prompt changes,
+# and only if the repository has an ANTHROPIC_API_KEY secret.
+on:
+  workflow_dispatch:
+    inputs:
+      repeat:
+        description: Runs per scenario (models vary between runs)
+        default: '3'
+      min:
+        description: Minimum scenario pass rate (0–1)
+        default: '0.85'
+  pull_request:
+    paths:
+      - apps/api/src/modules/ai/sales-agent/**
+      - apps/api/src/modules/ai/evals/**
+
+permissions:
+  contents: read
+
+jobs:
+  evals:
+    name: Hinglish eval suite
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      LLM_PROVIDER: anthropic
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+    steps:
+      - name: Skip without an API key
+        if: env.ANTHROPIC_API_KEY == ''
+        run: echo "::notice::Add an ANTHROPIC_API_KEY repository secret to run AI evals."
+      - uses: actions/checkout@v4
+        if: env.ANTHROPIC_API_KEY != ''
+      - uses: pnpm/action-setup@v4
+        if: env.ANTHROPIC_API_KEY != ''
+      - uses: actions/setup-node@v4
+        if: env.ANTHROPIC_API_KEY != ''
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - if: env.ANTHROPIC_API_KEY != ''
+        run: pnpm install --frozen-lockfile && pnpm build:packages
+      - name: Run evals
+        if: env.ANTHROPIC_API_KEY != ''
+        run: >
+          pnpm --filter @rea/api eval
+          --repeat ${{ inputs.repeat || '2' }}
+          --min ${{ inputs.min || '0.85' }}
+      - uses: actions/upload-artifact@v4
+        if: always() && env.ANTHROPIC_API_KEY != ''
+        with:
+          name: ai-eval-report
+          path: apps/api/evals/reports/

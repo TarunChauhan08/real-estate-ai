@@ -19,7 +19,8 @@
     "db:seed": "prisma db seed",
     "db:reset": "prisma migrate reset",
     "db:studio": "prisma studio",
-    "db:test:prepare": "node test/prepare-test-db.js"
+    "db:test:prepare": "node test/prepare-test-db.js",
+    "eval": "ts-node --transpile-only src/modules/ai/evals/cli.ts"
   },
   "dependencies": {
     "@nestjs/common": "11.2.10",
