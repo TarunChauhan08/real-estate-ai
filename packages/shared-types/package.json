@@ -1,0 +1,20 @@
+{
+  "name": "@rea/shared-types",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Types, enums and permission definitions shared by the API and web app",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint src"
+  },
+  "devDependencies": {
+    "@rea/eslint-config": "workspace:*",
+    "@rea/typescript-config": "workspace:*",
+    "eslint": "9.39.5",
+    "typescript": "5.9.3"
+  }
+}

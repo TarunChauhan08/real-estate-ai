@@ -1,0 +1,9 @@
+{
+  "extends": "@rea/typescript-config/nestjs.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "baseUrl": ".",
+    "types": ["node", "jest"]
+  },
+  "include": ["src", "test"]
+}
