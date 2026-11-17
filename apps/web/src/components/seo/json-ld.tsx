@@ -1,3 +1,4 @@
+import { COMPANY, filled } from '@/lib/company';
 import { absoluteUrl, SITE_DESCRIPTION, SITE_NAME, SITE_URL } from '@/lib/site';
 
 type Json = Record<string, unknown>;
@@ -24,6 +25,20 @@ export const organizationLd = (): Json => ({
   url: SITE_URL,
   logo: absoluteUrl('/icon.svg'),
   areaServed: { '@type': 'Country', name: 'India' },
+  // Only real details are published; [placeholders] are left out.
+  ...(filled(COMPANY.legalName) ? { legalName: COMPANY.legalName } : {}),
+  ...(filled(COMPANY.email)
+    ? {
+        contactPoint: {
+          '@type': 'ContactPoint',
+          contactType: 'sales',
+          email: COMPANY.email,
+          ...(filled(COMPANY.phone) ? { telephone: COMPANY.phone } : {}),
+          areaServed: 'IN',
+          availableLanguage: ['English', 'Hindi'],
+        },
+      }
+    : {}),
 });
 
 export const websiteLd = (): Json => ({

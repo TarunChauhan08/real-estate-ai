@@ -81,7 +81,8 @@ All are listed with safe placeholders in [`.env.example`](.env.example). The API
 | `LLM_PROVIDER`, `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL`                  | AI employee (`fake` works offline)                              |
 | `DATA_ENCRYPTION_KEY`                                                   | Encrypts stored secrets such as WhatsApp tokens (production)    |
 | `WHATSAPP_PROVIDER`, `WHATSAPP_APP_SECRET`, `WHATSAPP_VERIFY_TOKEN`     | WhatsApp (`fake` = demo mode; `cloud` = Meta Cloud API)         |
-| `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_DEMO_REQUEST_EMAIL`                 | Web app                                                         |
+| `NEXT_PUBLIC_API_URL`                                                   | Web app → API address                                           |
+| `CONTACT_NOTIFICATION_EMAIL`                                            | Inbox for demo requests from the public Contact page            |
 | `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION`          | Public site address for SEO; Search Console verification        |
 
 ## Commands

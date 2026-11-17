@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { Logo } from '@/components/brand/logo';
+import { COMPANY } from '@/lib/company';
 import { GUIDES, SOLUTIONS } from '@/lib/marketing-content';
 
 /** Footer for every public page. Its links help visitors — and search engines — find every page. */
@@ -61,8 +62,13 @@ export function SiteFooter() {
               </Link>
             </li>
             <li>
-              <Link href="/register" className="hover:text-white">
-                Get started
+              <Link href="/contact" className="hover:text-white">
+                Request a demo
+              </Link>
+            </li>
+            <li>
+              <Link href="/about" className="hover:text-white">
+                About us
               </Link>
             </li>
             <li>
@@ -73,8 +79,21 @@ export function SiteFooter() {
           </ul>
         </nav>
       </div>
-      <div className="mx-auto max-w-7xl border-t border-white/10 px-5 py-6 text-xs sm:px-8">
-        © {new Date().getFullYear()} AI Real Estate Sales Employee · Photography from Unsplash
+      <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 border-t border-white/10 px-5 py-6 text-xs sm:px-8">
+        <p>
+          © {new Date().getFullYear()} {COMPANY.legalName} · Photography from Unsplash
+        </p>
+        <nav aria-label="Legal" className="flex gap-5">
+          <Link href="/privacy" className="hover:text-white">
+            Privacy Policy
+          </Link>
+          <Link href="/terms" className="hover:text-white">
+            Terms of Service
+          </Link>
+          <Link href="/contact" className="hover:text-white">
+            Contact
+          </Link>
+        </nav>
       </div>
     </footer>
   );

@@ -108,7 +108,27 @@ export function RegisterForm() {
             aria-invalid={Boolean(errors.acceptTerms)}
             {...register('acceptTerms')}
           />
-          <span>I accept the Terms of Service and Privacy Policy on behalf of my business.</span>
+          <span>
+            I accept the{' '}
+            <a
+              href="/terms"
+              target="_blank"
+              rel="noopener"
+              className="font-semibold text-brand-fg underline"
+            >
+              Terms of Service
+            </a>{' '}
+            and{' '}
+            <a
+              href="/privacy"
+              target="_blank"
+              rel="noopener"
+              className="font-semibold text-brand-fg underline"
+            >
+              Privacy Policy
+            </a>{' '}
+            on behalf of my business.
+          </span>
         </label>
         {errors.acceptTerms && (
           <p role="alert" className="text-xs text-danger">
