@@ -96,6 +96,11 @@ export const envSchema = z
      * "hi" / "3 BHK chahiye" / "Noida" gets one reply that covers all of it.
      */
     WHATSAPP_REPLY_DEBOUNCE_MS: z.coerce.number().int().min(0).max(15000).default(2500),
+
+    /** Remind buyers on WhatsApp this many minutes before a confirmed site visit. */
+    SITE_VISIT_REMINDER_MINUTES: z.coerce.number().int().min(15).max(1440).default(180),
+    /** How often to look for due reminders. 0 turns the reminder loop off (tests). */
+    SITE_VISIT_REMINDER_INTERVAL_MS: z.coerce.number().int().min(0).max(3600000).default(60000),
   })
   .superRefine((env, ctx) => {
     if (env.LLM_PROVIDER === 'anthropic' && !env.ANTHROPIC_API_KEY) {

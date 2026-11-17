@@ -86,6 +86,7 @@ export class FakeLLMProvider implements LLMProvider {
         qualified: known >= 2,
         suggested_property_ids: suggested,
         site_visit_requested: wantsVisit,
+        site_visit_preference: wantsVisit ? visitPreference(last) : undefined,
         handoff_to_human: wantsHuman,
         handoff_reason: wantsHuman ? 'Buyer asked for a person' : undefined,
       },
@@ -94,6 +95,15 @@ export class FakeLLMProvider implements LLMProvider {
       latencyMs: 0,
     };
   }
+}
+
+/** Picks a day/time phrase out of the buyer's message, e.g. "Saturday 11am" or "kal shaam". */
+function visitPreference(text: string): string | undefined {
+  const match =
+    /\b(today|tomorrow|aaj|kal|parso|this weekend|weekend|(?:mon|tues|wednes|thurs|fri|satur|sun)day)\b(?:[^.?!,]{0,20}?\b(\d{1,2}(?::\d{2})?\s*(?:am|pm|baje))\b|\s+(morning|evening|afternoon|subah|shaam))?/i.exec(
+      text,
+    );
+  return match ? match[0].trim().slice(0, 120) : undefined;
 }
 
 function parseBudget(text: string): number | null {

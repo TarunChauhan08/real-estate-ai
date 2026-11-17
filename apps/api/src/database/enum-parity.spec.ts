@@ -22,6 +22,7 @@ describe('shared-types enums match Prisma enums', () => {
     'ConversationStatus',
     'MessageRole',
     'MessageDeliveryStatus',
+    'SiteVisitStatus',
   ] as const)('%s', (name) => {
     expect(Object.values(Shared[name]).sort()).toEqual(Object.values(Db[name]).sort());
   });

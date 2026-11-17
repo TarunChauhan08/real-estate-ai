@@ -14,4 +14,5 @@ export const queryKeys = {
   conversation: (id: string) => ['conversations', 'detail', id] as const,
   activeMembers: ['team', 'members', 'active-all'] as const,
   whatsapp: ['channels', 'whatsapp'] as const,
+  siteVisits: (params: string) => ['site-visits', 'list', params] as const,
 };

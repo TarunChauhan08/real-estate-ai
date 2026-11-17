@@ -31,7 +31,7 @@ export const NAV_ITEMS: NavItem[] = [
     available: true,
   },
   { label: 'Properties', href: '/dashboard/properties', icon: Building2, available: true },
-  { label: 'Site Visits', href: '/dashboard/site-visits', icon: CalendarCheck, available: false },
+  { label: 'Site Visits', href: '/dashboard/site-visits', icon: CalendarCheck, available: true },
   { label: 'Follow-ups', href: '/dashboard/follow-ups', icon: BellRing, available: false },
   { label: 'Analytics', href: '/dashboard/analytics', icon: ChartColumn, available: false },
   { label: 'Team', href: '/dashboard/team', icon: Users, available: true },

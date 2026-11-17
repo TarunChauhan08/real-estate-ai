@@ -19,6 +19,7 @@ import { LeadsModule } from './modules/leads/leads.module';
 import { PermissionsGuard } from './modules/roles/permissions.guard';
 import { PropertiesModule } from './modules/properties/properties.module';
 import { RolesModule } from './modules/roles/roles.module';
+import { SiteVisitsModule } from './modules/site-visits/site-visits.module';
 import { TenantsModule } from './modules/tenants/tenants.module';
 import { WhatsAppWebhookModule } from './modules/whatsapp-webhook/whatsapp-webhook.module';
 import { WhatsAppModule } from './modules/whatsapp/whatsapp.module';
@@ -39,6 +40,7 @@ import { WhatsAppModule } from './modules/whatsapp/whatsapp.module';
     LeadsModule,
     AiModule,
     WhatsAppModule,
+    SiteVisitsModule,
     ConversationsModule,
     WhatsAppWebhookModule,
     HealthModule,

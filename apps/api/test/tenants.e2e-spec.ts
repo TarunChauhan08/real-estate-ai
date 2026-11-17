@@ -150,18 +150,16 @@ describe('Tenant, profile, settings and onboarding (e2e)', () => {
     expect(settings.body.data.preferredLanguage).toBe('hi');
   });
 
-  it('dashboard overview reports real counts and marks unbuilt modules (visits, calls) as not available', async () => {
+  it('dashboard overview reports real counts and marks unbuilt modules (calls) as not available', async () => {
     const res = await http().get('/api/v1/dashboard/overview').set(bearer(owner)).expect(200);
     const { metrics, setup, aiEmployee } = res.body.data;
     expect(metrics.teamMembers).toEqual({ status: 'available', value: 1 });
     expect(metrics.pendingInvitations).toEqual({ status: 'available', value: 0 });
-    for (const key of ['totalLeads', 'qualifiedLeads', 'conversations']) {
+    for (const key of ['totalLeads', 'qualifiedLeads', 'conversations', 'siteVisits']) {
       expect(metrics[key]).toEqual({ status: 'available', value: 0 });
     }
-    for (const key of ['siteVisits', 'aiCalls']) {
-      expect(metrics[key].status).toBe('not_available');
-      expect(metrics[key]).not.toHaveProperty('value');
-    }
+    expect(metrics.aiCalls.status).toBe('not_available');
+    expect(metrics.aiCalls).not.toHaveProperty('value');
     expect(aiEmployee).toEqual({ status: 'not_configured' });
     expect(setup.steps.find((s: { key: string }) => s.key === 'business_profile').completed).toBe(
       true,

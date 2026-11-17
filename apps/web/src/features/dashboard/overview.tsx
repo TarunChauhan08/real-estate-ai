@@ -20,7 +20,7 @@ import { cn } from '@/lib/utils';
 const METRICS: Array<{ key: keyof DashboardOverview['metrics']; label: string }> = [
   { key: 'totalLeads', label: 'Total leads' },
   { key: 'qualifiedLeads', label: 'Qualified leads' },
-  { key: 'siteVisits', label: 'Site visits' },
+  { key: 'siteVisits', label: 'Upcoming site visits' },
   { key: 'conversations', label: 'Conversations' },
   { key: 'aiCalls', label: 'AI calls' },
   { key: 'teamMembers', label: 'Team members' },

@@ -106,4 +106,4 @@ All are listed with safe placeholders in [`.env.example`](.env.example). The API
 - [Design system](docs/design-system.md) — navy & gold palette, typography, photography and the psychology behind them
 - [SEO and launch checklist](docs/seo.md)
 - [Contributing](CONTRIBUTING.md) — branches, commit messages, pull requests, CI
-- Decisions: [properties & leads](docs/decisions/0001-properties-and-leads.md) · [AI sales employee](docs/decisions/0002-ai-sales-employee.md) · [WhatsApp channel](docs/decisions/0003-whatsapp-channel.md)
+- Decisions: [properties & leads](docs/decisions/0001-properties-and-leads.md) · [AI sales employee](docs/decisions/0002-ai-sales-employee.md) · [WhatsApp channel](docs/decisions/0003-whatsapp-channel.md) · [site visits](docs/decisions/0004-site-visits.md)
