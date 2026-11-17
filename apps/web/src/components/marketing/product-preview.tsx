@@ -61,7 +61,7 @@ export function ChatPreview({ className }: { className?: string }) {
               <span
                 className={cn(
                   'mt-1 block text-[10px]',
-                  m.from === 'buyer' ? 'text-brand-line' : 'text-fg-faint',
+                  m.from === 'buyer' ? 'text-brand-line' : 'text-fg-muted',
                 )}
               >
                 {m.time}
@@ -104,12 +104,11 @@ export function LeadPreview({ className }: { className?: string }) {
       </div>
       <dl className="mt-4 space-y-2.5">
         {facts.map(({ icon: Icon, label, value }) => (
-          <div key={label} className="flex items-start gap-2.5">
-            <Icon className="mt-0.5 size-4 shrink-0 text-gold-deep" aria-hidden />
-            <div>
-              <dt className="text-[11px] text-fg-muted">{label}</dt>
-              <dd className="text-[13px] font-medium text-fg-secondary">{value}</dd>
-            </div>
+          // A <div> directly inside <dl> is valid; it groups one term with its description.
+          <div key={label} className="grid grid-cols-[1rem_1fr] gap-x-2.5">
+            <dt className="col-start-2 text-[11px] text-fg-muted">{label}</dt>
+            <dd className="col-start-2 text-[13px] font-medium text-fg-secondary">{value}</dd>
+            <Icon className="col-start-1 row-start-1 mt-0.5 size-4 text-gold-deep" aria-hidden />
           </div>
         ))}
       </dl>

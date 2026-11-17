@@ -1,6 +1,4 @@
 @import 'tailwindcss';
-@import '@fontsource-variable/manrope';
-@import '@fontsource-variable/fraunces';
 /* Hindi: loaded only when Devanagari glyphs are on screen (unicode-range). */
 @import '@fontsource-variable/noto-sans-devanagari';
 
@@ -22,10 +20,10 @@
  */
 @theme {
   --font-sans:
-    'Manrope Variable', 'Noto Sans Devanagari Variable', 'Segoe UI', ui-sans-serif, system-ui,
+    var(--font-manrope), 'Noto Sans Devanagari Variable', 'Segoe UI', ui-sans-serif, system-ui,
     sans-serif;
   /* Editorial serif for marketing headlines only — signals craft and permanence. */
-  --font-display: 'Fraunces Variable', Georgia, 'Times New Roman', serif;
+  --font-display: var(--font-fraunces), Georgia, 'Times New Roman', serif;
 
   /* Neutrals (cool ivory → ink) */
   --color-canvas: #f6f7fa; /* app background */

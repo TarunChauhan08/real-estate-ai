@@ -79,6 +79,7 @@ All are listed with safe placeholders in [`.env.example`](.env.example). The API
 | `DATA_ENCRYPTION_KEY`                                                   | Encrypts stored secrets such as WhatsApp tokens (production)    |
 | `WHATSAPP_PROVIDER`, `WHATSAPP_APP_SECRET`, `WHATSAPP_VERIFY_TOKEN`     | WhatsApp (`fake` = demo mode; `cloud` = Meta Cloud API)         |
 | `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_DEMO_REQUEST_EMAIL`                 | Web app                                                         |
+| `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION`          | Public site address for SEO; Search Console verification        |
 
 ## Commands
 
@@ -103,5 +104,6 @@ All are listed with safe placeholders in [`.env.example`](.env.example). The API
 - [API design](docs/api-design.md) — conventions, error codes, every endpoint
 - [Setup guide](docs/setup-guide.md) — local development, tests, Docker, troubleshooting
 - [Design system](docs/design-system.md) — navy & gold palette, typography, photography and the psychology behind them
+- [SEO and launch checklist](docs/seo.md)
 - [Contributing](CONTRIBUTING.md) — branches, commit messages, pull requests, CI
 - Decisions: [properties & leads](docs/decisions/0001-properties-and-leads.md) · [AI sales employee](docs/decisions/0002-ai-sales-employee.md) · [WhatsApp channel](docs/decisions/0003-whatsapp-channel.md)
