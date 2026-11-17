@@ -1,5 +1,7 @@
 # AI Real Estate Sales Employee
 
+[![CI](https://github.com/TarunChauhan08/real-estate-ai/actions/workflows/ci.yml/badge.svg)](https://github.com/TarunChauhan08/real-estate-ai/actions/workflows/ci.yml)
+
 A multi-tenant SaaS platform that gives Indian real estate brokers, agencies, builders and developers an **AI sales employee** — one that talks to buyers in Hindi, English and Hinglish, qualifies them, recommends verified inventory and books site visits.
 
 > **Never miss a property enquiry. Turn more enquiries into qualified buyers and site visits.**
@@ -101,4 +103,5 @@ All are listed with safe placeholders in [`.env.example`](.env.example). The API
 - [API design](docs/api-design.md) — conventions, error codes, every endpoint
 - [Setup guide](docs/setup-guide.md) — local development, tests, Docker, troubleshooting
 - [Design system](docs/design-system.md) — navy & gold palette, typography, photography and the psychology behind them
-- Decisions: [properties & leads](docs/decisions/0001-properties-and-leads.md) · [AI sales employee](docs/decisions/0002-ai-sales-employee.md)
+- [Contributing](CONTRIBUTING.md) — branches, commit messages, pull requests, CI
+- Decisions: [properties & leads](docs/decisions/0001-properties-and-leads.md) · [AI sales employee](docs/decisions/0002-ai-sales-employee.md) · [WhatsApp channel](docs/decisions/0003-whatsapp-channel.md)
