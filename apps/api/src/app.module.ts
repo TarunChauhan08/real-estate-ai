@@ -11,6 +11,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { HealthModule } from './modules/health/health.module';
+import { InvitationsModule } from './modules/invitations/invitations.module';
 import { MembershipsModule } from './modules/memberships/memberships.module';
 import { PermissionsGuard } from './modules/roles/permissions.guard';
 import { RolesModule } from './modules/roles/roles.module';
@@ -26,6 +27,7 @@ import { TenantsModule } from './modules/tenants/tenants.module';
     AuthModule,
     RolesModule,
     TenantsModule,
+    InvitationsModule,
     DashboardModule,
     HealthModule,
   ],

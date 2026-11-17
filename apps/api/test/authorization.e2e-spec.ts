@@ -19,6 +19,8 @@ const MATRIX: Array<{ name: string; method: 'get' | 'patch'; path: string; body?
   { name: 'update settings', method: 'patch', path: '/tenants/current/settings', body: { preferredLanguage: 'hi' }, allowed: ['OWNER', 'ADMIN', 'MANAGER'] },
   { name: 'dashboard', method: 'get', path: '/dashboard/overview', allowed: ['OWNER', 'ADMIN', 'MANAGER', 'SALES_AGENT', 'VIEWER'] },
   { name: 'audit logs', method: 'get', path: '/audit-logs', allowed: ['OWNER', 'ADMIN'] },
+  { name: 'list members', method: 'get', path: '/tenants/current/members', allowed: ['OWNER', 'ADMIN', 'MANAGER', 'SALES_AGENT', 'VIEWER'] },
+  { name: 'list invitations', method: 'get', path: '/tenants/current/invitations', allowed: ['OWNER', 'ADMIN', 'MANAGER'] },
 ];
 
 const ROLES: Role[] = ['OWNER', 'ADMIN', 'MANAGER', 'SALES_AGENT', 'VIEWER'];

@@ -43,7 +43,8 @@ export const envSchema = z
     AUTH_RATE_LIMIT_MAX: z.coerce.number().int().positive().default(10),
 
     INVITATION_TTL_HOURS: z.coerce.number().int().min(1).max(720).default(72),
-    INVITATION_DELIVERY: z.enum(['log', 'none']).default('log'),
+    /** `dev_link` returns the accept link to the inviter (non-production only); `none` returns nothing. */
+    INVITATION_DELIVERY: z.enum(['dev_link', 'none']).default('none'),
   })
   .superRefine((env, ctx) => {
     if (env.NODE_ENV === 'production' && !env.COOKIE_SECURE) {
@@ -51,6 +52,13 @@ export const envSchema = z
         code: z.ZodIssueCode.custom,
         path: ['COOKIE_SECURE'],
         message: 'must be true in production',
+      });
+    }
+    if (env.NODE_ENV === 'production' && env.INVITATION_DELIVERY === 'dev_link') {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['INVITATION_DELIVERY'],
+        message: 'dev_link is not allowed in production',
       });
     }
     if (env.NODE_ENV === 'production' && /replace-with|change-me|local-dev/i.test(env.JWT_ACCESS_SECRET)) {
