@@ -23,6 +23,7 @@ import { SiteVisitsModule } from './modules/site-visits/site-visits.module';
 import { TenantsModule } from './modules/tenants/tenants.module';
 import { WhatsAppWebhookModule } from './modules/whatsapp-webhook/whatsapp-webhook.module';
 import { WhatsAppModule } from './modules/whatsapp/whatsapp.module';
+import { ContactModule } from './modules/contact/contact.module';
 import { MailModule } from './modules/mail/mail.module';
 
 @Module({
@@ -41,6 +42,7 @@ import { MailModule } from './modules/mail/mail.module';
     LeadsModule,
     AiModule,
     MailModule,
+    ContactModule,
     WhatsAppModule,
     SiteVisitsModule,
     ConversationsModule,

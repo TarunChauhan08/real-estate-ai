@@ -15,6 +15,10 @@ const PUBLIC_PAGES = [
   '/guides/how-to-respond-to-property-portal-leads',
   '/guides/whatsapp-24-hour-rule-for-real-estate',
   '/guides/questions-to-qualify-property-buyers',
+  '/about',
+  '/contact',
+  '/privacy',
+  '/terms',
 ];
 
 test('robots.txt allows the site, blocks the app and points to the sitemap', async ({

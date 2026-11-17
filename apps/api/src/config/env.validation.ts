@@ -109,6 +109,12 @@ export const envSchema = z
       .string()
       .optional()
       .transform((value) => (value ? value : undefined)),
+    /** Where demo/contact requests from the public website are emailed. Optional. */
+    CONTACT_NOTIFICATION_EMAIL: z
+      .string()
+      .email()
+      .optional()
+      .or(z.literal('').transform(() => undefined)),
     PASSWORD_RESET_TTL_MINUTES: z.coerce.number().int().min(10).max(1440).default(60),
     EMAIL_VERIFICATION_TTL_HOURS: z.coerce.number().int().min(1).max(168).default(48),
 

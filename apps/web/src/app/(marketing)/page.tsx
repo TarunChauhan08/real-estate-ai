@@ -29,7 +29,6 @@ import { SiteFooter } from '@/components/marketing/site-footer';
 import { SiteHeader } from '@/components/marketing/site-header';
 import { faqLd, JsonLd, organizationLd, softwareLd, websiteLd } from '@/components/seo/json-ld';
 import { Button } from '@/components/ui/button';
-import { DEMO_REQUEST_EMAIL } from '@/lib/env';
 import { SOLUTIONS } from '@/lib/marketing-content';
 
 const TITLE = 'AI Sales Agent for Real Estate in India | WhatsApp & Hinglish';
@@ -504,15 +503,11 @@ export default function HomePage() {
               <p className="mt-5 max-w-sm leading-relaxed text-fg-muted">
                 Something else on your mind? We are happy to talk it through.
               </p>
-              {DEMO_REQUEST_EMAIL && (
-                <Button asChild variant="secondary" size="lg" className="mt-7">
-                  <a
-                    href={`mailto:${DEMO_REQUEST_EMAIL}?subject=${encodeURIComponent('Question about the AI sales employee')}`}
-                  >
-                    <MessageCircle /> Ask us anything
-                  </a>
-                </Button>
-              )}
+              <Button asChild variant="secondary" size="lg" className="mt-7">
+                <Link href="/contact">
+                  <MessageCircle /> Ask us anything
+                </Link>
+              </Button>
             </div>
             <FaqList items={FAQ} />
           </div>
@@ -533,15 +528,9 @@ export default function HomePage() {
             </p>
             <div className="mt-10 flex flex-wrap justify-center gap-3">
               <GoldCta />
-              {DEMO_REQUEST_EMAIL && (
-                <Button asChild variant="glass" size="xl">
-                  <a
-                    href={`mailto:${DEMO_REQUEST_EMAIL}?subject=${encodeURIComponent('Private demo request')}`}
-                  >
-                    Request a private demo
-                  </a>
-                </Button>
-              )}
+              <Button asChild variant="glass" size="xl">
+                <Link href="/contact">Request a private demo</Link>
+              </Button>
             </div>
           </div>
         </section>

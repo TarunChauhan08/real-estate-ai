@@ -591,3 +591,23 @@ model UserToken {
   @@index([userId, purpose])
   @@map("user_tokens")
 }
+
+// ---------------------------------------------------------------------------
+// Public website: demo / contact requests from prospective customers (not tenant data).
+// ---------------------------------------------------------------------------
+
+model ContactRequest {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name      String   @db.VarChar(120)
+  email     String   @db.VarChar(254)
+  phone     String?  @db.VarChar(20)
+  company   String?  @db.VarChar(160)
+  city      String?  @db.VarChar(80)
+  message   String   @db.Text
+  /// Page the visitor sent it from, e.g. /contact or /whatsapp-ai-for-real-estate.
+  source    String?  @db.VarChar(200)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@index([createdAt])
+  @@map("contact_requests")
+}

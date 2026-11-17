@@ -24,6 +24,10 @@ estate", "how to respond to 99acres leads", "WhatsApp 24 hour rule".
 
 ## What only you can do
 
+0. **Fill in your company details** in `apps/web/src/lib/company.ts` (legal name, address, support
+   email, Grievance Officer). They appear on About, Contact, Privacy and Terms, and Meta checks them
+   during WhatsApp business verification. Have a lawyer review the Privacy Policy and Terms
+   (`apps/web/src/app/(marketing)/privacy` and `terms`) — they are careful drafts, not legal advice.
 1. **Choose a brand name and a domain.** "AI Real Estate Sales Employee" describes the product but
    is hard to remember and to search for. A short brand on a `.in` or `.com` domain helps people
    find you again. Then set `NEXT_PUBLIC_SITE_URL` to it.
