@@ -4,6 +4,7 @@ import { X } from 'lucide-react';
 import { useState } from 'react';
 import { SidebarNav } from './sidebar';
 import { Topbar } from './topbar';
+import { VerifyEmailBanner } from './verify-email-banner';
 
 export function DashboardShell({ children }: { children: React.ReactNode }) {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -36,6 +37,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       )}
 
       <Topbar onOpenMenu={() => setMenuOpen(true)} />
+      <VerifyEmailBanner />
       <main className="mx-auto w-full min-w-0 max-w-6xl px-4 py-8 sm:px-6 lg:px-10">
         {children}
       </main>

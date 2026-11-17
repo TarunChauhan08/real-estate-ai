@@ -42,7 +42,12 @@ describe('Authentication (e2e)', () => {
       const body = res.body.data;
       expect(body.accessToken).toEqual(expect.any(String));
       expect(body.expiresIn).toBe(900);
-      expect(body.user).toEqual({ id: expect.any(String), name: 'Rahul Sharma', email });
+      expect(body.user).toEqual({
+        id: expect.any(String),
+        name: 'Rahul Sharma',
+        email,
+        emailVerified: false,
+      });
       expect(body.activeTenant).toMatchObject({
         name: 'Noida Homes Brokerage',
         status: 'PENDING',

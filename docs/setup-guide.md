@@ -96,6 +96,21 @@ docker compose --profile app up -d --build
 
 `COOKIE_SECURE=true` requires HTTPS, so for local click-through testing prefer `pnpm dev`.
 
+## Sending real email
+
+In development `MAIL_PROVIDER=fake` prints every email — with its link — in the API log, so you can
+click verification and password-reset links without an email account. For real email:
+
+1. Create an account at [resend.com](https://resend.com) and add your domain under **Domains**.
+   Add the DNS records it shows (SPF, DKIM) and wait for "Verified".
+2. Create an API key with _sending access_.
+3. In `.env`: `MAIL_PROVIDER=resend`, `RESEND_API_KEY=re_…`,
+   `MAIL_FROM="Your Brand <noreply@yourdomain.in>"` (the domain you verified) and optionally
+   `MAIL_REPLY_TO=support@yourdomain.in`. Restart the API.
+4. Invite a teammate or use **Forgot password?** on the sign-in page to check delivery.
+
+Production refuses to start with `MAIL_PROVIDER=fake`.
+
 ## Going live on WhatsApp
 
 Out of the box `WHATSAPP_PROVIDER=fake`: you can connect any number in **Integrations**, and the

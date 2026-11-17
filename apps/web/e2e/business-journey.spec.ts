@@ -33,7 +33,8 @@ test.describe('Owner journey', () => {
     await navigate(page, 'Settings');
     await page.getByLabel('Phone').fill('+91 98765 43210');
     await page.getByRole('button', { name: 'Save changes' }).click();
-    await expect(page.getByText('Business profile saved')).toBeVisible();
+    // The dev server occasionally renders a toast twice (one save request is sent).
+    await expect(page.getByText('Business profile saved').first()).toBeVisible();
 
     await page.getByRole('tab', { name: 'Preferences' }).click();
     await expect(page.getByLabel('Preferred language')).toHaveValue('hinglish');

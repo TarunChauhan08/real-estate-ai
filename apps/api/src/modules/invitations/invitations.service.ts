@@ -139,7 +139,15 @@ export class InvitationsService {
       return created;
     });
 
-    return { invitation: this.toDto(invitation), delivery: this.delivery.deliver(token) };
+    const delivery = await this.delivery.deliver({
+      token,
+      email: dto.email,
+      role: dto.role,
+      expiresAt,
+      tenantId: ctx.tenantId,
+      inviterId: actorId,
+    });
+    return { invitation: this.toDto(invitation), delivery };
   }
 
   async list(ctx: TenantContext, query: InvitationQueryDto): Promise<Paginated<InvitationDto>> {

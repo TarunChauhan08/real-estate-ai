@@ -73,7 +73,7 @@ export function BusinessProfileTab() {
       return api<BusinessProfileDto>('/tenants/current/profile', { method: 'PATCH', body: rest });
     },
     onSuccess: async () => {
-      toast.success('Business profile saved');
+      toast.success('Business profile saved', { id: 'business-profile-saved' });
       await queryClient.invalidateQueries({ queryKey: ['tenant'] });
       await queryClient.invalidateQueries({ queryKey: ['dashboard'] });
       await reload();

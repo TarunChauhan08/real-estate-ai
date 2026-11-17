@@ -1,4 +1,4 @@
-import { CircleAlert, Info } from 'lucide-react';
+import { CircleAlert, CircleCheck, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export function Alert({
@@ -7,12 +7,12 @@ export function Alert({
   children,
   className,
 }: {
-  tone?: 'info' | 'danger' | 'warning';
+  tone?: 'info' | 'danger' | 'warning' | 'success';
   title?: string;
   children?: React.ReactNode;
   className?: string;
 }) {
-  const Icon = tone === 'info' ? Info : CircleAlert;
+  const Icon = tone === 'info' ? Info : tone === 'success' ? CircleCheck : CircleAlert;
   return (
     <div
       role={tone === 'danger' ? 'alert' : 'status'}
@@ -21,6 +21,7 @@ export function Alert({
         tone === 'info' && 'border-brand-soft-2 bg-brand-soft text-brand-strong',
         tone === 'warning' && 'border-attention-line bg-attention-soft text-attention-fg',
         tone === 'danger' && 'border-danger/20 bg-danger-soft text-danger',
+        tone === 'success' && 'border-success/20 bg-success-soft text-success',
         className,
       )}
     >
