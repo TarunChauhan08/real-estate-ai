@@ -59,8 +59,13 @@ describe('Tenant, profile, settings and onboarding (e2e)', () => {
       country: 'IN',
     });
 
-    const cleared = await http().patch('/api/v1/tenants/current/profile').set(bearer(owner)).send({ phone: '' }).expect(200);
+    const cleared = await http()
+      .patch('/api/v1/tenants/current/profile')
+      .set(bearer(owner))
+      .send({ phone: '', website: '' })
+      .expect(200);
     expect(cleared.body.data.phone).toBeNull();
+    expect(cleared.body.data.website).toBeNull();
   });
 
   it('validates profile input', async () => {

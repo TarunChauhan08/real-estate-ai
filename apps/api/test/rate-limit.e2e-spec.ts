@@ -33,4 +33,11 @@ describe('Rate limiting (e2e)', () => {
       await request(app.getHttpServer()).get('/api/v1/health').expect(200);
     }
   });
+
+  it('does not apply the strict limit to session refresh (every page load refreshes)', async () => {
+    for (let i = 0; i < 5; i += 1) {
+      // No cookie → 401, but never 429.
+      await request(app.getHttpServer()).post('/api/v1/auth/refresh').expect(401);
+    }
+  });
 });
