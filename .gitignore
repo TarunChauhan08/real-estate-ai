@@ -36,3 +36,6 @@ Thumbs.db
 !.vscode/extensions.json
 apps/api/src/generated/
 .design-preview/
+
+# AI eval reports (pnpm --filter @rea/api eval)
+apps/api/evals/reports/

@@ -411,6 +411,15 @@ export class ConversationsService {
     } catch (error) {
       const reason = error instanceof LLMError ? error.message : 'Unexpected AI error';
       this.logger.error(`AI turn failed for conversation ${conversation.id}: ${reason}`);
+      // Counted on the AI usage page so a business can see reliability, not just volume.
+      await this.audit.recordSafely({
+        tenantId,
+        actorId: null,
+        action: AuditAction.AI_REPLY_FAILED,
+        entityType: 'conversation',
+        entityId: conversation.id,
+        metadata: { reason: reason.slice(0, 200) },
+      });
       return {
         aiMessage: null,
         handoffRequested: false,

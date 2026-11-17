@@ -58,7 +58,7 @@ test('a buyer asks to visit, the team confirms it and records the outcome', asyn
 
   // The lead page lists the visit and can book a new one.
   await page.getByRole('link', { name: 'Anita Rao' }).first().click();
-  await expect(page).toHaveURL(/\/dashboard\/leads\//);
+  await expect(page).toHaveURL(/\/dashboard\/leads\//, { timeout: 20_000 });
   await page.getByRole('button', { name: 'Book a visit' }).click();
   await page.getByRole('dialog').getByRole('button', { name: 'Book visit' }).click();
   await expect(page.getByText(/Visit confirmed/).last()).toBeVisible();

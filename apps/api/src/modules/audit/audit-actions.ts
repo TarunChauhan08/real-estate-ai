@@ -32,6 +32,7 @@ export const AuditAction = {
   CONVERSATION_STARTED: 'conversation.started',
   CONVERSATION_UPDATED: 'conversation.updated',
   CONVERSATION_HANDED_OFF: 'conversation.handed_off',
+  AI_REPLY_FAILED: 'ai.reply_failed',
   WHATSAPP_CONNECTED: 'whatsapp.connected',
   WHATSAPP_DISCONNECTED: 'whatsapp.disconnected',
   SITE_VISIT_REQUESTED: 'site_visit.requested',

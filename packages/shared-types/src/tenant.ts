@@ -72,3 +72,31 @@ export interface AuditLogDto {
   actor: { id: string; name: string; email: string } | null;
   createdAt: string;
 }
+
+/** One day of AI activity (dates are in India Standard Time). */
+export interface AiUsageDay {
+  /** YYYY-MM-DD */
+  date: string;
+  replies: number;
+  inputTokens: number;
+  outputTokens: number;
+}
+
+/** How much the AI employee worked over a period, for the business and for capacity planning. */
+export interface AiUsageSummary {
+  days: number;
+  /** ISO timestamp of the start of the period. */
+  from: string;
+  replies: number;
+  failedReplies: number;
+  inputTokens: number;
+  outputTokens: number;
+  /** Average model response time; null when there were no replies. */
+  averageLatencyMs: number | null;
+  handoffs: number;
+  siteVisitRequests: number;
+  /** Replies by the language the AI answered in, e.g. { hinglish: 40, en: 12 }. */
+  languages: Record<string, number>;
+  /** One entry per day in the period, oldest first, including days with no activity. */
+  daily: AiUsageDay[];
+}

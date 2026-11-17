@@ -91,7 +91,13 @@ export class FakeLLMProvider implements LLMProvider {
         handoff_reason: wantsHuman ? 'Buyer asked for a person' : undefined,
       },
       model: 'fake-1',
-      usage: { inputTokens: 0, outputTokens: 0 },
+      // A rough ~4-characters-per-token estimate, so the usage page has numbers in demo mode.
+      usage: {
+        inputTokens: Math.ceil(
+          (request.system.length + request.messages.reduce((n, m) => n + m.content.length, 0)) / 4,
+        ),
+        outputTokens: Math.ceil(reply.length / 4) + 40,
+      },
       latencyMs: 0,
     };
   }
