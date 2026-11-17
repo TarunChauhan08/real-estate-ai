@@ -26,5 +26,7 @@ export const AuditAction = {
   CONVERSATION_STARTED: 'conversation.started',
   CONVERSATION_UPDATED: 'conversation.updated',
   CONVERSATION_HANDED_OFF: 'conversation.handed_off',
+  WHATSAPP_CONNECTED: 'whatsapp.connected',
+  WHATSAPP_DISCONNECTED: 'whatsapp.disconnected',
 } as const;
 export type AuditAction = (typeof AuditAction)[keyof typeof AuditAction];

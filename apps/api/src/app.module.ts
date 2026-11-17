@@ -20,6 +20,8 @@ import { PermissionsGuard } from './modules/roles/permissions.guard';
 import { PropertiesModule } from './modules/properties/properties.module';
 import { RolesModule } from './modules/roles/roles.module';
 import { TenantsModule } from './modules/tenants/tenants.module';
+import { WhatsAppWebhookModule } from './modules/whatsapp-webhook/whatsapp-webhook.module';
+import { WhatsAppModule } from './modules/whatsapp/whatsapp.module';
 
 @Module({
   imports: [
@@ -36,7 +38,9 @@ import { TenantsModule } from './modules/tenants/tenants.module';
     PropertiesModule,
     LeadsModule,
     AiModule,
+    WhatsAppModule,
     ConversationsModule,
+    WhatsAppWebhookModule,
     HealthModule,
   ],
   providers: [

@@ -110,7 +110,7 @@ export function refreshSession(): Promise<SessionResponse | null> {
 }
 
 interface RequestOptions {
-  method?: 'GET' | 'POST' | 'PATCH' | 'DELETE';
+  method?: 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE';
   body?: unknown;
 }
 

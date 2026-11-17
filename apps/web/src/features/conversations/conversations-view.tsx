@@ -18,6 +18,8 @@ export function ConversationsView() {
   const list = useQuery({
     queryKey: queryKeys.conversations('page=1'),
     queryFn: () => apiPage<ConversationSummaryDto>('/conversations?pageSize=50'),
+    // New WhatsApp chats appear without a page reload.
+    refetchInterval: 10_000,
   });
 
   return (

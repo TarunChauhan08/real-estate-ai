@@ -75,6 +75,7 @@ model Tenant {
   leads           Lead[]
   conversations   Conversation[]
   messages        Message[]
+  whatsAppAccount WhatsAppAccount?
 
   @@map("tenants")
 }
@@ -111,13 +112,14 @@ model User {
   createdAt    DateTime   @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt    DateTime   @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  memberships        Membership[]
-  refreshSessions    RefreshSession[]
-  invitationsCreated Invitation[]     @relation("InvitationInvitedBy")
-  auditLogs          AuditLog[]
-  propertiesCreated  Property[]       @relation("PropertyCreatedBy")
-  leadsCreated       Lead[]           @relation("LeadCreatedBy")
-  conversationsStarted Conversation[] @relation("ConversationCreatedBy")
+  memberships               Membership[]
+  refreshSessions           RefreshSession[]
+  invitationsCreated        Invitation[]      @relation("InvitationInvitedBy")
+  auditLogs                 AuditLog[]
+  propertiesCreated         Property[]        @relation("PropertyCreatedBy")
+  leadsCreated              Lead[]            @relation("LeadCreatedBy")
+  conversationsStarted      Conversation[]    @relation("ConversationCreatedBy")
+  whatsAppAccountsConnected WhatsAppAccount[] @relation("WhatsAppAccountConnectedBy")
 
   @@map("users")
 }
@@ -353,37 +355,37 @@ model Property {
 /// A prospective buyer or tenant. `phone` is stored in E.164 and is unique per business, so the
 /// same person messaging twice never creates two leads.
 model Lead {
-  id                 String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  tenantId           String            @map("tenant_id") @db.Uuid
-  name               String            @db.VarChar(120)
+  id                  String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId            String            @map("tenant_id") @db.Uuid
+  name                String            @db.VarChar(120)
   /// E.164, e.g. +919876543210.
-  phone              String            @db.VarChar(16)
-  email              String?           @db.VarChar(254)
-  source             LeadSource        @default(MANUAL)
-  status             LeadStatus        @default(NEW)
-  temperature        LeadTemperature   @default(UNSCORED)
+  phone               String            @db.VarChar(16)
+  email               String?           @db.VarChar(254)
+  source              LeadSource        @default(MANUAL)
+  status              LeadStatus        @default(NEW)
+  temperature         LeadTemperature   @default(UNSCORED)
   /// Whole rupees.
-  budgetMin          BigInt?           @map("budget_min")
-  budgetMax          BigInt?           @map("budget_max")
-  preferredCity      String?           @map("preferred_city") @db.VarChar(100)
-  preferredLocalities String[]         @default([]) @map("preferred_localities")
-  preferredBedrooms  Int[]             @default([]) @map("preferred_bedrooms")
-  purpose            LeadPurpose?
-  timeline           PurchaseTimeline?
-  needsHomeLoan      Boolean?          @map("needs_home_loan")
+  budgetMin           BigInt?           @map("budget_min")
+  budgetMax           BigInt?           @map("budget_max")
+  preferredCity       String?           @map("preferred_city") @db.VarChar(100)
+  preferredLocalities String[]          @default([]) @map("preferred_localities")
+  preferredBedrooms   Int[]             @default([]) @map("preferred_bedrooms")
+  purpose             LeadPurpose?
+  timeline            PurchaseTimeline?
+  needsHomeLoan       Boolean?          @map("needs_home_loan")
   /// Language the lead prefers to talk in: en | hi | hinglish.
-  preferredLanguage  String?           @map("preferred_language") @db.VarChar(16)
-  notes              String?           @db.Text
+  preferredLanguage   String?           @map("preferred_language") @db.VarChar(16)
+  notes               String?           @db.Text
   /// Membership (not user) so assignment is always tied to a specific business.
-  assignedToId       String?           @map("assigned_to_id") @db.Uuid
-  lastContactedAt    DateTime?         @map("last_contacted_at") @db.Timestamptz(3)
-  createdById        String?           @map("created_by_id") @db.Uuid
-  createdAt          DateTime          @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt          DateTime          @updatedAt @map("updated_at") @db.Timestamptz(3)
+  assignedToId        String?           @map("assigned_to_id") @db.Uuid
+  lastContactedAt     DateTime?         @map("last_contacted_at") @db.Timestamptz(3)
+  createdById         String?           @map("created_by_id") @db.Uuid
+  createdAt           DateTime          @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt           DateTime          @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  tenant     Tenant      @relation(fields: [tenantId], references: [id], onDelete: Restrict)
-  assignedTo Membership? @relation("LeadAssignedTo", fields: [assignedToId], references: [id], onDelete: SetNull)
-  createdBy  User?       @relation("LeadCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  tenant        Tenant         @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  assignedTo    Membership?    @relation("LeadAssignedTo", fields: [assignedToId], references: [id], onDelete: SetNull)
+  createdBy     User?          @relation("LeadCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
   conversations Conversation[]
 
   @@unique([tenantId, phone])
@@ -419,17 +421,19 @@ enum MessageRole {
 }
 
 model Conversation {
-  id            String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  tenantId      String              @map("tenant_id") @db.Uuid
-  leadId        String              @map("lead_id") @db.Uuid
-  channel       ConversationChannel
-  status        ConversationStatus  @default(OPEN)
+  id                 String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId           String              @map("tenant_id") @db.Uuid
+  leadId             String              @map("lead_id") @db.Uuid
+  channel            ConversationChannel
+  status             ConversationStatus  @default(OPEN)
   /// When false the AI stays silent and a human handles the conversation.
-  aiEnabled     Boolean             @default(true) @map("ai_enabled")
-  lastMessageAt DateTime?           @map("last_message_at") @db.Timestamptz(3)
-  createdById   String?             @map("created_by_id") @db.Uuid
-  createdAt     DateTime            @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt     DateTime            @updatedAt @map("updated_at") @db.Timestamptz(3)
+  aiEnabled          Boolean             @default(true) @map("ai_enabled")
+  lastMessageAt      DateTime?           @map("last_message_at") @db.Timestamptz(3)
+  /// Last message FROM the buyer. WhatsApp only allows free-form replies within 24 hours of it.
+  lastBuyerMessageAt DateTime?           @map("last_buyer_message_at") @db.Timestamptz(3)
+  createdById        String?             @map("created_by_id") @db.Uuid
+  createdAt          DateTime            @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt          DateTime            @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   tenant    Tenant    @relation(fields: [tenantId], references: [id], onDelete: Restrict)
   lead      Lead      @relation(fields: [leadId], references: [id], onDelete: Restrict)
@@ -442,24 +446,67 @@ model Conversation {
 }
 
 model Message {
-  id             String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  tenantId       String      @map("tenant_id") @db.Uuid
-  conversationId String      @map("conversation_id") @db.Uuid
+  id             String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId       String                 @map("tenant_id") @db.Uuid
+  conversationId String                 @map("conversation_id") @db.Uuid
   role           MessageRole
-  content        String      @db.Text
+  content        String                 @db.Text
   /// AI replies: what was extracted, which properties were suggested, etc.
-  metadata       Json?       @db.JsonB
+  metadata       Json?                  @db.JsonB
   /// AI replies only: model ID, token usage and latency, for cost tracking and evals.
-  model          String?     @db.VarChar(80)
-  inputTokens    Int?        @map("input_tokens")
-  outputTokens   Int?        @map("output_tokens")
-  latencyMs      Int?        @map("latency_ms")
-  createdAt      DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
+  model          String?                @db.VarChar(80)
+  inputTokens    Int?                   @map("input_tokens")
+  outputTokens   Int?                   @map("output_tokens")
+  latencyMs      Int?                   @map("latency_ms")
+  /// Channel provider's message ID (WhatsApp `wamid`). Unique per business, so webhook retries are ignored.
+  externalId     String?                @map("external_id") @db.VarChar(128)
+  /// Outgoing channel messages only (AI and team replies on WhatsApp).
+  deliveryStatus MessageDeliveryStatus? @map("delivery_status")
+  /// Why delivery failed, in plain words. Never contains tokens.
+  deliveryError  String?                @map("delivery_error") @db.VarChar(300)
+  createdAt      DateTime               @default(now()) @map("created_at") @db.Timestamptz(3)
 
   tenant       Tenant       @relation(fields: [tenantId], references: [id], onDelete: Restrict)
   conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 
+  @@unique([tenantId, externalId])
   @@index([conversationId, createdAt])
   @@index([tenantId, createdAt(sort: Desc)])
   @@map("messages")
+}
+
+// ---------------------------------------------------------------------------
+// Phase 3 — WhatsApp channel
+// One WhatsApp Business phone number per business. Meta webhooks are routed to the
+// business by `phone_number_id`. The access token is encrypted at rest (AES-256-GCM).
+// ---------------------------------------------------------------------------
+
+enum MessageDeliveryStatus {
+  PENDING
+  SENT
+  DELIVERED
+  READ
+  FAILED
+}
+
+model WhatsAppAccount {
+  id                   String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId             String    @unique @map("tenant_id") @db.Uuid
+  /// Meta's ID for the business phone number. Webhooks identify the business by it.
+  phoneNumberId        String    @unique @map("phone_number_id") @db.VarChar(32)
+  /// WhatsApp Business Account ID (needed later for templates).
+  wabaId               String?   @map("waba_id") @db.VarChar(32)
+  /// E.164 number buyers message, e.g. +919876543210.
+  displayPhoneNumber   String    @map("display_phone_number") @db.VarChar(16)
+  /// `v1:` + base64(iv | auth tag | ciphertext). Never returned by the API.
+  accessTokenEncrypted String    @map("access_token_encrypted") @db.Text
+  lastInboundAt        DateTime? @map("last_inbound_at") @db.Timestamptz(3)
+  connectedById        String?   @map("connected_by_id") @db.Uuid
+  createdAt            DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt            DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  tenant      Tenant @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  connectedBy User?  @relation("WhatsAppAccountConnectedBy", fields: [connectedById], references: [id], onDelete: SetNull)
+
+  @@map("whatsapp_accounts")
 }

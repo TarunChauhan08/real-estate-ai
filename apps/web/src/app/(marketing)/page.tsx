@@ -161,7 +161,7 @@ const FAQ = [
   },
   {
     q: 'Does it work on WhatsApp?',
-    a: 'Today you can test it in a live web chat inside your dashboard. The official WhatsApp Business integration is the next release, followed by voice calls.',
+    a: 'Yes. Connect your number through the official WhatsApp Business (Cloud) API and the AI replies to buyers in seconds, from your own listings. Your team sees every chat and can step in at any time. Voice calls are next.',
   },
   {
     q: 'What does it cost?',

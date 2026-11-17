@@ -2,6 +2,7 @@
 
 import { Permission } from '@rea/shared-types';
 import { Globe, MessageCircle, Phone } from 'lucide-react';
+import Link from 'next/link';
 import { PageHeader } from '@/components/layout/dashboard-shell';
 import { Badge } from '@/components/ui/badge';
 import { Panel, PanelHeader } from '@/components/ui/panel';
@@ -21,7 +22,14 @@ const CHANNELS = [
     icon: MessageCircle,
     name: 'WhatsApp Business',
     detail: 'Reply to buyers through the official WhatsApp Business API.',
-    status: <Badge tone="warning">Next release</Badge>,
+    status: (
+      <Link
+        href="/dashboard/integrations"
+        className="text-xs font-semibold text-brand-fg hover:underline"
+      >
+        Set up →
+      </Link>
+    ),
   },
   {
     icon: Phone,

@@ -4,18 +4,21 @@ import {
   type ConversationSummaryDto,
   type ConversationTurnDto,
   type MessageDto,
+  WHATSAPP_REPLY_WINDOW_HOURS,
 } from '@rea/shared-types';
 import { Errors } from '../../common/errors/app.exception';
 import { Paginated } from '../../common/interceptors/response-envelope.interceptor';
 import { AppConfigService } from '../../config/app-config.service';
 import { PrismaService } from '../../database/prisma.service';
-import { type Prisma } from '../../generated/prisma/client';
+import { Prisma } from '../../generated/prisma/client';
 import {
   ConversationChannel,
   ConversationStatus,
   LeadSource,
+  MessageDeliveryStatus,
   MessageRole,
   PropertyStatus,
+  TenantStatus,
 } from '../../generated/prisma/enums';
 import { LLMError, type LLMMessage } from '../ai/llm/llm-provider';
 import { type PromptProperty } from '../ai/sales-agent/prompt';
@@ -23,6 +26,7 @@ import { SalesAgentService } from '../ai/sales-agent/sales-agent.service';
 import { AuditService } from '../audit/audit.service';
 import { AuditAction } from '../audit/audit-actions';
 import { type TenantContext } from '../auth/auth-context';
+import { WhatsAppDeliveryService } from '../whatsapp/whatsapp-delivery.service';
 import { type ConversationQueryDto } from './dto/conversation-query.dto';
 import { type SendMessageDto } from './dto/send-message.dto';
 import { type StartConversationDto } from './dto/start-conversation.dto';
@@ -31,6 +35,7 @@ import { type LeadSnapshot, PLACEHOLDER_LEAD_NAME, planLeadUpdate } from './lead
 
 const MAX_MESSAGES_RETURNED = 200;
 const MAX_CANDIDATE_PROPERTIES = 6;
+const REPLY_WINDOW_MS = WHATSAPP_REPLY_WINDOW_HOURS * 60 * 60 * 1000;
 
 const summaryInclude = {
   lead: { select: { id: true, name: true, phone: true, status: true, temperature: true } },
@@ -39,6 +44,29 @@ const summaryInclude = {
 type SummaryRow = Prisma.ConversationGetPayload<{ include: typeof summaryInclude }>;
 type MessageRow = Prisma.MessageGetPayload<object>;
 type LeadRow = Prisma.LeadGetPayload<object>;
+type ConversationRow = Prisma.ConversationGetPayload<object>;
+
+/** A buyer message that arrived on WhatsApp, already parsed from Meta's webhook. */
+export interface InboundWhatsAppMessage {
+  tenantId: string;
+  from: string;
+  profileName: string | null;
+  externalId: string;
+  content: string;
+}
+
+export interface InboundResult {
+  conversationId: string;
+  messageId: string;
+  /** False when Meta re-sent a message we already stored. */
+  isNew: boolean;
+}
+
+interface AiTurnResult {
+  aiMessage: MessageRow | null;
+  handoffRequested: boolean;
+  aiError: string | null;
+}
 
 /**
  * Conversations between buyers and the business: the AI employee, plus humans when they step in.
@@ -57,6 +85,7 @@ export class ConversationsService {
     private readonly audit: AuditService,
     private readonly agent: SalesAgentService,
     private readonly config: AppConfigService,
+    private readonly whatsapp: WhatsAppDeliveryService,
   ) {}
 
   async list(
@@ -220,20 +249,42 @@ export class ConversationsService {
           'Buyer messages can only be simulated in test chats.',
         );
       }
+      const onWhatsApp = conversation.channel === ConversationChannel.WHATSAPP;
+      if (onWhatsApp && !isInsideReplyWindow(conversation.lastBuyerMessageAt)) {
+        throw Errors.conflict(
+          'WHATSAPP_WINDOW_CLOSED',
+          `WhatsApp only allows free replies within ${WHATSAPP_REPLY_WINDOW_HOURS} hours of the buyer's last message. Wait for the buyer to write again.`,
+        );
+      }
       const message = await tx.message.create({
         data: {
           tenantId: ctx.tenantId,
           conversationId: conversation.id,
           role,
           content: dto.content,
+          deliveryStatus: onWhatsApp ? MessageDeliveryStatus.PENDING : null,
         },
       });
       await tx.conversation.update({
         where: { id: conversation.id },
-        data: { lastMessageAt: message.createdAt },
+        data: {
+          lastMessageAt: message.createdAt,
+          lastBuyerMessageAt: role === MessageRole.BUYER ? message.createdAt : undefined,
+        },
       });
       return { conversation, message };
     });
+
+    // A team member's reply on WhatsApp goes straight to the buyer.
+    if (conversation.channel === ConversationChannel.WHATSAPP) {
+      const delivered = await this.whatsapp.deliver(ctx.tenantId, message.id);
+      return {
+        buyerMessage: toMessageDto(delivered),
+        aiMessage: null,
+        handoffRequested: false,
+        aiError: null,
+      };
+    }
 
     const turn: ConversationTurnDto = {
       buyerMessage: toMessageDto(message),
@@ -243,8 +294,115 @@ export class ConversationsService {
     };
     if (role !== MessageRole.BUYER || !conversation.aiEnabled) return turn;
 
-    // 2. Ask the AI (no transaction held open while we wait).
-    const context = await this.loadAgentContext(ctx.tenantId, conversation.id, conversation.leadId);
+    const result = await this.runAiTurn(ctx.tenantId, conversation);
+    return {
+      ...turn,
+      aiMessage: result.aiMessage ? toMessageDto(result.aiMessage) : null,
+      handoffRequested: result.handoffRequested,
+      aiError: result.aiError,
+    };
+  }
+
+  /**
+   * Stores a buyer's WhatsApp message: finds or creates the lead (by phone) and their WhatsApp
+   * conversation (re-opening it if it was closed). Returns null if the business is suspended.
+   * Meta retries webhooks, so a message ID we already have is reported as `isNew: false`.
+   */
+  async receiveWhatsApp(input: InboundWhatsAppMessage): Promise<InboundResult | null> {
+    const tenant = await this.prisma.tenant.findUnique({
+      where: { id: input.tenantId },
+      select: { status: true },
+    });
+    if (!tenant || tenant.status === TenantStatus.SUSPENDED) return null;
+
+    const duplicate = await this.prisma.message.findUnique({
+      where: { tenantId_externalId: { tenantId: input.tenantId, externalId: input.externalId } },
+      select: { id: true, conversationId: true },
+    });
+    if (duplicate)
+      return { conversationId: duplicate.conversationId, messageId: duplicate.id, isNew: false };
+
+    try {
+      return await this.prisma.$transaction(async (tx) => {
+        const lead = await this.findOrCreateWhatsAppLead(tx, input);
+        const conversation = await this.findOrOpenWhatsAppConversation(tx, input.tenantId, lead.id);
+        const message = await tx.message.create({
+          data: {
+            tenantId: input.tenantId,
+            conversationId: conversation.id,
+            role: MessageRole.BUYER,
+            content: input.content,
+            externalId: input.externalId,
+            // Arrival time (ms precision) rather than WhatsApp's whole-second timestamp, so a
+            // burst of messages keeps its order.
+          },
+        });
+        await tx.conversation.update({
+          where: { id: conversation.id },
+          data: { lastMessageAt: message.createdAt, lastBuyerMessageAt: message.createdAt },
+        });
+        await tx.lead.update({
+          where: { id: lead.id },
+          data: { lastContactedAt: message.createdAt },
+        });
+        return { conversationId: conversation.id, messageId: message.id, isNew: true };
+      });
+    } catch (error) {
+      // Two deliveries of the same webhook raced each other; the other one stored it.
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+        const existing = await this.prisma.message.findUnique({
+          where: {
+            tenantId_externalId: { tenantId: input.tenantId, externalId: input.externalId },
+          },
+          select: { id: true, conversationId: true },
+        });
+        if (existing)
+          return { conversationId: existing.conversationId, messageId: existing.id, isNew: false };
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Lets the AI answer a WhatsApp buyer and sends the reply. Skipped when the AI is paused, the
+   * conversation is closed, or a newer buyer message arrived (that one will be answered instead,
+   * with everything the buyer said in view).
+   */
+  async replyOnWhatsApp(
+    tenantId: string,
+    conversationId: string,
+    buyerMessageId: string,
+  ): Promise<{ replied: boolean; aiError: string | null }> {
+    const conversation = await this.prisma.conversation.findFirst({
+      where: { id: conversationId, tenantId, channel: ConversationChannel.WHATSAPP },
+    });
+    if (!conversation?.aiEnabled || conversation.status !== ConversationStatus.OPEN)
+      return { replied: false, aiError: null };
+
+    const latestBuyer = await this.prisma.message.findFirst({
+      where: { conversationId, tenantId, role: MessageRole.BUYER },
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+      select: { id: true },
+    });
+    if (latestBuyer?.id !== buyerMessageId) return { replied: false, aiError: null };
+
+    const result = await this.runAiTurn(tenantId, conversation, { pending: true });
+    if (!result.aiMessage) return { replied: false, aiError: result.aiError };
+    await this.whatsapp.deliver(tenantId, result.aiMessage.id);
+    return { replied: true, aiError: null };
+  }
+
+  /**
+   * One AI turn, in two steps so a slow or failing AI never loses data:
+   *   1. ask the AI (outside any transaction — it can take seconds),
+   *   2. save the AI reply, lead updates and audit entries together (one transaction).
+   */
+  private async runAiTurn(
+    tenantId: string,
+    conversation: ConversationRow,
+    options: { pending?: boolean } = {},
+  ): Promise<AiTurnResult> {
+    const context = await this.loadAgentContext(tenantId, conversation.id, conversation.leadId);
     let result;
     try {
       result = await this.agent.respond(context.input);
@@ -252,15 +410,15 @@ export class ConversationsService {
       const reason = error instanceof LLMError ? error.message : 'Unexpected AI error';
       this.logger.error(`AI turn failed for conversation ${conversation.id}: ${reason}`);
       return {
-        ...turn,
+        aiMessage: null,
+        handoffRequested: false,
         aiError: 'The AI could not reply just now. Your message was saved — try again shortly.',
       };
     }
 
-    // 3. Save the reply and what the AI learned, atomically.
     const aiMessage = await this.prisma.$transaction(async (tx) => {
       const lead = await tx.lead.findFirst({
-        where: { id: conversation.leadId, tenantId: ctx.tenantId },
+        where: { id: conversation.leadId, tenantId },
       });
       if (!lead) throw Errors.notFound('Lead');
       const patch = planLeadUpdate(toSnapshot(lead), result);
@@ -274,7 +432,7 @@ export class ConversationsService {
       if (changedFields.length > 0) {
         await this.audit.record(
           {
-            tenantId: ctx.tenantId,
+            tenantId,
             actorId: null,
             action: AuditAction.LEAD_UPDATED,
             entityType: 'lead',
@@ -287,7 +445,7 @@ export class ConversationsService {
       if (patch.status) {
         await this.audit.record(
           {
-            tenantId: ctx.tenantId,
+            tenantId,
             actorId: null,
             action: AuditAction.LEAD_STATUS_CHANGED,
             entityType: 'lead',
@@ -300,10 +458,11 @@ export class ConversationsService {
 
       const ai = await tx.message.create({
         data: {
-          tenantId: ctx.tenantId,
+          tenantId,
           conversationId: conversation.id,
           role: MessageRole.AI,
           content: result.reply,
+          deliveryStatus: options.pending ? MessageDeliveryStatus.PENDING : null,
           model: result.model.slice(0, 80),
           inputTokens: result.usage.inputTokens,
           outputTokens: result.usage.outputTokens,
@@ -327,7 +486,7 @@ export class ConversationsService {
       if (result.handoff.requested) {
         const system = await tx.message.create({
           data: {
-            tenantId: ctx.tenantId,
+            tenantId,
             conversationId: conversation.id,
             role: MessageRole.SYSTEM,
             content: `AI paused and handed over to the team${result.handoff.reason ? `: ${result.handoff.reason}` : ''}.`,
@@ -336,7 +495,7 @@ export class ConversationsService {
         lastMessageAt = system.createdAt;
         await this.audit.record(
           {
-            tenantId: ctx.tenantId,
+            tenantId,
             actorId: null,
             action: AuditAction.CONVERSATION_HANDED_OFF,
             entityType: 'conversation',
@@ -353,11 +512,93 @@ export class ConversationsService {
       return ai;
     });
 
-    return {
-      ...turn,
-      aiMessage: toMessageDto(aiMessage),
-      handoffRequested: result.handoff.requested,
-    };
+    return { aiMessage, handoffRequested: result.handoff.requested, aiError: null };
+  }
+
+  private async findOrCreateWhatsAppLead(
+    tx: Prisma.TransactionClient,
+    input: InboundWhatsAppMessage,
+  ): Promise<{ id: string }> {
+    const existing = await tx.lead.findUnique({
+      where: { tenantId_phone: { tenantId: input.tenantId, phone: input.from } },
+      select: { id: true, name: true },
+    });
+    if (existing) {
+      if (existing.name === PLACEHOLDER_LEAD_NAME && input.profileName) {
+        await tx.lead.update({ where: { id: existing.id }, data: { name: input.profileName } });
+      }
+      return existing;
+    }
+    const lead = await tx.lead.create({
+      data: {
+        tenantId: input.tenantId,
+        name: input.profileName ?? PLACEHOLDER_LEAD_NAME,
+        phone: input.from,
+        source: LeadSource.WHATSAPP,
+      },
+      select: { id: true },
+    });
+    await this.audit.record(
+      {
+        tenantId: input.tenantId,
+        actorId: null,
+        action: AuditAction.LEAD_CREATED,
+        entityType: 'lead',
+        entityId: lead.id,
+        metadata: { source: LeadSource.WHATSAPP, via: 'whatsapp_inbound' },
+      },
+      tx,
+    );
+    return lead;
+  }
+
+  private async findOrOpenWhatsAppConversation(
+    tx: Prisma.TransactionClient,
+    tenantId: string,
+    leadId: string,
+  ): Promise<{ id: string }> {
+    // One WhatsApp thread per buyer, like the WhatsApp app itself.
+    const existing = await tx.conversation.findFirst({
+      where: { tenantId, leadId, channel: ConversationChannel.WHATSAPP },
+      orderBy: { createdAt: 'desc' },
+      select: { id: true, status: true },
+    });
+    if (existing) {
+      if (existing.status === ConversationStatus.CLOSED) {
+        await tx.conversation.update({
+          where: { id: existing.id },
+          data: { status: ConversationStatus.OPEN },
+        });
+        await this.audit.record(
+          {
+            tenantId,
+            actorId: null,
+            action: AuditAction.CONVERSATION_UPDATED,
+            entityType: 'conversation',
+            entityId: existing.id,
+            metadata: { status: ConversationStatus.OPEN, by: 'buyer_message' },
+          },
+          tx,
+        );
+      }
+      return existing;
+    }
+    const conversation = await tx.conversation.create({
+      data: { tenantId, leadId, channel: ConversationChannel.WHATSAPP },
+      select: { id: true },
+    });
+    await this.audit.record(
+      {
+        tenantId,
+        actorId: null,
+        action: AuditAction.CONVERSATION_STARTED,
+        entityType: 'conversation',
+        entityId: conversation.id,
+        metadata: { channel: ConversationChannel.WHATSAPP, leadId },
+      },
+      tx,
+    );
+    return conversation;
   }
 
   /** Everything the AI needs for one turn: business, lead profile, matching inventory and recent history. */
@@ -485,6 +726,10 @@ function toPrismaPatch(patch: ReturnType<typeof planLeadUpdate>): Prisma.LeadUnc
   };
 }
 
+function isInsideReplyWindow(lastBuyerMessageAt: Date | null): boolean {
+  return lastBuyerMessageAt !== null && Date.now() - lastBuyerMessageAt.getTime() < REPLY_WINDOW_MS;
+}
+
 function toMessageDto(row: MessageRow): MessageDto {
   const metadata = (row.metadata ?? {}) as { suggestedPropertyIds?: unknown };
   return {
@@ -494,6 +739,8 @@ function toMessageDto(row: MessageRow): MessageDto {
     suggestedPropertyIds: Array.isArray(metadata.suggestedPropertyIds)
       ? metadata.suggestedPropertyIds.filter((v): v is string => typeof v === 'string')
       : [],
+    deliveryStatus: row.deliveryStatus,
+    deliveryError: row.deliveryError,
     createdAt: row.createdAt.toISOString(),
   };
 }
@@ -514,6 +761,10 @@ function toSummaryDto(row: SummaryRow): ConversationSummaryDto {
         }
       : null,
     lastMessageAt: row.lastMessageAt ? row.lastMessageAt.toISOString() : null,
+    replyWindowEndsAt:
+      row.channel === ConversationChannel.WHATSAPP && row.lastBuyerMessageAt
+        ? new Date(row.lastBuyerMessageAt.getTime() + REPLY_WINDOW_MS).toISOString()
+        : null,
     createdAt: row.createdAt.toISOString(),
   };
 }

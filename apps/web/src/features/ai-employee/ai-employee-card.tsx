@@ -57,7 +57,7 @@ export function AiEmployeeIdCard({
           </div>
           <div>
             <dt className="text-xs text-brand-line">Channels</dt>
-            <dd className="mt-1 font-medium">Test chat · WhatsApp next</dd>
+            <dd className="mt-1 font-medium">Test chat · WhatsApp</dd>
           </div>
         </dl>
       )}

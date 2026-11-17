@@ -179,6 +179,17 @@ export type ConversationStatus = (typeof ConversationStatus)[keyof typeof Conver
 export const MessageRole = { BUYER: 'BUYER', AI: 'AI', AGENT: 'AGENT', SYSTEM: 'SYSTEM' } as const;
 export type MessageRole = (typeof MessageRole)[keyof typeof MessageRole];
 
+/** Outgoing WhatsApp messages: PENDING → SENT → DELIVERED → READ, or FAILED. */
+export const MessageDeliveryStatus = {
+  PENDING: 'PENDING',
+  SENT: 'SENT',
+  DELIVERED: 'DELIVERED',
+  READ: 'READ',
+  FAILED: 'FAILED',
+} as const;
+export type MessageDeliveryStatus =
+  (typeof MessageDeliveryStatus)[keyof typeof MessageDeliveryStatus];
+
 export const PROPERTY_STATUS_LABELS: Record<PropertyStatus, string> = {
   AVAILABLE: 'Available',
   ON_HOLD: 'On hold',
