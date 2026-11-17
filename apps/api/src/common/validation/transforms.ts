@@ -17,3 +17,23 @@ export const EmptyToNull = (): PropertyDecorator =>
     const trimmed = value.trim();
     return trimmed === '' ? null : trimmed;
   });
+
+/** Trims each entry of a string list, drops blanks and case-insensitive duplicates (first spelling wins). */
+export const CleanStringList = (): PropertyDecorator =>
+  Transform(({ value }: { value: unknown }) => {
+    if (!Array.isArray(value)) return value;
+    const seen = new Set<string>();
+    const out: unknown[] = [];
+    for (const item of value) {
+      if (typeof item !== 'string') {
+        out.push(item);
+        continue;
+      }
+      const trimmed = item.trim();
+      const key = trimmed.toLowerCase();
+      if (trimmed === '' || seen.has(key)) continue;
+      seen.add(key);
+      out.push(trimmed);
+    }
+    return out;
+  });

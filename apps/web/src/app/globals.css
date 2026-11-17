@@ -1,64 +1,75 @@
 @import 'tailwindcss';
 @import '@fontsource-variable/manrope';
+@import '@fontsource-variable/fraunces';
 /* Hindi: loaded only when Devanagari glyphs are on screen (unicode-range). */
 @import '@fontsource-variable/noto-sans-devanagari';
 
 /*
- * Colour system
- * -------------
- * Built on Radix Colors' 12-step scales (sage neutral, teal brand, amber attention,
- * red danger, grass success), where each step has one job: 1–2 app backgrounds,
- * 3–5 component fills, 6–8 borders, 9–10 solid fills, 11–12 text.
- * Every text/background pair below was measured (WCAG 2.2 ratio and APCA Lc):
- * body text ≥ 4.5:1, UI boundaries ≥ 3:1. Values that missed were darkened, not waived.
+ * Colour system — "Navy & Gold"
+ * ------------------------------
+ * Why these colours (the psychology):
+ *   Deep navy  — the colour banks, insurers and law firms use: stability, competence, trust.
+ *                Buying a home is the biggest purchase of most people's lives; the brand has
+ *                to feel like a safe pair of hands before it feels exciting.
+ *   Warm gold  — premium property, achievement, "the keys to your home". Used sparingly:
+ *                one accent per view, mostly on the primary call to action, so the eye
+ *                always knows where to go next.
+ *   Cool ivory neutrals — lots of white space reads as calm and expensive; clutter reads as cheap.
  *
- * Roles
- *   brand      deep ink-teal for navigation and primary actions (≈ Radix teal 12)
- *   attention  amber, reserved for states that need the user's attention
- *   neutrals   sage, a green-tinted grey that Radix pairs with teal
+ * Each step has one job: canvas/subtle = backgrounds, line = borders, fg-* = text.
+ * Text pairs were chosen for WCAG 2.2 AA: body text ≥ 4.5:1, UI boundaries ≥ 3:1.
+ * Token names are kept from Phase 1 (brand = navy, attention = gold) so the whole app re-themes.
  */
 @theme {
   --font-sans:
     'Manrope Variable', 'Noto Sans Devanagari Variable', 'Segoe UI', ui-sans-serif, system-ui,
     sans-serif;
+  /* Editorial serif for marketing headlines only — signals craft and permanence. */
+  --font-display: 'Fraunces Variable', Georgia, 'Times New Roman', serif;
 
-  /* Neutrals (sage) */
-  --color-canvas: #f7f9f8; /* sage 2  — app background */
-  --color-subtle: #eef1f0; /* sage 3  — hover fills, tracks */
-  --color-line: #dfe2e0; /* sage 5  — separators */
-  --color-line-strong: #8f9693; /* between sage 9/10 — control borders, 3.02:1 on white */
-  --color-fg-faint: #868e8b; /* sage 9  — disabled or decorative only, never body text */
-  --color-fg-muted: #5f6563; /* sage 11 — secondary text, 5.95:1 */
-  --color-fg-secondary: #3b4340; /* sage 11→12 — labels, 10.4:1 */
-  --color-fg: #1a211e; /* sage 12 — primary text, 16.4:1 */
+  /* Neutrals (cool ivory → ink) */
+  --color-canvas: #f6f7fa; /* app background */
+  --color-subtle: #edf0f5; /* hover fills, tracks */
+  --color-line: #e0e4ec; /* separators */
+  --color-line-strong: #8790a3; /* control borders, 3.2:1 on white */
+  --color-fg-faint: #8790a3; /* decorative only, never body text */
+  --color-fg-muted: #586174; /* secondary text, 6.3:1 */
+  --color-fg-secondary: #343d52; /* labels, 11:1 */
+  --color-fg: #0e1626; /* primary text, 17.8:1 */
 
-  /* Brand (teal) */
-  --color-brand-soft: #e0f8f3; /* teal 3 */
-  --color-brand-soft-2: #ccf3ea; /* teal 4 */
-  --color-brand-line: #a1ded2; /* teal 6 — tinted borders; muted text on brand, 7.9:1 */
-  --color-focus: #008573; /* teal 11 — focus rings, 4.56:1 */
-  --color-brand-fg: #00715f; /* teal 11 darkened — links and brand text, 5.95:1 */
-  --color-brand-hover: #164b4c;
-  --color-brand-strong: #0d3d38; /* teal 12 */
-  --color-brand: #0f3d3e; /* primary surface; white text 11.95:1 */
-  --color-brand-deep: #0a2a2b;
+  /* Brand (navy) */
+  --color-brand-soft: #eaf0f8;
+  --color-brand-soft-2: #d6e1f1;
+  --color-brand-line: #aebfda; /* tinted borders; muted text on navy, 8.6:1 */
+  --color-focus: #2c5ba3; /* focus rings, 6.4:1 on white */
+  --color-brand-fg: #1d4384; /* links and brand text, 9.3:1 */
+  --color-brand-hover: #15305a;
+  --color-brand-strong: #0a1a33;
+  --color-brand: #0c1f3f; /* primary surface; white text 15.9:1 */
+  --color-brand-deep: #071429;
 
-  /* Attention (amber) */
-  --color-attention-soft: #fff7c2; /* amber 3 */
-  --color-attention-line: #f3d673; /* amber 6 */
-  --color-attention: #ffc53d; /* amber 9 — fills and dots only */
-  --color-attention-fg: #8f5300; /* amber 11 darkened — text, 5.68:1 on amber 3 */
+  /* Accent (gold) — "attention" kept as the token name for compatibility */
+  --color-attention-soft: #fbf5e6;
+  --color-attention-line: #ead6a6;
+  --color-attention: #c8a25a; /* fills and dots; navy text on gold 7.6:1 */
+  --color-attention-fg: #7f5b17; /* gold text on light backgrounds, 5.6:1 on gold-soft */
+  --color-gold: #c8a25a;
+  --color-gold-light: #e3c88d;
+  --color-gold-deep: #a5803a;
 
   /* Status */
-  --color-danger-soft: #feebec; /* red 3 */
-  --color-danger: #ce2c31; /* red 11 — 5.21:1 on white */
-  --color-success-soft: #e9f6e9; /* grass 3 */
-  --color-success: #2a7e3b; /* grass 11 — 5.07:1 on white */
+  --color-danger-soft: #fdecec;
+  --color-danger: #c42b2b; /* 5.6:1 on white */
+  --color-success-soft: #e8f5ee;
+  --color-success: #1f7a48; /* 5.4:1 on white */
 
-  --radius-control: 0.5rem;
-  --radius-panel: 0.75rem;
+  --radius-control: 0.625rem;
+  --radius-panel: 1rem;
 
-  /* Type scale (1.2 minor third from a 15px base) */
+  --shadow-soft: 0 1px 2px rgb(12 31 63 / 0.04), 0 8px 24px -8px rgb(12 31 63 / 0.1);
+  --shadow-lift: 0 2px 4px rgb(12 31 63 / 0.06), 0 24px 48px -16px rgb(12 31 63 / 0.25);
+
+  /* Type scale */
   --text-display: 2.25rem;
   --text-display--line-height: 1.15;
 }
@@ -88,4 +99,41 @@
       transition-duration: 0.01ms !important;
     }
   }
+}
+
+@layer components {
+  /* Thin gold rule used above section eyebrows. */
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-attention-fg);
+  }
+  .eyebrow::before {
+    content: '';
+    height: 1px;
+    width: 2rem;
+    background: var(--color-gold);
+  }
+  .eyebrow-inverted {
+    color: var(--color-gold-light);
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@utility animate-rise {
+  animation: rise 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }

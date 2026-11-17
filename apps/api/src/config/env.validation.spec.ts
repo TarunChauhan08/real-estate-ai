@@ -55,4 +55,12 @@ describe('validateEnv', () => {
       }),
     ).toThrow(/INVITATION_DELIVERY/);
   });
+
+  it('defaults to the offline fake AI provider and requires a key for Anthropic', () => {
+    expect(validateEnv(valid).LLM_PROVIDER).toBe('fake');
+    expect(() => validateEnv({ ...valid, LLM_PROVIDER: 'anthropic' })).toThrow(/ANTHROPIC_API_KEY/);
+    expect(
+      validateEnv({ ...valid, LLM_PROVIDER: 'anthropic', ANTHROPIC_API_KEY: 'k' }).ANTHROPIC_MODEL,
+    ).toBe('claude-sonnet-5-5');
+  });
 });

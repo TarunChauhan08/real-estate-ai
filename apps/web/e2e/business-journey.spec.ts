@@ -20,13 +20,13 @@ test.describe('Owner journey', () => {
     await expect(
       page.getByText('3 of 5 steps complete').or(page.getByText('2 of 5 steps complete')),
     ).toBeVisible();
-    await expect(page.getByText('Not configured, not active')).toBeVisible();
+    await expect(page.getByText('Ready to test · not live with buyers yet')).toBeVisible();
     await expect(page.getByText('Not configured').first()).toBeVisible();
 
-    // Future modules are visibly unavailable, not links.
-    await expect(
-      page.getByRole('navigation', { name: 'Main' }).getByRole('link', { name: 'Leads' }),
-    ).toHaveCount(0);
+    // Released modules are links; future ones are visibly unavailable.
+    const nav = page.getByRole('navigation', { name: 'Main' });
+    await expect(nav.getByRole('link', { name: 'Leads' })).toHaveCount(1);
+    await expect(nav.getByRole('link', { name: 'Site Visits' })).toHaveCount(0);
 
     // Update the business profile from Settings.
     await navigate(page, 'Settings');

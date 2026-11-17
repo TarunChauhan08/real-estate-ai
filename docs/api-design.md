@@ -119,3 +119,37 @@ Session response:
 | GET    | `/audit-logs`         | `audit:read`     | Newest first; `?action=&entityType=&actorId=&from=&to=&page=&pageSize=`                                                          |
 
 Audit actions: `auth.registered`, `auth.login`, `auth.login_failed`, `auth.logout`, `auth.refresh_reuse_detected`, `auth.tenant_switched`, `tenant.created`, `tenant.updated`, `tenant.onboarding_completed`, `business_profile.updated`, `tenant_settings.updated`, `invitation.created`, `invitation.revoked`, `invitation.accepted`, `member.role_changed`, `member.status_changed`. Metadata never contains passwords, tokens or hashes (enforced by a scrubber and a unit test).
+
+### Properties (`properties:read` / `properties:write`)
+
+| Method | Path              | Notes                                                                                                                                |
+| ------ | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| GET    | `/properties`     | Filters: `q, status, propertyType, listingType, city, bedrooms, minPrice, maxPrice, sort`. ARCHIVED hidden unless `status=ARCHIVED`. |
+| GET    | `/properties/:id` | 404 for unknown IDs and for other businesses' IDs.                                                                                   |
+| POST   | `/properties`     | `price` is whole rupees. `possessionDate` is `YYYY-MM-DD`.                                                                           |
+| PATCH  | `/properties/:id` | `null` clears optional fields; `null` on required fields is ignored. Set `status: ARCHIVED` instead of deleting.                     |
+
+### Leads (`leads:read` / `leads:write` / `leads:assign`)
+
+| Method | Path                  | Notes                                                                                                          |
+| ------ | --------------------- | -------------------------------------------------------------------------------------------------------------- |
+| GET    | `/leads`              | Filters: `q` (name, email, phone digits), `status, temperature, source, assignedToId, sort`.                   |
+| GET    | `/leads/:id`          |                                                                                                                |
+| POST   | `/leads`              | Phone normalised to E.164; duplicate phone in the same business → 409 `LEAD_PHONE_EXISTS`.                     |
+| PATCH  | `/leads/:id`          | Details only.                                                                                                  |
+| PATCH  | `/leads/:id/status`   | WON is terminal; LOST can only go back to NEW; otherwise 409 `LEAD_INVALID_TRANSITION`.                        |
+| PATCH  | `/leads/:id/assignee` | Body `{ membershipId \| null }`; needs `leads:assign`; assignee must be an ACTIVE member of the same business. |
+
+Roles: OWNER/ADMIN everything; MANAGER everything (read, write, assign); SALES_AGENT reads properties, reads/writes leads (cannot assign); VIEWER read-only.
+
+### Conversations (`conversations:read` / `conversations:write`)
+
+| Method | Path                          | Notes                                                                                                                                                                                                                                                               |
+| ------ | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/conversations`              | Filters: `leadId, status, channel`. Most recent activity first.                                                                                                                                                                                                     |
+| GET    | `/conversations/:id`          | Includes the last 200 messages, oldest first.                                                                                                                                                                                                                       |
+| POST   | `/conversations`              | Start a **test chat**: `{ leadId }` or `{ phone, name? }` (lead created or reused). Also needs `leads:write`.                                                                                                                                                       |
+| POST   | `/conversations/:id/messages` | `{ content, as?: 'BUYER' \| 'AGENT' }`. A buyer message in a test chat returns `{ buyerMessage, aiMessage, handoffRequested, aiError }`. If the AI fails, the buyer message is still saved and `aiError` explains. Closed conversation → 409 `CONVERSATION_CLOSED`. |
+| PATCH  | `/conversations/:id`          | `{ aiEnabled?, status? }` — take over from the AI, or close/re-open.                                                                                                                                                                                                |
+
+SALES_AGENT and above can chat; VIEWER can only read.

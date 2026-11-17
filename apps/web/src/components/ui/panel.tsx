@@ -4,7 +4,10 @@ import { cn } from '@/lib/utils';
 export function Panel({ className, ...props }: React.HTMLAttributes<HTMLElement>) {
   return (
     <section
-      className={cn('rounded-[var(--radius-panel)] border border-line bg-white', className)}
+      className={cn(
+        'rounded-[var(--radius-panel)] border border-line bg-white shadow-[var(--shadow-soft)]',
+        className,
+      )}
       {...props}
     />
   );

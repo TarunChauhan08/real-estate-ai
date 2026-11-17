@@ -15,6 +15,15 @@ export const Permission = {
   MEMBERS_MANAGE: 'members:manage',
   AUDIT_READ: 'audit:read',
   DASHBOARD_READ: 'dashboard:read',
+  PROPERTIES_READ: 'properties:read',
+  PROPERTIES_WRITE: 'properties:write',
+  LEADS_READ: 'leads:read',
+  LEADS_WRITE: 'leads:write',
+  /** Assign a lead to a team member (or take it off them). */
+  LEADS_ASSIGN: 'leads:assign',
+  CONVERSATIONS_READ: 'conversations:read',
+  /** Start test chats, send messages, switch the AI on or off for a conversation. */
+  CONVERSATIONS_WRITE: 'conversations:write',
 } as const;
 export type Permission = (typeof Permission)[keyof typeof Permission];
 
@@ -35,18 +44,33 @@ export const ROLE_PERMISSIONS: Record<MembershipRole, readonly Permission[]> = {
     Permission.MEMBERS_INVITE,
     Permission.MEMBERS_MANAGE,
     Permission.DASHBOARD_READ,
+    Permission.PROPERTIES_READ,
+    Permission.PROPERTIES_WRITE,
+    Permission.LEADS_READ,
+    Permission.LEADS_WRITE,
+    Permission.LEADS_ASSIGN,
+    Permission.CONVERSATIONS_READ,
+    Permission.CONVERSATIONS_WRITE,
   ],
   SALES_AGENT: [
     Permission.TENANT_READ,
     Permission.SETTINGS_READ,
     Permission.MEMBERS_READ,
     Permission.DASHBOARD_READ,
+    Permission.PROPERTIES_READ,
+    Permission.LEADS_READ,
+    Permission.LEADS_WRITE,
+    Permission.CONVERSATIONS_READ,
+    Permission.CONVERSATIONS_WRITE,
   ],
   VIEWER: [
     Permission.TENANT_READ,
     Permission.SETTINGS_READ,
     Permission.MEMBERS_READ,
     Permission.DASHBOARD_READ,
+    Permission.PROPERTIES_READ,
+    Permission.LEADS_READ,
+    Permission.CONVERSATIONS_READ,
   ],
 };
 
