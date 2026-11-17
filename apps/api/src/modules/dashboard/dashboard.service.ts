@@ -37,6 +37,7 @@ export class DashboardService {
       conversations,
       aiReplies,
       upcomingVisits,
+      whatsappConnected,
     ] = await Promise.all([
       this.prisma.tenant.findUnique({
         where: { id: ctx.tenantId },
@@ -86,6 +87,7 @@ export class DashboardService {
           ],
         },
       }),
+      this.prisma.whatsAppAccount.count({ where: { tenantId } }).then((n) => n > 0),
     ]);
     if (!tenant) throw Errors.notFound('Business');
 
@@ -118,6 +120,12 @@ export class DashboardService {
         key: 'ai_employee',
         label: 'Test your AI employee in a chat',
         completed: aiReplies > 0,
+        available: true,
+      },
+      {
+        key: 'whatsapp',
+        label: 'Connect your WhatsApp Business number',
+        completed: whatsappConnected,
         available: true,
       },
     ];

@@ -168,6 +168,10 @@ describe('Tenant, profile, settings and onboarding (e2e)', () => {
       available: true,
       completed: false,
     });
+    expect(setup.steps.find((s: { key: string }) => s.key === 'whatsapp')).toMatchObject({
+      available: true,
+      completed: false,
+    });
   });
 
   it('GET /audit-logs lists this tenant’s events, newest first, with pagination and filters', async () => {

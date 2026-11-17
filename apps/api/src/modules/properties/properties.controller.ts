@@ -1,6 +1,22 @@
-import { Body, Controller, Get, Param, ParseUUIDPipe, Patch, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  ParseUUIDPipe,
+  Patch,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { Permission, type PropertyDto } from '@rea/shared-types';
+import {
+  type AddSampleListingsResult,
+  type ImportListingsResult,
+  Permission,
+  type PropertyDto,
+} from '@rea/shared-types';
 import { CurrentAuth, CurrentTenant } from '../../common/decorators/current-auth.decorator';
 import { Errors } from '../../common/errors/app.exception';
 import { type Paginated } from '../../common/interceptors/response-envelope.interceptor';
@@ -9,6 +25,8 @@ import { RequirePermissions } from '../roles/require-permissions.decorator';
 import { CreatePropertyDto } from './dto/create-property.dto';
 import { PropertyQueryDto } from './dto/property-query.dto';
 import { UpdatePropertyDto } from './dto/update-property.dto';
+import { ImportListingsDto } from './import/import.dto';
+import { PropertyImportService } from './import/property-import.service';
 import { PropertiesService } from './properties.service';
 
 const uuidPipe = new ParseUUIDPipe({ exceptionFactory: () => Errors.notFound('Property') });
@@ -21,7 +39,33 @@ const uuidPipe = new ParseUUIDPipe({ exceptionFactory: () => Errors.notFound('Pr
 @ApiBearerAuth()
 @Controller('properties')
 export class PropertiesController {
-  constructor(private readonly properties: PropertiesService) {}
+  constructor(
+    private readonly properties: PropertiesService,
+    private readonly importer: PropertyImportService,
+  ) {}
+
+  // Declared before ':id' routes so the paths are not read as IDs.
+  @Post('import')
+  @HttpCode(HttpStatus.OK)
+  @RequirePermissions(Permission.PROPERTIES_WRITE)
+  @ApiOperation({ summary: 'Import listings from CSV (all-or-nothing; dryRun to check first)' })
+  import(
+    @CurrentTenant() ctx: TenantContext,
+    @CurrentAuth() auth: AuthContext,
+    @Body() dto: ImportListingsDto,
+  ): Promise<ImportListingsResult> {
+    return this.importer.import(ctx, auth.userId, dto.csv, dto.dryRun ?? false);
+  }
+
+  @Post('samples')
+  @RequirePermissions(Permission.PROPERTIES_WRITE)
+  @ApiOperation({ summary: 'Add six sample listings so the AI can be tried right away' })
+  addSamples(
+    @CurrentTenant() ctx: TenantContext,
+    @CurrentAuth() auth: AuthContext,
+  ): Promise<AddSampleListingsResult> {
+    return this.importer.addSamples(ctx, auth.userId);
+  }
 
   @Get()
   @RequirePermissions(Permission.PROPERTIES_READ)

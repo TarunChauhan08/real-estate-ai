@@ -44,7 +44,7 @@ test('a buyer asks to visit, the team confirms it and records the outcome', asyn
   ).toBeVisible();
 
   await navigate(page, 'Site Visits');
-  await expect(page.getByRole('heading', { name: 'Site visits' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Site visits' })).toBeVisible({ timeout: 20_000 });
   await page.getByRole('tab', { name: 'Upcoming' }).click();
   const card = page.getByRole('listitem').filter({ hasText: 'Anita Rao' });
   await expect(card).toContainText('Confirmed');

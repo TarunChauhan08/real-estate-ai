@@ -1,7 +1,8 @@
 'use client';
 
-import { keepPreviousData, useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
+  type AddSampleListingsResult,
   formatInr,
   Permission,
   PROPERTY_STATUS_LABELS,
@@ -10,8 +11,19 @@ import {
   PropertyStatus,
   PropertyType,
 } from '@rea/shared-types';
-import { BadgeCheck, BedDouble, Building2, MapPin, Pencil, Plus, Ruler } from 'lucide-react';
+import {
+  BadgeCheck,
+  BedDouble,
+  Building2,
+  MapPin,
+  Pencil,
+  Plus,
+  Ruler,
+  Sparkles,
+  Upload,
+} from 'lucide-react';
 import { useState } from 'react';
+import { toast } from 'sonner';
 import { PageHeader } from '@/components/layout/dashboard-shell';
 import { EmptyState, ErrorState } from '@/components/states/states';
 import { Badge } from '@/components/ui/badge';
@@ -20,8 +32,9 @@ import { Input, Select } from '@/components/ui/input';
 import { Panel } from '@/components/ui/panel';
 import { Skeleton } from '@/components/ui/skeleton';
 import { usePermission } from '@/hooks/use-permission';
-import { apiPage } from '@/lib/api-client';
+import { api, apiPage, ApiError } from '@/lib/api-client';
 import { queryKeys } from '@/lib/query-keys';
+import { ImportListingsDialog } from './import-dialog';
 import { PropertyFormDialog } from './property-form-dialog';
 
 const PAGE_SIZE = 12;
@@ -114,6 +127,18 @@ export function PropertiesView() {
   const [page, setPage] = useState(1);
   const [editing, setEditing] = useState<PropertyDto | undefined>();
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
+  const queryClient = useQueryClient();
+  const samples = useMutation({
+    mutationFn: () => api<AddSampleListingsResult>('/properties/samples', { method: 'POST' }),
+    onSuccess: (r) => {
+      void queryClient.invalidateQueries({ queryKey: ['properties'] });
+      void queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      toast.success(`${r.created} sample listings added. Try asking the AI about them.`);
+    },
+    onError: (err) =>
+      toast.error(err instanceof ApiError ? err.message : 'Could not add sample listings.'),
+  });
 
   const params = new URLSearchParams({
     page: String(page),
@@ -146,9 +171,14 @@ export function PropertiesView() {
         description="Your verified inventory. The AI employee recommends only what is listed here as available."
         actions={
           canWrite ? (
-            <Button onClick={() => openDialog()}>
-              <Plus /> Add listing
-            </Button>
+            <div className="flex flex-wrap gap-2">
+              <Button variant="secondary" onClick={() => setImportOpen(true)}>
+                <Upload /> Import CSV
+              </Button>
+              <Button onClick={() => openDialog()}>
+                <Plus /> Add listing
+              </Button>
+            </div>
           ) : undefined
         }
       />
@@ -220,9 +250,21 @@ export function PropertiesView() {
             }
             action={
               canWrite && !search && !status && !type ? (
-                <Button onClick={() => openDialog()}>
-                  <Plus /> Add listing
-                </Button>
+                <div className="flex flex-wrap justify-center gap-2">
+                  <Button onClick={() => openDialog()}>
+                    <Plus /> Add listing
+                  </Button>
+                  <Button variant="secondary" onClick={() => setImportOpen(true)}>
+                    <Upload /> Import CSV
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    loading={samples.isPending}
+                    onClick={() => samples.mutate()}
+                  >
+                    <Sparkles /> Add sample listings
+                  </Button>
+                </div>
               ) : undefined
             }
           />
@@ -268,7 +310,10 @@ export function PropertiesView() {
       )}
 
       {canWrite && (
-        <PropertyFormDialog property={editing} open={dialogOpen} onOpenChange={setDialogOpen} />
+        <>
+          <PropertyFormDialog property={editing} open={dialogOpen} onOpenChange={setDialogOpen} />
+          <ImportListingsDialog open={importOpen} onOpenChange={setImportOpen} />
+        </>
       )}
     </>
   );

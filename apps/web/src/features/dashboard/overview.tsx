@@ -140,13 +140,18 @@ export function Overview() {
                         <Link href="/dashboard/ai-employee">Open test chat</Link>
                       </Button>
                     )}
+                    {!step.completed && step.key === 'whatsapp' && (
+                      <Button asChild size="sm" variant="secondary">
+                        <Link href="/dashboard/integrations">Connect WhatsApp</Link>
+                      </Button>
+                    )}
                   </li>
                 ))}
               </ol>
             </>
           ) : (
             <div className="space-y-3 p-5">
-              {Array.from({ length: 5 }, (_, i) => (
+              {Array.from({ length: 6 }, (_, i) => (
                 <Skeleton key={i} className="h-6" />
               ))}
             </div>
