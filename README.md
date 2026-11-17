@@ -4,21 +4,25 @@ A multi-tenant SaaS platform that gives Indian real estate brokers, agencies, bu
 
 > **Never miss a property enquiry. Turn more enquiries into qualified buyers and site visits.**
 
-## Status: Phase 2B — AI employee (test chat), properties and leads
+## Status: Phase 3 — WhatsApp channel
 
-| Implemented                                                                  | Not yet (clearly labelled in the UI)       |
-| ---------------------------------------------------------------------------- | ------------------------------------------ |
-| Premium public site (navy & gold, 4K photography, trust-led copy)            | WhatsApp Business channel (next release)   |
-| Registration, login, refresh-token rotation, multi-tenant isolation, roles   | Voice calls                                |
-| Onboarding, business profile, team invitations, audit log                    | Site-visit calendar, follow-ups, analytics |
-| Property inventory: list, search, filter, add, edit, archive                 | Email delivery of invitations              |
-| Lead pipeline: list, filter, add, edit, stage rules, assignment              | Password reset, profile editing, 2FA       |
-| **AI sales employee in a test chat** (Claude or offline fake provider)       |                                            |
-| AI fills in the lead (budget, city, BHK…), scores it, suggests real listings |                                            |
-| Human handoff (discounts, legal, complaints) and one-click AI on/off         |                                            |
+| Implemented                                                                  | Not yet (clearly labelled in the UI)          |
+| ---------------------------------------------------------------------------- | --------------------------------------------- |
+| Premium public site (navy & gold, 4K photography, trust-led copy)            | WhatsApp template messages (24 h+ follow-ups) |
+| Registration, login, refresh-token rotation, multi-tenant isolation, roles   | Voice calls, voice-note transcription         |
+| Onboarding, business profile, team invitations, audit log                    | Site-visit calendar, follow-ups, analytics    |
+| Property inventory: list, search, filter, add, edit, archive                 | Email delivery of invitations                 |
+| Lead pipeline: list, filter, add, edit, stage rules, assignment              | Password reset, profile editing, 2FA          |
+| **AI sales employee** (Claude or offline fake provider)                      | Meta Embedded Signup (one-click connect)      |
+| **WhatsApp Business (Meta Cloud API)**: buyers message, the AI replies       |                                               |
+| WhatsApp inbox: live updates, delivery ticks, team replies, 24-hour window   |                                               |
+| AI fills in the lead (budget, city, BHK…), scores it, suggests real listings |                                               |
+| Human handoff (discounts, legal, complaints) and one-click AI on/off         |                                               |
 
-The AI only talks to buyers inside the dashboard's test chat today. It works without an API key
-(`LLM_PROVIDER=fake`); set `LLM_PROVIDER=anthropic` and `ANTHROPIC_API_KEY` for real replies.
+Everything runs without any accounts: `LLM_PROVIDER=fake` gives offline AI replies and
+`WHATSAPP_PROVIDER=fake` gives a WhatsApp demo mode with a buyer simulator in **Integrations**.
+For real replies set `LLM_PROVIDER=anthropic`; to go live on WhatsApp follow
+[docs/setup-guide.md → Going live on WhatsApp](docs/setup-guide.md#going-live-on-whatsapp).
 
 ## Technology
 
@@ -33,7 +37,7 @@ The AI only talks to buyers inside the dashboard's test chat today. It works wit
 
 ```
 apps/api            NestJS API (auth, tenants, memberships, invitations, roles, audit, dashboard,
-                    properties, leads, conversations, ai, health)
+                    properties, leads, conversations, ai, whatsapp, whatsapp-webhook, health)
 apps/web            Next.js app (public site + dashboard) and Playwright tests
 packages/shared-types   enums, API types and the role/permission matrix shared by both apps
 packages/eslint-config  shared lint rules
@@ -69,6 +73,9 @@ All are listed with safe placeholders in [`.env.example`](.env.example). The API
 | `COOKIE_SECURE`, `COOKIE_DOMAIN`                                        | Refresh cookie (secure must be `true` in production)            |
 | `RATE_LIMIT_TTL_SECONDS`, `RATE_LIMIT_MAX`, `AUTH_RATE_LIMIT_MAX`       | Rate limiting                                                   |
 | `INVITATION_TTL_HOURS`, `INVITATION_DELIVERY`                           | Invitations (`dev_link` is development-only)                    |
+| `LLM_PROVIDER`, `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL`                  | AI employee (`fake` works offline)                              |
+| `DATA_ENCRYPTION_KEY`                                                   | Encrypts stored secrets such as WhatsApp tokens (production)    |
+| `WHATSAPP_PROVIDER`, `WHATSAPP_APP_SECRET`, `WHATSAPP_VERIFY_TOKEN`     | WhatsApp (`fake` = demo mode; `cloud` = Meta Cloud API)         |
 | `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_DEMO_REQUEST_EMAIL`                 | Web app                                                         |
 
 ## Commands

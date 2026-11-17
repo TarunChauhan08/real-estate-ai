@@ -57,6 +57,45 @@ export const envSchema = z
     LLM_TIMEOUT_MS: z.coerce.number().int().min(1000).max(120000).default(30000),
     /** How many earlier messages the AI sees on each turn. */
     AI_HISTORY_MESSAGES: z.coerce.number().int().min(2).max(60).default(20),
+
+    /**
+     * Key for encrypting secrets stored in the database (e.g. WhatsApp access tokens):
+     * 32 random bytes, base64. Generate with `openssl rand -base64 32`. Required in production.
+     */
+    DATA_ENCRYPTION_KEY: z
+      .string()
+      .optional()
+      .transform((value) => (value ? value : undefined))
+      .refine((value) => value === undefined || Buffer.from(value, 'base64').length === 32, {
+        message: 'must be 32 bytes, base64-encoded (openssl rand -base64 32)',
+      }),
+
+    /** `fake` = messages are recorded but not sent (tests, demos without Meta); `cloud` = Meta WhatsApp Cloud API. */
+    WHATSAPP_PROVIDER: z.enum(['fake', 'cloud']).default('fake'),
+    /** Meta app secret. Every webhook is verified against it (X-Hub-Signature-256). */
+    WHATSAPP_APP_SECRET: z
+      .string()
+      .optional()
+      .transform((value) => (value ? value : undefined)),
+    /** Any long random string; entered in the Meta app when subscribing the webhook. */
+    WHATSAPP_VERIFY_TOKEN: z
+      .string()
+      .optional()
+      .transform((value) => (value ? value : undefined))
+      .refine((value) => value === undefined || value.length >= 16, {
+        message: 'must be at least 16 characters',
+      }),
+    WHATSAPP_GRAPH_API_VERSION: z
+      .string()
+      .regex(/^v\d+\.\d+$/, 'must look like v26.0')
+      .default('v26.0'),
+    WHATSAPP_GRAPH_BASE_URL: z.string().url().default('https://graph.facebook.com'),
+    WHATSAPP_TIMEOUT_MS: z.coerce.number().int().min(1000).max(60000).default(15000),
+    /**
+     * Wait this long after a buyer message before the AI answers, so a burst like
+     * "hi" / "3 BHK chahiye" / "Noida" gets one reply that covers all of it.
+     */
+    WHATSAPP_REPLY_DEBOUNCE_MS: z.coerce.number().int().min(0).max(15000).default(2500),
   })
   .superRefine((env, ctx) => {
     if (env.LLM_PROVIDER === 'anthropic' && !env.ANTHROPIC_API_KEY) {
@@ -64,6 +103,24 @@ export const envSchema = z
         code: z.ZodIssueCode.custom,
         path: ['ANTHROPIC_API_KEY'],
         message: 'is required when LLM_PROVIDER=anthropic',
+      });
+    }
+    if (env.WHATSAPP_PROVIDER === 'cloud') {
+      for (const key of ['WHATSAPP_APP_SECRET', 'WHATSAPP_VERIFY_TOKEN'] as const) {
+        if (!env[key]) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: [key],
+            message: 'is required when WHATSAPP_PROVIDER=cloud',
+          });
+        }
+      }
+    }
+    if (env.NODE_ENV === 'production' && !env.DATA_ENCRYPTION_KEY) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['DATA_ENCRYPTION_KEY'],
+        message: 'is required in production',
       });
     }
     if (env.NODE_ENV === 'production' && !env.COOKIE_SECURE) {

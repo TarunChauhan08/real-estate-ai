@@ -6,7 +6,7 @@ import { configureApp } from '../src/app.setup';
 /** Boots the full application with the production middleware stack for e2e tests. */
 export async function createTestApp(): Promise<INestApplication> {
   const moduleRef = await Test.createTestingModule({ imports: [AppModule] }).compile();
-  const app = moduleRef.createNestApplication({ logger: ['error', 'warn'] });
+  const app = moduleRef.createNestApplication({ logger: ['error', 'warn'], rawBody: true });
   configureApp(app);
   await app.init();
   return app;

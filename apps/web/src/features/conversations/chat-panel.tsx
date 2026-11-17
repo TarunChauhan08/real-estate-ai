@@ -11,7 +11,18 @@ import {
   Permission,
   type PropertyDto,
 } from '@rea/shared-types';
-import { Bot, Building2, Lock, SendHorizonal, UserRound } from 'lucide-react';
+import {
+  Bot,
+  Building2,
+  Check,
+  CheckCheck,
+  Clock3,
+  Lock,
+  MessageCircle,
+  SendHorizonal,
+  TriangleAlert,
+  UserRound,
+} from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
@@ -35,6 +46,29 @@ const SAMPLE_MESSAGES = [
 ];
 
 const timeFormat = new Intl.DateTimeFormat('en-IN', { hour: 'numeric', minute: '2-digit' });
+
+/** WhatsApp-style ticks for outgoing messages. */
+function DeliveryTicks({ message }: { message: MessageDto }) {
+  switch (message.deliveryStatus) {
+    case 'PENDING':
+      return <Clock3 className="size-3" aria-label="Sending" />;
+    case 'SENT':
+      return <Check className="size-3.5" aria-label="Sent" />;
+    case 'DELIVERED':
+      return <CheckCheck className="size-3.5" aria-label="Delivered" />;
+    case 'READ':
+      return <CheckCheck className="size-3.5 text-sky-600" aria-label="Read" />;
+    case 'FAILED':
+      return <TriangleAlert className="size-3.5 text-danger" aria-label="Not delivered" />;
+    default:
+      return null;
+  }
+}
+
+function hoursLeft(iso: string | null): number | null {
+  if (!iso) return null;
+  return Math.max(0, (new Date(iso).getTime() - Date.now()) / 3_600_000);
+}
 
 function Message({
   message,
@@ -114,10 +148,21 @@ function Message({
             ))}
           </ul>
         )}
-        <p className={cn('px-1 text-[11px] text-fg-faint', buyer && 'text-right')}>
+        <p
+          className={cn(
+            'flex items-center gap-1 px-1 text-[11px] text-fg-faint',
+            buyer && 'justify-end',
+          )}
+        >
           {message.role === 'AI' ? 'AI · ' : message.role === 'AGENT' ? 'Team · ' : ''}
           {timeFormat.format(new Date(message.createdAt))}
+          <DeliveryTicks message={message} />
         </p>
+        {message.deliveryStatus === 'FAILED' && (
+          <p className="px-1 text-xs text-danger" role="status">
+            Not delivered on WhatsApp{message.deliveryError ? `: ${message.deliveryError}` : '.'}
+          </p>
+        )}
       </div>
     </li>
   );
@@ -134,6 +179,8 @@ export function ChatPanel({ id }: { id: string }) {
   const conversation = useQuery({
     queryKey: queryKeys.conversation(id),
     queryFn: () => api<ConversationDto>(`/conversations/${id}`),
+    // Buyers write on WhatsApp in real time; keep the thread fresh while it is open.
+    refetchInterval: (query) => (query.state.data?.channel === 'WHATSAPP' ? 4000 : false),
   });
   const leadId = conversation.data?.lead.id;
   const lead = useQuery({
@@ -152,6 +199,7 @@ export function ChatPanel({ id }: { id: string }) {
   );
 
   const isTest = conversation.data?.channel === 'WEB_TEST';
+  const isWhatsApp = conversation.data?.channel === 'WHATSAPP';
   const sendAs = isTest ? as : 'AGENT';
 
   const refresh = () => {
@@ -170,6 +218,8 @@ export function ChatPanel({ id }: { id: string }) {
       }),
     onMutate: (content) => setPending({ content, role: sendAs }),
     onSuccess: (turn) => {
+      if (turn.buyerMessage.deliveryStatus === 'FAILED')
+        toast.error(turn.buyerMessage.deliveryError ?? 'WhatsApp could not deliver the message');
       if (turn.aiError) toast.error(turn.aiError);
       if (turn.handoffRequested)
         toast.info('The AI handed this conversation to your team and paused.');
@@ -209,6 +259,8 @@ export function ChatPanel({ id }: { id: string }) {
     );
   const c = conversation.data;
   const closed = c.status === 'CLOSED';
+  const windowHours = isWhatsApp ? hoursLeft(c.replyWindowEndsAt) : null;
+  const windowClosed = isWhatsApp && (windowHours === null || windowHours <= 0);
 
   const submit = (content: string) => {
     const text = content.trim();
@@ -228,8 +280,14 @@ export function ChatPanel({ id }: { id: string }) {
             >
               {c.lead.name}
             </Link>
-            <p className="text-xs text-fg-muted">
+            <p className="flex items-center gap-1.5 text-xs text-fg-muted">
+              {isWhatsApp && <MessageCircle className="size-3.5 text-success" aria-hidden />}
               {c.lead.phone} · {CONVERSATION_CHANNEL_LABELS[c.channel]}
+              {isWhatsApp && windowHours !== null && windowHours > 0 && (
+                <span title="WhatsApp allows free replies for 24 hours after the buyer's last message">
+                  · reply window {windowHours >= 1 ? `${Math.floor(windowHours)}h` : '<1h'} left
+                </span>
+              )}
             </p>
           </div>
           {canWrite && (
@@ -273,8 +331,12 @@ export function ChatPanel({ id }: { id: string }) {
           {c.messages.length === 0 && !pending ? (
             <div className="mx-auto max-w-md py-10 text-center">
               <Bot className="mx-auto size-8 text-gold-deep" aria-hidden />
-              <p className="mt-3 font-semibold text-fg">Say hello as the buyer</p>
-              <p className="mt-1 text-sm text-fg-muted">Try one of these, or write your own:</p>
+              <p className="mt-3 font-semibold text-fg">
+                {isTest ? 'Say hello as the buyer' : 'No messages yet'}
+              </p>
+              {isTest && (
+                <p className="mt-1 text-sm text-fg-muted">Try one of these, or write your own:</p>
+              )}
               {canWrite && isTest && (
                 <ul className="mt-5 space-y-2 text-left">
                   {SAMPLE_MESSAGES.map((m) => (
@@ -341,6 +403,12 @@ export function ChatPanel({ id }: { id: string }) {
               <p className="flex items-center gap-2 text-sm text-fg-muted">
                 <Lock className="size-4" /> This conversation is closed. Re-open it to continue.
               </p>
+            ) : windowClosed ? (
+              <p className="flex items-start gap-2 text-sm text-fg-muted">
+                <Clock3 className="mt-0.5 size-4 shrink-0" />
+                WhatsApp only allows free replies within 24 hours of the buyer’s last message. You
+                can reply again as soon as they write.
+              </p>
             ) : (
               <form
                 className="space-y-2"
@@ -379,7 +447,11 @@ export function ChatPanel({ id }: { id: string }) {
                     maxLength={2000}
                     className="max-h-40 min-h-11 resize-none"
                     placeholder={
-                      sendAs === 'BUYER' ? 'Type what a buyer would say…' : 'Reply as your team…'
+                      sendAs === 'BUYER'
+                        ? 'Type what a buyer would say…'
+                        : isWhatsApp
+                          ? 'Reply on WhatsApp as your team…'
+                          : 'Reply as your team…'
                     }
                     value={draft}
                     onChange={(e) => setDraft(e.target.value)}

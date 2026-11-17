@@ -173,3 +173,17 @@ RLS is intentionally **not** enabled yet (see `architecture.md`). When it is:
 - Both carry `tenant_id`; messages cascade-delete with their conversation; conversations never
   delete leads (`RESTRICT`).
 - CHECK constraints: `messages_content_not_blank`, `messages_content_length` (≤ 8000).
+
+## Phase 3: WhatsApp
+
+- `whatsapp_accounts`: one per business (`tenant_id` unique). `phone_number_id` is unique across all
+  businesses because Meta's webhooks are routed by it. `access_token_encrypted` is
+  `v1:` + base64(iv | GCM tag | ciphertext) under `DATA_ENCRYPTION_KEY` — never stored or logged in
+  plain text, never returned by the API. Disconnecting deletes the row (it only holds settings); the
+  audit log keeps the history.
+- `messages.external_id`: WhatsApp's `wamid`, unique per business, so Meta's webhook retries never
+  create duplicates and delivery-status webhooks find their message.
+- `messages.delivery_status` / `delivery_error`: for outgoing WhatsApp messages. Statuses only move
+  forward (a late "delivered" never overwrites "read").
+- `conversations.last_buyer_message_at`: drives WhatsApp's 24-hour reply window.
+- WhatsApp conversations are one thread per buyer: a buyer writing again re-opens a closed thread.

@@ -6,6 +6,13 @@ const valid = {
   WEB_APP_URL: 'http://localhost:3000',
   JWT_ACCESS_SECRET: 'a'.repeat(48),
 };
+const KEY = Buffer.alloc(32, 7).toString('base64');
+const production = {
+  ...valid,
+  NODE_ENV: 'production',
+  COOKIE_SECURE: 'true',
+  DATA_ENCRYPTION_KEY: KEY,
+};
 
 describe('validateEnv', () => {
   it('parses a valid environment and applies defaults', () => {
@@ -40,20 +47,13 @@ describe('validateEnv', () => {
         JWT_ACCESS_SECRET: 'replace-with-' + 'x'.repeat(40),
       }),
     ).toThrow(/COOKIE_SECURE[\s\S]*JWT_ACCESS_SECRET/);
-    expect(() =>
-      validateEnv({ ...valid, NODE_ENV: 'production', COOKIE_SECURE: 'true' }),
-    ).not.toThrow();
+    expect(() => validateEnv(production)).not.toThrow();
   });
 
   it('forbids returning invitation links in production', () => {
-    expect(() =>
-      validateEnv({
-        ...valid,
-        NODE_ENV: 'production',
-        COOKIE_SECURE: 'true',
-        INVITATION_DELIVERY: 'dev_link',
-      }),
-    ).toThrow(/INVITATION_DELIVERY/);
+    expect(() => validateEnv({ ...production, INVITATION_DELIVERY: 'dev_link' })).toThrow(
+      /INVITATION_DELIVERY/,
+    );
   });
 
   it('defaults to the offline fake AI provider and requires a key for Anthropic', () => {
@@ -62,5 +62,38 @@ describe('validateEnv', () => {
     expect(
       validateEnv({ ...valid, LLM_PROVIDER: 'anthropic', ANTHROPIC_API_KEY: 'k' }).ANTHROPIC_MODEL,
     ).toBe('claude-sonnet-5-5');
+  });
+
+  it('requires a 32-byte encryption key in production', () => {
+    const { DATA_ENCRYPTION_KEY: _omit, ...withoutKey } = production;
+    expect(() => validateEnv(withoutKey)).toThrow(/DATA_ENCRYPTION_KEY/);
+    expect(() => validateEnv({ ...valid, DATA_ENCRYPTION_KEY: 'dG9vLXNob3J0' })).toThrow(
+      /DATA_ENCRYPTION_KEY/,
+    );
+  });
+
+  it('defaults to the fake WhatsApp provider and requires Meta secrets for the Cloud API', () => {
+    const env = validateEnv(valid);
+    expect(env.WHATSAPP_PROVIDER).toBe('fake');
+    expect(env.WHATSAPP_GRAPH_API_VERSION).toBe('v26.0');
+    expect(() => validateEnv({ ...valid, WHATSAPP_PROVIDER: 'cloud' })).toThrow(
+      /WHATSAPP_APP_SECRET[\s\S]*WHATSAPP_VERIFY_TOKEN/,
+    );
+    expect(() =>
+      validateEnv({
+        ...valid,
+        WHATSAPP_PROVIDER: 'cloud',
+        WHATSAPP_APP_SECRET: 'app-secret',
+        WHATSAPP_VERIFY_TOKEN: 'short',
+      }),
+    ).toThrow(/WHATSAPP_VERIFY_TOKEN/);
+    expect(() =>
+      validateEnv({
+        ...valid,
+        WHATSAPP_PROVIDER: 'cloud',
+        WHATSAPP_APP_SECRET: 'app-secret',
+        WHATSAPP_VERIFY_TOKEN: 'a-long-random-verify-token',
+      }),
+    ).not.toThrow();
   });
 });

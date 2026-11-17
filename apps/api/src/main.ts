@@ -6,7 +6,11 @@ import { API_PREFIX, configureApp } from './app.setup';
 import { AppConfigService } from './config/app-config.service';
 
 async function bootstrap(): Promise<void> {
-  const app = await NestFactory.create(AppModule, { bufferLogs: false });
+  const app = await NestFactory.create(AppModule, {
+    bufferLogs: false,
+    // Keep the exact request bytes: WhatsApp webhooks are verified by an HMAC over them.
+    rawBody: true,
+  });
   configureApp(app);
 
   const config = app.get(AppConfigService);

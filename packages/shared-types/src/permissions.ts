@@ -24,6 +24,8 @@ export const Permission = {
   CONVERSATIONS_READ: 'conversations:read',
   /** Start test chats, send messages, switch the AI on or off for a conversation. */
   CONVERSATIONS_WRITE: 'conversations:write',
+  /** Connect or disconnect messaging channels (WhatsApp). Owners and admins only. */
+  CHANNELS_MANAGE: 'channels:manage',
 } as const;
 export type Permission = (typeof Permission)[keyof typeof Permission];
 

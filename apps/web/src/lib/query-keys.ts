@@ -13,4 +13,5 @@ export const queryKeys = {
   conversations: (params: string) => ['conversations', 'list', params] as const,
   conversation: (id: string) => ['conversations', 'detail', id] as const,
   activeMembers: ['team', 'members', 'active-all'] as const,
+  whatsapp: ['channels', 'whatsapp'] as const,
 };

@@ -35,6 +35,6 @@ export const NAV_ITEMS: NavItem[] = [
   { label: 'Follow-ups', href: '/dashboard/follow-ups', icon: BellRing, available: false },
   { label: 'Analytics', href: '/dashboard/analytics', icon: ChartColumn, available: false },
   { label: 'Team', href: '/dashboard/team', icon: Users, available: true },
-  { label: 'Integrations', href: '/dashboard/integrations', icon: Plug, available: false },
+  { label: 'Integrations', href: '/dashboard/integrations', icon: Plug, available: true },
   { label: 'Settings', href: '/dashboard/settings', icon: Settings, available: true },
 ];

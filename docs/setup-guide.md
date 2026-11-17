@@ -96,6 +96,36 @@ docker compose --profile app up -d --build
 
 `COOKIE_SECURE=true` requires HTTPS, so for local click-through testing prefer `pnpm dev`.
 
+## Going live on WhatsApp
+
+Out of the box `WHATSAPP_PROVIDER=fake`: you can connect any number in **Integrations**, and the
+**Try it like a buyer** simulator sends pretend WhatsApp messages through the real pipeline. Nothing
+reaches a real phone. To go live:
+
+1. **Meta app.** In [Meta for Developers](https://developers.facebook.com/apps) create a _Business_ app
+   and add the **WhatsApp** product. Note the **App secret** (App settings → Basic).
+2. **Server settings.** In `.env` set `WHATSAPP_PROVIDER=cloud`, `WHATSAPP_APP_SECRET`,
+   a long random `WHATSAPP_VERIFY_TOKEN`, and `DATA_ENCRYPTION_KEY` (`openssl rand -base64 32`).
+   Restart the API.
+3. **Public HTTPS URL.** Meta must reach the API. Locally, use a tunnel such as
+   `ngrok http 4000` or `cloudflared tunnel --url http://localhost:4000`.
+4. **Webhook.** WhatsApp → Configuration → Webhook: callback URL
+   `https://<your-api-host>/api/v1/webhooks/whatsapp`, verify token = `WHATSAPP_VERIFY_TOKEN`.
+   Click _Verify and save_, then subscribe to the **messages** field.
+5. **Number and token.** Add the business's number under WhatsApp → API Setup. In Business Manager,
+   create a **System User** with `whatsapp_business_messaging` and `whatsapp_business_management`,
+   assign the WhatsApp account to it, and generate a **permanent** token.
+6. **Connect.** In the dashboard, **Integrations → WhatsApp Business**: paste the Phone number ID,
+   WhatsApp Business Account ID, number and token. The API checks the token with Meta before saving
+   it (encrypted).
+7. Message the number from your own phone. The AI replies within a few seconds and the chat appears
+   under **Conversations**.
+
+WhatsApp rules the product follows: free-form replies are only allowed within 24 hours of the
+buyer's last message (the inbox shows the remaining window and blocks replies after it). Starting a
+conversation, or following up after 24 hours, needs Meta-approved _template_ messages — not built
+yet.
+
 ## Troubleshooting
 
 | Symptom                                            | Fix                                                                                                                            |
@@ -104,4 +134,7 @@ docker compose --profile app up -d --build
 | `P1001: Can't reach database server`               | `docker compose up -d`, and check `DATABASE_URL` host/port/password                                                            |
 | Prisma engine download fails during `pnpm install` | A network/proxy is blocking `binaries.prisma.sh`; allow it, or set `PRISMA_SCHEMA_ENGINE_BINARY` to a local engine             |
 | Signed out on every page load                      | `CORS_ORIGINS` must contain the exact web origin (e.g. `http://localhost:3000`); `COOKIE_SECURE` must be `false` on plain http |
+| Meta says the callback URL could not be verified   | `WHATSAPP_VERIFY_TOKEN` must match exactly, and the URL must be public HTTPS ending in `/api/v1/webhooks/whatsapp`             |
+| Buyer messages arrive but the AI does not reply    | Check the conversation is not paused ("AI paused"), and the API log for `WhatsApp delivery failed` with Meta's reason          |
+| "WhatsApp access token is invalid or expired"      | Generate a permanent System User token (temporary tokens expire after 24 hours) and reconnect in Integrations                  |
 | Web pages load without styles after building       | `pnpm build` overwrote the dev output — stop `pnpm dev`, delete `apps/web/.next`, restart                                      |
