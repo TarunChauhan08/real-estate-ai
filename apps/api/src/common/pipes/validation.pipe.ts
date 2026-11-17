@@ -1,7 +1,8 @@
 import { ValidationPipe, type ValidationError } from '@nestjs/common';
 import { Errors, type FieldError } from '../errors/app.exception';
 
-function flatten(errors: ValidationError[], parent = ''): FieldError[] {
+/** Class-validator errors → `{ field, message }` list (nested fields joined with dots). */
+export function flatten(errors: ValidationError[], parent = ''): FieldError[] {
   return errors.flatMap((error) => {
     const field = parent ? `${parent}.${error.property}` : error.property;
     const own = Object.values(error.constraints ?? {}).map((message) => ({ field, message }));

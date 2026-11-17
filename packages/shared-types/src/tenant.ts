@@ -35,7 +35,13 @@ export type MetricValue =
   { status: 'available'; value: number } | { status: 'not_available'; reason: string };
 
 export interface SetupStep {
-  key: 'account_created' | 'business_profile' | 'team_invited' | 'ai_employee' | 'properties';
+  key:
+    | 'account_created'
+    | 'business_profile'
+    | 'team_invited'
+    | 'ai_employee'
+    | 'properties'
+    | 'whatsapp';
   label: string;
   completed: boolean;
   /** False for steps that belong to modules not yet released. */

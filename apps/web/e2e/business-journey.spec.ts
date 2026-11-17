@@ -18,7 +18,7 @@ test.describe('Owner journey', () => {
     await expect(page.getByRole('heading', { name: 'Welcome, Asha' })).toBeVisible();
     await expect(page.getByRole('banner').getByText('Noida Homes Brokerage')).toBeVisible();
     await expect(
-      page.getByText('3 of 5 steps complete').or(page.getByText('2 of 5 steps complete')),
+      page.getByText('3 of 6 steps complete').or(page.getByText('2 of 6 steps complete')),
     ).toBeVisible();
     await expect(page.getByText('Ready to test · not live with buyers yet')).toBeVisible();
     await expect(page.getByText('Not configured').first()).toBeVisible();

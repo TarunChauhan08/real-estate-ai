@@ -21,6 +21,8 @@ export const AuditAction = {
   MEMBER_ROLE_CHANGED: 'member.role_changed',
   MEMBER_STATUS_CHANGED: 'member.status_changed',
   PROPERTY_CREATED: 'property.created',
+  PROPERTIES_IMPORTED: 'property.imported',
+  SAMPLE_PROPERTIES_ADDED: 'property.samples_added',
   PROPERTY_UPDATED: 'property.updated',
   PROPERTY_STATUS_CHANGED: 'property.status_changed',
   LEAD_CREATED: 'lead.created',

@@ -9,3 +9,4 @@ export * from './team';
 export * from './tenant';
 export * from './site-visit';
 export * from './contact';
+export * from './property-import';
