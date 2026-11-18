@@ -3,57 +3,55 @@
 @import '@fontsource-variable/noto-sans-devanagari';
 
 /*
- * Colour system — "Navy & Gold"
- * ------------------------------
- * Why these colours (the psychology):
- *   Deep navy  — the colour banks, insurers and law firms use: stability, competence, trust.
- *                Buying a home is the biggest purchase of most people's lives; the brand has
- *                to feel like a safe pair of hands before it feels exciting.
- *   Warm gold  — premium property, achievement, "the keys to your home". Used sparingly:
- *                one accent per view, mostly on the primary call to action, so the eye
- *                always knows where to go next.
- *   Cool ivory neutrals — lots of white space reads as calm and expensive; clutter reads as cheap.
+ * Colour system — "Nothing" (monochrome + one red signal)
+ * --------------------------------------------------------
+ * Inspired by Nothing OS: pure black and white, quiet greys, and a single red used like a
+ * recording light — only for the one thing that needs attention (primary CTA, live status, key
+ * numbers). Everything else stays monochrome so the red always means "look here".
  *
  * Each step has one job: canvas/subtle = backgrounds, line = borders, fg-* = text.
- * Text pairs were chosen for WCAG 2.2 AA: body text ≥ 4.5:1, UI boundaries ≥ 3:1.
- * Token names are kept from Phase 1 (brand = navy, attention = gold) so the whole app re-themes.
+ * Text pairs were chosen for WCAG 2.2 AA: body text >= 4.5:1, UI boundaries >= 3:1.
+ * Token names are kept from Phase 1 (brand = primary surface, attention/gold = accent) so the
+ * whole app re-themes from this file alone.
  */
 @theme {
   --font-sans:
-    var(--font-manrope), 'Noto Sans Devanagari Variable', 'Segoe UI', ui-sans-serif, system-ui,
+    var(--font-grotesk), 'Noto Sans Devanagari Variable', 'Segoe UI', ui-sans-serif, system-ui,
     sans-serif;
-  /* Editorial serif for marketing headlines only — signals craft and permanence. */
-  --font-display: var(--font-fraunces), Georgia, 'Times New Roman', serif;
+  /* Dot-matrix display face for headlines and big numbers only. */
+  --font-display: var(--font-doto), ui-monospace, monospace;
+  /* Monospaced labels, eyebrows, data readouts. */
+  --font-mono: var(--font-space-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
 
-  /* Neutrals (cool ivory → ink) */
-  --color-canvas: #f6f7fa; /* app background */
-  --color-subtle: #edf0f5; /* hover fills, tracks */
-  --color-line: #e0e4ec; /* separators */
-  --color-line-strong: #8790a3; /* control borders, 3.2:1 on white */
-  --color-fg-faint: #8790a3; /* decorative only, never body text */
-  --color-fg-muted: #586174; /* secondary text, 6.3:1 */
-  --color-fg-secondary: #343d52; /* labels, 11:1 */
-  --color-fg: #0e1626; /* primary text, 17.8:1 */
+  /* Neutrals (paper white -> ink black) */
+  --color-canvas: #f4f4f4; /* app background */
+  --color-subtle: #ebebeb; /* hover fills, tracks */
+  --color-line: #e0e0e0; /* separators */
+  --color-line-strong: #8a8a8a; /* control borders, 3.4:1 on white */
+  --color-fg-faint: #8a8a8a; /* decorative only, never body text */
+  --color-fg-muted: #5e5e5e; /* secondary text, 6.4:1 */
+  --color-fg-secondary: #333333; /* labels, 12.6:1 */
+  --color-fg: #000000; /* primary text, 21:1 */
 
-  /* Brand (navy) */
-  --color-brand-soft: #eaf0f8;
-  --color-brand-soft-2: #d6e1f1;
-  --color-brand-line: #aebfda; /* tinted borders; muted text on navy, 8.6:1 */
-  --color-focus: #2c5ba3; /* focus rings, 6.4:1 on white */
-  --color-brand-fg: #1d4384; /* links and brand text, 9.3:1 */
-  --color-brand-hover: #15305a;
-  --color-brand-strong: #0a1a33;
-  --color-brand: #0c1f3f; /* primary surface; white text 15.9:1 */
-  --color-brand-deep: #071429;
+  /* Brand (black) */
+  --color-brand-soft: #f2f2f2;
+  --color-brand-soft-2: #e3e3e3; /* also light text on black, 16:1 */
+  --color-brand-line: #a6a6a6; /* tinted borders; muted text on black, 8.5:1 */
+  --color-focus: #d71921; /* focus rings, 5.6:1 on white */
+  --color-brand-fg: #000000; /* links and brand text */
+  --color-brand-hover: #262626;
+  --color-brand-strong: #0d0d0d;
+  --color-brand: #000000; /* primary surface; white text 21:1 */
+  --color-brand-deep: #000000;
 
-  /* Accent (gold) — "attention" kept as the token name for compatibility */
-  --color-attention-soft: #fbf5e6;
-  --color-attention-line: #ead6a6;
-  --color-attention: #c8a25a; /* fills and dots; navy text on gold 7.6:1 */
-  --color-attention-fg: #7f5b17; /* gold text on light backgrounds, 5.6:1 on gold-soft */
-  --color-gold: #c8a25a;
-  --color-gold-light: #e3c88d;
-  --color-gold-deep: #a5803a;
+  /* Accent (Nothing red) — "attention" / "gold" kept as token names for compatibility */
+  --color-attention-soft: #fdeced;
+  --color-attention-line: #f4b3b6;
+  --color-attention: #d71921; /* fills and dots; white text on red 5.6:1 */
+  --color-attention-fg: #b3131a; /* red text on light backgrounds, 6.3:1 on red-soft */
+  --color-gold: #d71921;
+  --color-gold-light: #ff5c63; /* red text on black, 6.9:1 */
+  --color-gold-deep: #b3131a; /* red text on white, 7.1:1 */
 
   /* Status */
   --color-danger-soft: #fdecec;
@@ -61,11 +59,12 @@
   --color-success-soft: #e8f5ee;
   --color-success: #1f7a48; /* 5.4:1 on white */
 
-  --radius-control: 0.625rem;
-  --radius-panel: 1rem;
+  --radius-control: 0.875rem;
+  --radius-panel: 1.25rem;
 
-  --shadow-soft: 0 1px 2px rgb(12 31 63 / 0.04), 0 8px 24px -8px rgb(12 31 63 / 0.1);
-  --shadow-lift: 0 2px 4px rgb(12 31 63 / 0.06), 0 24px 48px -16px rgb(12 31 63 / 0.25);
+  /* Nearly flat: hairline + soft drop, no coloured glow. */
+  --shadow-soft: 0 0 0 1px rgb(0 0 0 / 0.04), 0 6px 20px -10px rgb(0 0 0 / 0.12);
+  --shadow-lift: 0 0 0 1px rgb(0 0 0 / 0.05), 0 24px 48px -20px rgb(0 0 0 / 0.3);
 
   /* Type scale */
   --text-display: 2.25rem;
@@ -78,8 +77,10 @@
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
-  body {
-    font-feature-settings: 'cv11' 1;
+  /* Dot-matrix needs weight to read: bold by default, never squeezed. */
+  .font-display {
+    font-weight: 700;
+    letter-spacing: -0.01em;
   }
   :focus-visible {
     outline: 2px solid var(--color-focus);
@@ -100,25 +101,37 @@
 }
 
 @layer components {
-  /* Thin gold rule used above section eyebrows. */
+  /* Nothing-style label: monospaced caps led by a red "recording" dot. */
   .eyebrow {
     display: inline-flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: 0.6rem;
+    font-family: var(--font-mono);
     font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 0.18em;
+    font-weight: 400;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
-    color: var(--color-attention-fg);
+    color: var(--color-fg-muted);
   }
   .eyebrow::before {
     content: '';
-    height: 1px;
-    width: 2rem;
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: 999px;
     background: var(--color-gold);
   }
   .eyebrow-inverted {
-    color: var(--color-gold-light);
+    color: var(--color-brand-line);
+  }
+
+  /* Dot-grid texture, as on Nothing's glyph/UI backgrounds. */
+  .dot-grid {
+    background-image: radial-gradient(rgb(0 0 0 / 0.14) 1px, transparent 1.2px);
+    background-size: 18px 18px;
+  }
+  .dot-grid-inverted {
+    background-image: radial-gradient(rgb(255 255 255 / 0.13) 1px, transparent 1.2px);
+    background-size: 18px 18px;
   }
 
   /* Long-form text pages (privacy, terms, about). */
@@ -130,8 +143,9 @@
   .prose-legal > h2 {
     margin-top: 2.75rem;
     font-family: var(--font-display);
-    font-size: 1.6rem;
-    line-height: 1.25;
+    font-size: 1.75rem;
+    font-weight: 700;
+    line-height: 1.2;
     color: var(--color-brand);
   }
   .prose-legal > h3 {

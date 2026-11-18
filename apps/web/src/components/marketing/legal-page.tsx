@@ -35,7 +35,7 @@ export function TextPage({
                 { name: title, path },
               ]}
             />
-            <h1 className="mt-8 font-display text-4xl font-medium leading-tight tracking-tight text-white sm:text-5xl">
+            <h1 className="mt-8 font-display text-4xl font-bold leading-tight text-white sm:text-5xl">
               {title}
             </h1>
             {intro && <p className="mt-5 text-lg leading-relaxed text-brand-soft-2">{intro}</p>}

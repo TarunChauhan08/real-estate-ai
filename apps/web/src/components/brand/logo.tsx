@@ -31,7 +31,7 @@ export function Logo({ className, inverted = false }: { className?: string; inve
         Sales Employee
         <span
           className={cn(
-            'block text-[11px] font-medium',
+            'block font-mono text-[10px] font-normal uppercase tracking-[0.12em]',
             inverted ? 'text-brand-line' : 'text-fg-muted',
           )}
         >
