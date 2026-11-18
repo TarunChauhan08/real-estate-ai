@@ -60,7 +60,7 @@ function PropertyCard({ property, onEdit }: { property: PropertyDto; onEdit?: ()
             {PROPERTY_STATUS_LABELS[property.status]}
           </Badge>
         </div>
-        <p className="mt-5 font-display text-3xl font-medium tracking-tight text-gold-light">
+        <p className="mt-5 font-display text-3xl font-bold text-gold-light">
           {formatInr(property.price)}
           {property.listingType === 'RENT' && (
             <span className="text-base text-brand-line"> /month</span>

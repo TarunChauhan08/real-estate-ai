@@ -38,7 +38,7 @@ export default function GuidesPage() {
                 { name: 'Guides', path: '/guides' },
               ]}
             />
-            <h1 className="mt-8 max-w-3xl font-display text-4xl font-medium leading-tight tracking-tight text-white sm:text-6xl">
+            <h1 className="mt-8 max-w-3xl font-display text-4xl font-bold leading-tight text-white sm:text-6xl">
               Real estate sales guides
             </h1>
             <p className="mt-5 max-w-2xl text-lg text-brand-soft-2">{DESCRIPTION}</p>

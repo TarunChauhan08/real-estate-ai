@@ -66,7 +66,7 @@ export default async function SolutionPage({ params }: { params: Promise<{ slug:
               ]}
             />
             <p className="eyebrow eyebrow-inverted mt-8">{page.eyebrow}</p>
-            <h1 className="mt-5 max-w-4xl font-display text-4xl font-medium leading-[1.08] tracking-tight text-white sm:text-6xl">
+            <h1 className="mt-5 max-w-4xl font-display text-4xl font-bold leading-[1.08] text-white sm:text-6xl">
               {page.h1}
             </h1>
             <p className="mt-6 max-w-2xl text-lg leading-relaxed text-brand-soft-2">{page.intro}</p>
@@ -86,7 +86,7 @@ export default async function SolutionPage({ params }: { params: Promise<{ slug:
 
         <section className="bg-canvas">
           <div className="mx-auto max-w-7xl px-5 py-20 sm:px-8 lg:py-28">
-            <h2 className="max-w-2xl font-display text-3xl font-medium leading-tight tracking-tight text-brand sm:text-4xl">
+            <h2 className="max-w-2xl font-display text-3xl font-bold leading-tight text-brand sm:text-4xl">
               {page.problem.heading}
             </h2>
             <ul className="mt-12 grid gap-8 md:grid-cols-3">
@@ -108,7 +108,7 @@ export default async function SolutionPage({ params }: { params: Promise<{ slug:
         <section id="how-it-works" className="scroll-mt-20 bg-white">
           <div className="mx-auto max-w-7xl px-5 py-20 sm:px-8 lg:py-28">
             <p className="eyebrow">How it works</p>
-            <h2 className="mt-5 max-w-2xl font-display text-3xl font-medium leading-tight tracking-tight text-brand sm:text-4xl">
+            <h2 className="mt-5 max-w-2xl font-display text-3xl font-bold leading-tight text-brand sm:text-4xl">
               {page.how.heading}
             </h2>
             <ol className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
@@ -130,7 +130,7 @@ export default async function SolutionPage({ params }: { params: Promise<{ slug:
 
         <section className="bg-brand">
           <div className="mx-auto max-w-7xl px-5 py-20 sm:px-8 lg:py-28">
-            <h2 className="max-w-2xl font-display text-3xl font-medium leading-tight tracking-tight text-white sm:text-4xl">
+            <h2 className="max-w-2xl font-display text-3xl font-bold leading-tight text-white sm:text-4xl">
               {page.features.heading}
             </h2>
             <ul className="mt-12 grid gap-x-10 gap-y-9 sm:grid-cols-2 lg:grid-cols-3">
@@ -153,7 +153,7 @@ export default async function SolutionPage({ params }: { params: Promise<{ slug:
           <div className="mx-auto grid max-w-7xl gap-12 px-5 py-20 sm:px-8 lg:grid-cols-[1fr_1.5fr] lg:py-28">
             <div>
               <p className="eyebrow">Questions</p>
-              <h2 className="mt-5 font-display text-3xl font-medium leading-tight tracking-tight text-brand sm:text-4xl">
+              <h2 className="mt-5 font-display text-3xl font-bold leading-tight text-brand sm:text-4xl">
                 Frequently asked questions
               </h2>
             </div>
@@ -201,7 +201,7 @@ export default async function SolutionPage({ params }: { params: Promise<{ slug:
 
         <section className="bg-brand-deep">
           <div className="mx-auto max-w-4xl px-5 py-20 text-center sm:px-8">
-            <h2 className="font-display text-3xl font-medium tracking-tight text-white sm:text-5xl">
+            <h2 className="font-display text-3xl font-bold text-white sm:text-5xl">
               See it answer your buyers.
             </h2>
             <p className="mx-auto mt-5 max-w-xl text-lg text-brand-soft-2">

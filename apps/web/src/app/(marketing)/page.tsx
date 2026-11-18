@@ -219,7 +219,7 @@ export default function HomePage() {
                 <span className="eyebrow eyebrow-inverted">
                   AI sales agent for real estate in India
                 </span>
-                <span className="mt-6 block font-display text-[2.6rem] font-medium leading-[1.05] tracking-tight text-white sm:text-6xl lg:text-[4.2rem]">
+                <span className="mt-6 block font-display text-[2.6rem] font-bold leading-[1.05] text-white sm:text-6xl lg:text-[3.75rem]">
                   Every enquiry answered.
                   <span className="block text-gold-light">
                     Every serious buyer on your calendar.
@@ -292,7 +292,7 @@ export default function HomePage() {
             </div>
             <div>
               <p className="eyebrow">The problem</p>
-              <h2 className="mt-5 font-display text-4xl font-medium leading-tight tracking-tight text-brand sm:text-5xl">
+              <h2 className="mt-5 font-display text-4xl font-bold leading-tight text-brand sm:text-5xl">
                 Slow replies quietly cost you deals.
               </h2>
               <ul className="mt-10 space-y-8">
@@ -317,7 +317,7 @@ export default function HomePage() {
           <div className="mx-auto max-w-7xl px-5 py-24 sm:px-8 lg:py-32">
             <div className="mx-auto max-w-2xl text-center">
               <p className="eyebrow">How it works</p>
-              <h2 className="mt-5 font-display text-4xl font-medium leading-tight tracking-tight text-brand sm:text-5xl">
+              <h2 className="mt-5 font-display text-4xl font-bold leading-tight text-brand sm:text-5xl">
                 From first message to site visit — without the wait.
               </h2>
             </div>
@@ -350,13 +350,13 @@ export default function HomePage() {
         {/* 4 — Proof: the actual product, on navy */}
         <section id="product" className="relative isolate scroll-mt-20 overflow-hidden bg-brand">
           <div
-            className="absolute -right-40 -top-40 -z-10 size-[36rem] rounded-full bg-gold/10 blur-3xl"
+            className="absolute -right-40 -top-40 -z-10 size-[36rem] rounded-full dot-grid-inverted opacity-60"
             aria-hidden
           />
           <div className="mx-auto grid max-w-7xl gap-14 px-5 py-24 sm:px-8 lg:grid-cols-[1fr_1.25fr] lg:items-center lg:py-32">
             <div>
               <p className="eyebrow eyebrow-inverted">The product</p>
-              <h2 className="mt-5 font-display text-4xl font-medium leading-tight tracking-tight text-white sm:text-5xl">
+              <h2 className="mt-5 font-display text-4xl font-bold leading-tight text-white sm:text-5xl">
                 See exactly what the AI learned — and act on it.
               </h2>
               <p className="mt-6 text-lg leading-relaxed text-brand-soft-2">
@@ -391,7 +391,7 @@ export default function HomePage() {
           <div className="mx-auto max-w-7xl px-5 py-24 sm:px-8 lg:py-32">
             <div className="max-w-2xl">
               <p className="eyebrow">Built for how India buys property</p>
-              <h2 className="mt-5 font-display text-4xl font-medium leading-tight tracking-tight text-brand sm:text-5xl">
+              <h2 className="mt-5 font-display text-4xl font-bold leading-tight text-brand sm:text-5xl">
                 A salesperson that never sleeps, and never oversells.
               </h2>
             </div>
@@ -414,7 +414,7 @@ export default function HomePage() {
           <div className="mx-auto max-w-7xl px-5 py-24 sm:px-8 lg:py-28">
             <div className="max-w-2xl">
               <p className="eyebrow">Solutions</p>
-              <h2 className="mt-5 font-display text-4xl font-medium leading-tight tracking-tight text-brand sm:text-5xl">
+              <h2 className="mt-5 font-display text-4xl font-bold leading-tight text-brand sm:text-5xl">
                 Built for every kind of property business.
               </h2>
             </div>
@@ -464,7 +464,7 @@ export default function HomePage() {
           <div className="mx-auto grid max-w-7xl gap-14 px-5 py-24 sm:px-8 lg:grid-cols-2 lg:items-center lg:py-32">
             <div>
               <p className="eyebrow">Trust & security</p>
-              <h2 className="mt-5 font-display text-4xl font-medium leading-tight tracking-tight text-brand sm:text-5xl">
+              <h2 className="mt-5 font-display text-4xl font-bold leading-tight text-brand sm:text-5xl">
                 Your buyers trust you. So we built it to earn that trust.
               </h2>
               <ul className="mt-12 grid gap-8 sm:grid-cols-2">
@@ -497,7 +497,7 @@ export default function HomePage() {
           <div className="mx-auto grid max-w-7xl gap-12 px-5 py-24 sm:px-8 lg:grid-cols-[1fr_1.4fr] lg:py-32">
             <div>
               <p className="eyebrow">Questions</p>
-              <h2 className="mt-5 font-display text-4xl font-medium leading-tight tracking-tight text-brand sm:text-5xl">
+              <h2 className="mt-5 font-display text-4xl font-bold leading-tight text-brand sm:text-5xl">
                 Straight answers.
               </h2>
               <p className="mt-5 max-w-sm leading-relaxed text-fg-muted">
@@ -519,7 +519,7 @@ export default function HomePage() {
           <div className="absolute inset-0 -z-10 bg-brand-deep/80" aria-hidden />
           <div className="mx-auto max-w-4xl px-5 py-28 text-center sm:px-8 lg:py-36">
             <p className="eyebrow eyebrow-inverted justify-center">Early access is open</p>
-            <h2 className="mt-6 font-display text-4xl font-medium leading-tight tracking-tight text-white sm:text-6xl">
+            <h2 className="mt-6 font-display text-4xl font-bold leading-tight text-white sm:text-6xl">
               Your next buyer is messaging right now.
             </h2>
             <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-brand-soft-2">

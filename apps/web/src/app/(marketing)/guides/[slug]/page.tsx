@@ -80,7 +80,7 @@ export default async function GuidePage({ params }: { params: Promise<{ slug: st
                 { name: guide.metaTitle, path },
               ]}
             />
-            <h1 className="mt-8 font-display text-4xl font-medium leading-tight tracking-tight text-white sm:text-5xl">
+            <h1 className="mt-8 font-display text-4xl font-bold leading-tight text-white sm:text-5xl">
               {guide.title}
             </h1>
             <p className="mt-5 text-sm text-brand-line">
@@ -95,7 +95,7 @@ export default async function GuidePage({ params }: { params: Promise<{ slug: st
           <p className="text-xl leading-relaxed text-fg-secondary">{guide.intro}</p>
           {guide.sections.map((section) => (
             <section key={section.heading} className="mt-12">
-              <h2 className="font-display text-2xl font-medium tracking-tight text-brand sm:text-3xl">
+              <h2 className="font-display text-2xl font-bold text-brand sm:text-3xl">
                 {section.heading}
               </h2>
               {section.paragraphs.map((p) => (
@@ -132,7 +132,7 @@ export default async function GuidePage({ params }: { params: Promise<{ slug: st
           </aside>
 
           <section className="mt-16">
-            <h2 className="font-display text-2xl font-medium tracking-tight text-brand">
+            <h2 className="font-display text-2xl font-bold text-brand">
               Frequently asked questions
             </h2>
             <div className="mt-6">

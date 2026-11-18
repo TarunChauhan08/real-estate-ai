@@ -35,7 +35,7 @@ export function ChatPreview({ className }: { className?: string }) {
       aria-label="Example conversation between a buyer and the AI sales employee, in Hinglish"
     >
       <div className="flex items-center gap-3 bg-brand px-5 py-4 text-white">
-        <span className="flex size-9 items-center justify-center rounded-full bg-gold text-sm font-bold text-brand-deep">
+        <span className="flex size-9 items-center justify-center rounded-full bg-gold text-sm font-bold text-white">
           AI
         </span>
         <div className="min-w-0 flex-1">
